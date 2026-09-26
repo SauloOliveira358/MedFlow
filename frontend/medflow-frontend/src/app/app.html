@@ -1,0 +1,709 @@
+﻿<a class="skip" href="#main">Pular para o conteúdo</a>
+@if (!loggedIn()) {
+  <div class="login-layout">
+    <section class="login-story">
+      <a class="brand" href="/" aria-label="MedFlow início"
+        ><span class="brand-mark">✚</span> medflow<span class="brand-dot">.</span></a
+      >
+      <div>
+        <span class="eyebrow">MENOS BUROCRACIA. MAIS CUIDADO.</span>
+        <h1>O cuidado começa<br />com um bom fluxo.</h1>
+        <p>Uma rotina mais leve para sua equipe.<br />Uma experiência melhor para cada paciente.</p>
+        <div class="story-card">
+          <span class="pulse">♡</span>
+          <div>
+            <strong>Sua clínica, em sintonia.</strong>
+            <p>Agenda, pessoas e gestão no mesmo lugar.</p>
+          </div>
+        </div>
+      </div>
+      <small>MedFlow · Gestão que cuida.</small>
+    </section>
+    <main class="login-main" id="main">
+      <div class="login-box">
+        <span class="eyebrow">BEM-VINDO AO MEDFLOW</span>
+        <h2>Bom ter você aqui.</h2>
+        <p>Acesse seu espaço de cuidado e gestão.</p>
+        <form (ngSubmit)="login()">
+          <label
+            >E-mail<input
+              type="email"
+              name="email"
+              [(ngModel)]="email"
+              required
+              autocomplete="username" /></label
+          ><label
+            >Senha<input
+              type="password"
+              name="password"
+              [(ngModel)]="password"
+              required
+              autocomplete="current-password"
+              placeholder="Digite sua senha"
+          /></label>
+          @if (loginError) {
+            <p class="error" role="alert">{{ loginError }}</p>
+          }
+          <button class="primary wide" type="submit">Entrar na plataforma <span>→</span></button>
+        </form>
+        <div class="demo-box">
+          <strong>Conheça a experiência MedFlow</strong>
+          <p>Ambiente demonstrativo com dados fictícios.</p>
+          <button class="secondary wide" (click)="demo()">Explorar demonstração →</button
+          ><small>Login: admin&#64;medflow.demo<br />Senha de teste: MedFlow123!</small>
+        </div>
+        <p class="login-foot">Protótipo frontend · Não utilize dados reais.</p>
+      </div>
+    </main>
+  </div>
+} @else {
+  <div class="app-layout">
+    <aside class="sidebar">
+      <a class="brand" href="/" (click)="$event.preventDefault(); go('Dashboard')"
+        ><span class="brand-mark">✚</span> medflow<span class="brand-dot">.</span></a
+      >
+      <div class="clinic-label">
+        <span class="clinic-icon">✚</span>
+        <div><strong>Clínica MedFlow</strong><small>Seu espaço de cuidado</small></div>
+        <span>⌄</span>
+      </div>
+      <span class="nav-label">PRINCIPAL</span>
+      <nav aria-label="Menu principal">
+        @for (item of pages; track item; let i = $index) {
+          <button
+            (click)="go(item)"
+            [class.active]="page() === item"
+            [attr.aria-current]="page() === item ? 'page' : null"
+          >
+            <span aria-hidden="true">{{ icons[i] }}</span
+            >{{ item }}
+            @if (item === 'Agenda') {
+              <b>{{ confirmed() }}</b>
+            }
+          </button>
+        }
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="demo-note">
+          <span class="live-dot"></span> Ambiente demonstrativo<small>Gestão que cuida.</small>
+        </div>
+        <button class="profile" (click)="logout()" aria-label="Sair da demonstração">
+          <span class="avatar">AM</span
+          ><span><strong>Alex Morgan</strong><small>Administrador · Sair ↗</small></span>
+        </button>
+      </div>
+    </aside>
+    <div class="workspace">
+      <header class="topbar">
+        <span
+          >Workspace <span class="slash">/</span> <strong>{{ page() }}</strong></span
+        >
+        <div><span class="environment">● Demo</span><span class="avatar small">AM</span></div>
+      </header>
+      <main id="main" class="content">
+        <div class="page-heading">
+          <div>
+            <span class="eyebrow">SUA CLÍNICA EM MOVIMENTO</span>
+            <h1>{{ page() === 'Dashboard' ? 'Visão geral' : page() }}</h1>
+            <p>
+              {{
+                page() === 'Dashboard'
+                  ? 'Olá, Alex. Vamos cuidar de mais um dia?'
+                  : page() === 'Agenda'
+                    ? 'Organize os encontros que fazem a diferença.'
+                    : 'Tudo organizado para um cuidado mais próximo.'
+              }}
+            </p>
+          </div>
+          @if (page() === 'Dashboard' || page() === 'Agenda') {
+            <button class="primary" (click)="open('Agendamento')">＋ Novo agendamento</button>
+          } @else if (page() === 'Pacientes') {
+            <button class="primary" (click)="open('Paciente')">＋ Novo paciente</button>
+          } @else if (page() === 'Profissionais') {
+            <button class="primary" (click)="open('Profissional')">＋ Novo profissional</button>
+          } @else if (page() === 'Especialidades') {
+            <button class="primary" (click)="open('Especialidade')">＋ Nova especialidade</button>
+          } @else if (page() === 'Usuários') {
+            <button class="primary" (click)="open('Usuário')">＋ Novo usuário</button>
+          }
+        </div>
+        @if (notice()) {
+          <div class="success" role="status">
+            ✓ {{ notice() }}<button aria-label="Fechar aviso" (click)="notice.set('')">×</button>
+          </div>
+        }
+        @if (clinic.storageWarning()) {
+          <div class="error" role="alert">{{ clinic.storageWarning() }}</div>
+        }
+        @if (page() === 'Dashboard') {
+          <section class="welcome-banner">
+            <div>
+              <span class="eyebrow">CUIDAR FICA MAIS SIMPLES</span>
+              <h2>Mais tempo para o que importa.</h2>
+              <p>Sua agenda organizada. Sua equipe conectada.</p>
+              <button (click)="go('Agenda')">Acompanhar a agenda <span>↗</span></button>
+            </div>
+            <div class="banner-art" aria-hidden="true">
+              <div class="orbit"></div>
+              <span class="art-cross">✚</span><span class="art-heart">♡</span
+              ><span class="art-check">✓</span>
+            </div>
+          </section>
+          <section class="metrics" aria-label="Indicadores de hoje">
+            <article>
+              <span>Agendamentos hoje <i>▦</i></span
+              ><strong>{{ todayAppointments().length }}</strong
+              ><small>Visão completa do seu dia</small>
+            </article>
+            <article>
+              <span>Consultas confirmadas <i class="teal">✓</i></span
+              ><strong>{{ confirmed() }}</strong
+              ><small><span class="live-dot"></span> Aguardando atendimento</small>
+            </article>
+            <article>
+              <span>Atendimentos concluídos <i class="purple">♡</i></span
+              ><strong>{{ completed() }}</strong
+              ><small>Cuidado que faz a diferença</small>
+            </article>
+            <article>
+              <span>Pacientes cadastrados <i class="orange">♧</i></span
+              ><strong>{{ data().patients.length }}</strong
+              ><small>Pessoas no centro do cuidado</small>
+            </article>
+          </section>
+        }
+        @if (page() === 'Dashboard' || page() === 'Agenda') {
+          <div [class.dashboard-grid]="page() === 'Dashboard'">
+            <section class="panel">
+              <div class="panel-heading">
+                <div>
+                  <h2>{{ page() === 'Dashboard' ? 'Agenda do dia' : 'Agendamentos' }}</h2>
+                  <p>{{ appointments().length }} consulta(s) no período selecionado</p>
+                </div>
+                <div class="date-control">
+                  <button aria-label="Dia anterior" (click)="moveDate(-1)">‹</button
+                  ><input
+                    aria-label="Data da agenda"
+                    type="date"
+                    [ngModel]="date()"
+                    (ngModelChange)="date.set($event)"
+                  /><button aria-label="Próximo dia" (click)="moveDate(1)">›</button>
+                </div>
+              </div>
+              <div class="filters">
+                <input
+                  class="search"
+                  aria-label="Buscar na agenda"
+                  placeholder="Buscar paciente ou profissional..."
+                  [ngModel]="search()"
+                  (ngModelChange)="search.set($event)"
+                /><select
+                  aria-label="Filtrar profissional"
+                  [ngModel]="professionalFilter()"
+                  (ngModelChange)="professionalFilter.set($event)"
+                >
+                  <option value="">Todos os profissionais</option>
+                  @for (p of data().professionals; track p.id) {
+                    <option [value]="p.id">{{ p.name }}</option>
+                  }</select
+                ><select
+                  aria-label="Filtrar status"
+                  [ngModel]="statusFilter()"
+                  (ngModelChange)="statusFilter.set($event)"
+                >
+                  <option value="">Todos os status</option>
+                  <option>Confirmado</option>
+                  <option>Concluído</option>
+                  <option>Cancelado</option>
+                </select>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Horário</th>
+                      <th>Paciente</th>
+                      <th>Profissional</th>
+                      <th>Status</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (a of appointments(); track a.id) {
+                      <tr>
+                        <td>
+                          <strong>{{ a.time }}</strong
+                          ><small>30 min</small>
+                        </td>
+                        <td>
+                          <div class="person">
+                            <span class="avatar">{{ initials(patient(a.patientId)) }}</span
+                            ><strong>{{ patient(a.patientId) }}</strong>
+                          </div>
+                        </td>
+                        <td>{{ professional(a.professionalId) }}</td>
+                        <td>
+                          <span
+                            class="badge"
+                            [class.done]="a.status === 'Concluído'"
+                            [class.cancelled]="a.status === 'Cancelado'"
+                            >{{ a.status }}</span
+                          >
+                        </td>
+                        <td>
+                          <div class="row-actions">
+                            @if (a.status === 'Confirmado') {
+                              <button
+                                [attr.aria-label]="'Remarcar consulta de ' + patient(a.patientId)"
+                                title="Remarcar"
+                                (click)="open('Agendamento', a)"
+                              >
+                                ↗</button
+                              ><button
+                                [attr.aria-label]="'Concluir consulta de ' + patient(a.patientId)"
+                                title="Concluir"
+                                (click)="changeStatus(a, 'Concluído')"
+                              >
+                                ✓</button
+                              ><button
+                                [attr.aria-label]="'Cancelar consulta de ' + patient(a.patientId)"
+                                title="Cancelar"
+                                (click)="requestCancel(a)"
+                              >
+                                ×
+                              </button>
+                            } @else {
+                              <span class="muted">—</span>
+                            }
+                          </div>
+                        </td>
+                      </tr>
+                    } @empty {
+                      <tr>
+                        <td colspan="5" class="empty">
+                          <span>▦</span><strong>Nenhuma consulta por aqui</strong>
+                          <p>Escolha outra data ou ajuste os filtros.</p>
+                          <button class="secondary" (click)="open('Agendamento')">
+                            Agendar consulta
+                          </button>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+              <div class="panel-footer">
+                <span>Horários locais · Consultas de 30 minutos</span
+                ><button (click)="date.set(today)">Ir para hoje →</button>
+              </div>
+            </section>
+            @if (page() === 'Dashboard') {
+              <aside class="side-panels">
+                <section class="panel quick">
+                  <h2>Atalhos para seu dia</h2>
+                  <p>O essencial, a um clique.</p>
+                  <button (click)="open('Paciente')">
+                    <span class="shortcut-icon">♧</span
+                    ><span
+                      ><strong>Cadastrar paciente</strong
+                      ><small>Um novo cuidado começa aqui</small></span
+                    ><b>↗</b></button
+                  ><button (click)="go('Profissionais')">
+                    <span class="shortcut-icon lilac">♡</span
+                    ><span
+                      ><strong>Equipe e disponibilidade</strong
+                      ><small>Organize os profissionais</small></span
+                    ><b>↗</b></button
+                  ><button (click)="go('Histórico')">
+                    <span class="shortcut-icon peach">↺</span
+                    ><span
+                      ><strong>Consultar histórico</strong
+                      ><small>Acompanhe cada movimento</small></span
+                    ><b>↗</b>
+                  </button>
+                </section>
+                <section class="care-note">
+                  <span>✧</span>
+                  <h3>Pequenos detalhes.<br />Melhores experiências.</h3>
+                  <p>Confira os dados de contato dos pacientes antes de cada agendamento.</p>
+                </section>
+              </aside>
+            }
+          </div>
+        } @else if (page() === 'Histórico') {
+          <section class="panel">
+            <div class="panel-heading">
+              <div>
+                <h2>Histórico de atividades</h2>
+                <p>Cadastro, alterações e atendimentos desta demonstração.</p>
+              </div>
+            </div>
+            <div class="filters">
+              <input
+                class="search"
+                aria-label="Buscar histórico"
+                placeholder="Buscar atividade..."
+                [ngModel]="search()"
+                (ngModelChange)="search.set($event)"
+              />
+            </div>
+            <div class="history">
+              @for (h of filteredHistory(); track h.id) {
+                @if (matches(h.text)) {
+                  <article>
+                    <span class="history-dot"></span>
+                    <div>
+                      <strong>{{ h.text }}</strong
+                      ><small>{{ h.at | date: 'dd/MM/yyyy · HH:mm' }}</small>
+                    </div>
+                  </article>
+                }
+              }
+              @if (!filteredHistory().length) {
+                <div class="empty">
+                  <strong>Nenhuma atividade encontrada</strong>
+                  <p>
+                    Cadastre um paciente ou agende uma consulta para registrar a primeira atividade.
+                  </p>
+                </div>
+              }
+            </div>
+          </section>
+        } @else {
+          <section class="panel">
+            <div class="panel-heading">
+              <div>
+                <h2>
+                  {{
+                    page() === 'Profissionais'
+                      ? 'Equipe de cuidado'
+                      : page() === 'Especialidades'
+                        ? 'Áreas de atendimento'
+                        : page() === 'Usuários'
+                          ? 'Equipe administrativa'
+                          : 'Pessoas que cuidamos'
+                  }}
+                </h2>
+                <p>
+                  {{
+                    page() === 'Usuários'
+                      ? 'Perfis demonstrativos. O cadastro não cria credenciais de acesso.'
+                      : 'Cadastre e mantenha as informações sempre atualizadas.'
+                  }}
+                </p>
+              </div>
+            </div>
+            <div class="filters">
+              <input
+                class="search"
+                aria-label="Buscar registros"
+                placeholder="Buscar por nome..."
+                [ngModel]="search()"
+                (ngModelChange)="search.set($event)"
+              />
+            </div>
+            @if (page() === 'Pacientes') {
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Paciente</th>
+                      <th>Contato</th>
+                      <th>Nascimento</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (p of data().patients; track p.id) {
+                      @if (matches(p.name)) {
+                        <tr>
+                          <td>
+                            <div class="person">
+                              <span class="avatar">{{ initials(p.name) }}</span
+                              ><strong>{{ p.name }}</strong>
+                            </div>
+                          </td>
+                          <td>
+                            {{ p.email }}<small>{{ p.phone }}</small>
+                          </td>
+                          <td>{{ p.birth | date: 'dd/MM/yyyy' }}</td>
+                          <td>
+                            <button
+                              class="text-button"
+                              (click)="open('Paciente', p)"
+                              [attr.aria-label]="'Editar ' + p.name"
+                            >
+                              Editar ↗
+                            </button>
+                          </td>
+                        </tr>
+                      }
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+            @if (page() === 'Profissionais') {
+              <div class="cards">
+                @for (p of data().professionals; track p.id) {
+                  @if (matches(p.name)) {
+                    <article class="professional-card">
+                      <span class="avatar large">{{ initials(p.name) }}</span
+                      ><span class="badge">Disponível na agenda</span>
+                      <h3>{{ p.name }}</h3>
+                      <p>{{ specialty(p.specialtyId) }}</p>
+                      <small>CRM {{ p.crm }}</small>
+                      <div class="hours">
+                        ◷ {{ p.start }} – {{ p.end }}
+                        <small>Expediente diário · 30 min/consulta</small>
+                      </div>
+                      <button class="secondary wide" (click)="open('Profissional', p)">
+                        Editar perfil e disponibilidade
+                      </button>
+                    </article>
+                  }
+                }
+              </div>
+            }
+            @if (page() === 'Especialidades') {
+              <div class="cards">
+                @for (s of data().specialties; track s.id) {
+                  @if (matches(s.name)) {
+                    <article class="specialty-card">
+                      <span class="shortcut-icon">✚</span>
+                      <h3>{{ s.name }}</h3>
+                      <p>Especialidade de atendimento</p>
+                      <button class="text-button" (click)="open('Especialidade', s)">
+                        Editar especialidade ↗
+                      </button>
+                    </article>
+                  }
+                }
+              </div>
+            }
+            @if (page() === 'Usuários') {
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Nome</th>
+                      <th>E-mail</th>
+                      <th>Perfil</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (u of data().users; track u.id) {
+                      @if (matches(u.name)) {
+                        <tr>
+                          <td>
+                            <strong>{{ u.name }}</strong>
+                          </td>
+                          <td>{{ u.email }}</td>
+                          <td>
+                            <span class="badge">{{ u.role }}</span>
+                          </td>
+                          <td>
+                            <button class="text-button" (click)="open('Usuário', u)">
+                              Editar usuário ↗
+                            </button>
+                          </td>
+                        </tr>
+                      }
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+            @if (!recordCount()) {
+              <div class="empty">
+                <strong>Nenhum registro encontrado</strong>
+                <p>Ajuste a busca ou adicione um novo cadastro.</p>
+              </div>
+            }
+            <div class="panel-footer">
+              {{ recordCount() }} registro(s) · Dados fictícios salvos neste navegador.
+            </div>
+          </section>
+        }
+        <footer class="footer">
+          <span>medflow<span class="brand-dot">.</span> <span>Gestão que cuida.</span></span
+          ><span>Protótipo frontend · Dados demonstrativos</span>
+        </footer>
+      </main>
+    </div>
+  </div>
+}
+@if (modal()) {
+  <dialog aria-labelledby="dialog-title" (cancel)="close()">
+    <div class="modal-heading">
+      <div>
+        <span class="eyebrow">MEDFLOW · CUIDADO CONECTADO</span>
+        <h2 id="dialog-title">
+          {{
+            modal() === 'Cancelar consulta'
+              ? 'Cancelar consulta'
+              : (editingId ? 'Editar ' : 'Novo cadastro · ') + modal()
+          }}
+        </h2>
+      </div>
+      <button aria-label="Fechar formulário" (click)="close()">×</button>
+    </div>
+    @if (modal() === 'Cancelar consulta') {
+      <p>
+        Deseja cancelar a consulta de <strong>{{ patient(cancelTarget?.patientId ?? '') }}</strong
+        >? O horário será liberado e a ação ficará no histórico.
+      </p>
+      <div class="modal-footer">
+        <button class="secondary" (click)="close()">Manter consulta</button
+        ><button class="danger" (click)="cancel()">Confirmar cancelamento</button>
+      </div>
+    } @else {
+      <form (ngSubmit)="save()">
+        <div class="form-grid">
+          @if (modal() === 'Agendamento') {
+            <label class="full"
+              >Paciente<select name="patientId" [(ngModel)]="form['patientId']" required>
+                <option value="">Selecione o paciente</option>
+                @for (p of data().patients; track p.id) {
+                  <option [value]="p.id">{{ p.name }}</option>
+                }
+              </select></label
+            >
+            <label class="full"
+              >Profissional<select
+                name="professionalId"
+                [(ngModel)]="form['professionalId']"
+                (ngModelChange)="form['time'] = ''"
+                required
+              >
+                <option value="">Selecione o profissional</option>
+                @for (p of data().professionals; track p.id) {
+                  <option [value]="p.id">{{ p.name }} · {{ specialty(p.specialtyId) }}</option>
+                }
+              </select></label
+            >
+            <label
+              >Data<input
+                type="date"
+                name="date"
+                [(ngModel)]="form['date']"
+                (ngModelChange)="form['time'] = ''"
+                [min]="today"
+                required /></label
+            ><label
+              >Horário<select name="time" [(ngModel)]="form['time']" required>
+                <option value="">Selecione o horário</option>
+                @for (time of slots; track time) {
+                  @if (!unavailable(time)) {
+                    <option [value]="time">{{ time }}</option>
+                  }
+                }
+              </select></label
+            >
+            <p class="form-hint full">
+              Apenas horários livres são exibidos. Duração de 30 minutos por consulta.
+            </p>
+            <label class="full"
+              >Observações (opcional)<textarea
+                name="notes"
+                [(ngModel)]="form['notes']"
+                maxlength="500"
+                placeholder="Informações administrativas sobre a consulta"
+              ></textarea>
+            </label>
+          } @else {
+            <label class="full"
+              >Nome<input
+                name="name"
+                [(ngModel)]="form['name']"
+                required
+                minlength="2"
+                maxlength="100"
+                placeholder="Digite o nome"
+            /></label>
+            @if (modal() === 'Paciente' || modal() === 'Usuário') {
+              <label class="full"
+                >E-mail<input
+                  type="email"
+                  name="recordEmail"
+                  [(ngModel)]="form['email']"
+                  required
+                  maxlength="120"
+                  placeholder="nome@exemplo.com"
+              /></label>
+            }
+            @if (modal() === 'Paciente') {
+              <label
+                >Telefone com DDD<input
+                  type="tel"
+                  name="phone"
+                  [(ngModel)]="form['phone']"
+                  required
+                  maxlength="20"
+                  placeholder="(11) 99999-0000" /></label
+              ><label
+                >Data de nascimento<input
+                  type="date"
+                  name="birth"
+                  [(ngModel)]="form['birth']"
+                  [max]="today"
+                  required
+              /></label>
+            }
+            @if (modal() === 'Profissional') {
+              <label
+                >CRM / UF<input
+                  name="crm"
+                  [(ngModel)]="form['crm']"
+                  required
+                  placeholder="123456-SP" /></label
+              ><label
+                >Especialidade<select name="specialty" [(ngModel)]="form['specialtyId']" required>
+                  @for (s of data().specialties; track s.id) {
+                    <option [value]="s.id">{{ s.name }}</option>
+                  }
+                </select></label
+              ><label
+                >Início do expediente<input
+                  type="time"
+                  step="1800"
+                  name="start"
+                  [(ngModel)]="form['start']"
+                  required /></label
+              ><label
+                >Fim do expediente<input
+                  type="time"
+                  step="1800"
+                  name="end"
+                  [(ngModel)]="form['end']"
+                  required
+              /></label>
+              <p class="form-hint full">O expediente se repete diariamente nesta demonstração.</p>
+            }
+            @if (modal() === 'Usuário') {
+              <label class="full"
+                >Perfil<select name="role" [(ngModel)]="form['role']">
+                  <option>Recepção</option>
+                  <option>Administrador</option>
+                </select></label
+              >
+              <p class="form-hint full">
+                Perfil demonstrativo. O acesso real dependerá da integração com o backend.
+              </p>
+            }
+          }
+          @if (error()) {
+            <p class="error full" role="alert">{{ error() }}</p>
+          }
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="secondary" (click)="close()">Voltar</button
+          ><button type="submit" class="primary">
+            {{ modal() === 'Agendamento' ? 'Confirmar agendamento' : 'Salvar cadastro' }} →
+          </button>
+        </div>
+      </form>
+    }
+  </dialog>
+}
