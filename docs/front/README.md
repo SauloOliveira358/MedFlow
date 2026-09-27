@@ -1,58 +1,58 @@
-﻿# Frontend MedFlow
+﻿# Frontend React — guia técnico
 
-## Executar
+## Stack e execução
 
-Na pasta `frontend/medflow-frontend`:
+React 19, React Router, Context API, JavaScript/JSX, CSS, Lucide e Vite. Testes com Vitest, Testing Library e Playwright. Não há TypeScript no código da aplicação. Bibliotecas podem incluir declarações de tipos como dependências internas.
 
 ```powershell
+cd frontend/medflow-frontend
 npm ci
 npm start
-```
-
-Abra `http://localhost:4200`. Use uma versão de Node aceita pelo Angular instalado (consulte o campo `engines` de `node_modules/@angular/core/package.json`). O lockfile fixa as dependências. Não é preciso iniciar o backend.
-
-```powershell
 npm run build
-npm test -- --watch=false
+npm test
+npm run test:e2e
 ```
 
-Build em `dist/medflow-frontend/browser`. Sirva os arquivos por HTTP; abrir `index.html` diretamente não é o fluxo suportado.
+Vite em http://localhost:4200. Build estático em `dist/`; configurar fallback de SPA para `index.html` ao hospedar, permitindo acesso direto às rotas. Nenhum servidor de aplicação ou API é necessário.
 
-## Acesso demonstrativo
+## Rotas
 
-Clique em **Explorar demonstração**, ou use `admin@medflow.demo` e `MedFlow123!`. A credencial é pública e serve apenas à apresentação. Nenhuma senha de usuário é cadastrada ou persistida. A sessão fica em memória e retorna ao login ao recarregar; os cadastros permanecem no navegador.
-
-## Funcionalidades
-
-| Tela | Comportamento |
+| Perfil | Rotas |
 |---|---|
-| Login | Formulário, erro e acesso direto à demonstração |
-| Dashboard | Indicadores derivados dos dados, agenda por data e atalhos |
-| Agenda | Busca, filtros de profissional/status, criação, remarcação, cancelamento confirmado e conclusão |
-| Pacientes | Listagem, busca, cadastro e edição, contato e nascimento |
-| Profissionais | Nome, CRM, especialidade e expediente diário editáveis |
-| Especialidades | Cadastro, edição, busca e prevenção de nome duplicado |
-| Usuários | Cadastro/edição de perfis demonstrativos, e-mail único |
-| Histórico | Registro das operações locais e busca |
+| Paciente | `/paciente`, `/paciente/agendar`, `/paciente/agendamentos`, `/paciente/historico`, `/paciente/notificacoes`, `/paciente/perfil` |
+| Especialista | `/medico`, `/medico/agenda`, `/medico/agendar`, `/medico/pacientes`, `/medico/prontuarios`, `/medico/prontuarios/:id`, `/medico/atendimentos`, `/medico/notificacoes`, `/medico/perfil` |
+| Clínica | `/clinica`, `/clinica/agenda`, `/clinica/agendamentos`, `/clinica/agendar`, `/clinica/pacientes`, `/clinica/profissionais`, `/clinica/prontuarios`, `/clinica/prontuarios/:id`, `/clinica/especialidades`, `/clinica/relatorios`, `/clinica/configuracoes` |
 
-Cada consulta dura 30 minutos. O expediente é diário, sem regras de dias da semana, feriados ou pausas. Datas passadas não podem receber novos agendamentos. O mesmo profissional não pode ocupar duas vezes o mesmo horário; cancelar libera o horário. Consultas concluídas preservam a ocupação histórica. O modelo não implementa prontuário.
+`/` é a tela de login e `/cadastro` permite somente cadastro de paciente. `RequireAccount` redireciona visitantes ao login e contas de outro perfil à própria área. A identidade do paciente ou médico vem da conta atual. Não há seletor livre de área. A clínica cria contas médicas em Profissionais. Consulte [Acesso e cadastro](ACESSO.md).
 
-## Organização técnica
+## Organização e componentes
 
-- `src/app/app.ts`: coordenação de telas, formulários, filtros e ações.
-- `src/app/app.html`: interface com controle de fluxo Angular e elementos semânticos.
-- `src/app/models.ts`: interfaces TypeScript do domínio.
-- `src/app/clinic.service.ts`: estado reativo, dados iniciais, validação de agenda e persistência demonstrativa.
-- `src/styles.css`: tokens e estilos responsivos compartilhados.
-- `public/logo.svg`: símbolo vetorial da marca.
-- `*.spec.ts`: testes de regras e renderização.
+`App.jsx` define rotas e lazy loading; `AreaLayout` compõe Sidebar, TopHeader e MobileBottomNavigation específicos de cada perfil. `DemoContext` concentra leitura/gravação e ações. `mockData.js` cria as fixtures. `utils/appointments.js` contém operações puras e validações; `utils/date.js` trata datas locais.
 
-Componentes standalone, signals/computed e formulários template-driven. A navegação é interna à aplicação, sem URLs específicas para cada tela; o roteador do scaffold está sem rotas. Não há dependências visuais externas nem chamadas de rede. A tipografia utiliza fontes do sistema.
+Componentes reutilizados: AppointmentCard, AppointmentDetailsModal, DoctorCard, SpecialtyCard, ScheduleCalendar, TimeSlotPicker, DatePicker, MedicalRecordCard, StatusBadge, DashboardCard, SearchInput, EmptyState, LoadingSkeleton, ConfirmationModal, Modal, Avatar e PatientForm. Páginas compartilhadas recebem `area` e aplicam o recorte correspondente, evitando três cópias das mesmas regras.
 
-## Dados locais e recuperação
+## Estado e sincronização
 
-Chave: `medflow-demo-v1` em `localStorage`. Os dados iniciais são gerados com a data do primeiro uso. Depois disso a agenda preserva suas datas, inclusive ao abrir em outro dia. O histórico inicia vazio. Falhas de armazenamento geram um aviso e mantêm o estado em memória. Estruturas incompatíveis recebem dados iniciais. Para reiniciar deliberadamente a demonstração, remova apenas essa chave nas ferramentas do navegador e recarregue. Não use dados reais.
+```mermaid
+flowchart LR
+ P[Paciente confirma] --> C[DemoContext / Context API]
+ C --> A[Única lista de consultas]
+ A --> P1[Meus agendamentos: patientId]
+ A --> M[Agenda médica: doctorId]
+ A --> K[Agenda geral: todos]
+ C --> L[localStorage opcional]
+```
 
-## Integração futura
+Operações de criação/remarcação validam o estado mais recente por referência síncrona antes de publicar o próximo estado React. Salvar consulta também atualiza o cadastro demonstrativo e cria notificação. Cancelar libera o slot; iniciar cria prontuário para novo vínculo paciente/profissional; concluir muda o status. As contagens dos dashboards são calculadas, não números decorativos.
 
-Substituir as operações locais do serviço por chamadas HTTP e estados de carregamento/erro. Preservar os componentes de apresentação e adaptar DTOs ao contrato aprovado. Não assumir que validações do cliente substituem validação transacional no servidor. O contrato sugerido está em [API](../back/API.md).
+Persistência: `medflow-react-demo-v2`, independente da antiga chave Angular. Ao recarregar, os dados do primeiro uso mantêm suas datas. Armazenamento bloqueado produz aviso; a sessão continua em memória. Não há sincronização entre dispositivos ou tratamento de concorrência entre abas. Perfis não representam autenticação ou proteção real de dados.
+
+## Agenda e formulários
+
+Slots de 30 minutos entre 08:00 e 18:00, intervalo 12:00–13:00, expediente diário fictício. Datas passadas, horários já transcorridos de hoje, slots ocupados e fora do expediente são bloqueados. O mesmo paciente também não pode ter consultas simultâneas. Os campos são nome, nascimento, telefone, e-mail e CPF fictício com 11 dígitos (sem validação fiscal de dígitos verificadores). Observação opcional de até 500 caracteres.
+
+Paciente: especialidade → profissional → data/horário → dados → revisão. Clínica: seleciona ou preenche paciente antes dessas etapas. Reagendamento mantém o ID. Os horários indisponíveis continuam visíveis, mas desabilitados.
+
+## Limites intencionais
+
+Login e permissões são simulações locais de frontend, sem autenticação de produção. Não há prontuário real, API, banco, upload, mensagens externas, pagamento ou diagnóstico. Relatórios exportam apenas totais locais em CSV. Retratos são ilustrações SVG próprias, não fotografias de profissionais reais. Autorização no servidor, fuso da clínica e persistência compartilhada ficam para futura integração fora desta entrega.

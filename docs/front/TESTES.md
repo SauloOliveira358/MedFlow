@@ -1,38 +1,58 @@
-﻿# Testes e demonstração
+﻿# Testes — React e três áreas
 
-## Evidências automatizadas — 26/09/2026
+## Verificação em 27/09/2026
 
-Ambiente: Windows, Node 24.16.0, Angular 22 e Vitest 5. Comandos executados na pasta frontend/medflow-frontend:
+Ambiente: Windows, Node 24.16.0, React 19, Vite 7, Vitest 3 e Microsoft Edge headless via Playwright.
 
-- `npm run build`: aprovado; compilação de produção dentro do orçamento configurado.
-- `npm test -- --watch=false`: **2 arquivos, 9 testes aprovados**.
+- `npm run build`: aprovado; compilação estática de produção.
+- `npm test`: **14 aprovados** (8 regras de estado, 5 regras de contas e 1 integração completa da interface React).
+- `npm run test:e2e`: **8 cenários validados**, incluindo 150 combinações das rotas originais e 12 de login/cadastro por viewport. Na revisão final, 7 passaram na execução completa e o cenário de cadastro médico passou na reexecução isolada após corrigir o seletor e a espera do login no teste.
 
-O ambiente restrito bloqueou leitura de diretórios pelo compilador; os comandos foram repetidos com permissão de execução e concluídos. Não foram feitos testes integrados com backend.
+A ferramenta de navegador integrada não iniciou por erro de configuração da sessão. A verificação foi realizada com o Edge local em modo headless. O teste de varredura permite até 240 segundos, pois percorre 150 combinações de rota e viewport, com logins entre as áreas.
 
-Cobertura de cenários (não é percentual de cobertura): slot livre; conflito com mesmo profissional; profissional diferente no mesmo horário; paciente inexistente; data passada; horário fora do expediente e intervalo inválido; horário liberado por cancelamento; edição da própria reserva; remarcação persistida sem duplicação; histórico; dados intactos após conflito; recuperação de armazenamento inválido; criação/renderização e navegação até pacientes.
+## Cobertura dos testes
 
-## Verificação visual pendente
+**Estado e React (14 testes):** quantidades e referências dos mocks; consulta única nos seletores de paciente/médico/clínica; conflito do médico e do paciente; remarcação preservando ID; cancelamento liberando vaga e notificações; início e conclusão de atendimento; validação de dados/horários; navegação e confirmação pelas cinco etapas com login nas três áreas. Contas: perfil de paciente obrigatório no cadastro público, criação de médico exclusiva do administrador, duplicidade de e-mail/registro, senha mínima e conferência dos hashes de demonstração.
 
-A ferramenta de navegador falhou antes de conectar, com erro interno de configuração de sandbox. Não foi possível abrir a aplicação, capturar telas ou verificar layout e interações em navegador real. Os testes de componentes executaram em jsdom. A responsividade foi implementada em CSS, mas ainda deve ser inspecionada visualmente.
+**Navegador:** paciente agenda, médico correto visualiza, outro médico não visualiza, clínica cancela e paciente vê histórico após reload; 25 rotas em 375, 390, 430, 768, 1024 e 1440 px; anotações e documentos do prontuário; agenda dia/semana/mês; menu mobile; capturas; clínica cadastra novo paciente, agenda e especialista inicia atendimento com criação do prontuário.
 
-## Roteiro manual de aceite
+**Acessos no navegador:** login incorreto, acesso direto sem sessão, cadastro público e agendamento com identidade própria, sessão preservada ao recarregar, redirecionamento de perfil indevido, administrador cria médico, novo médico entra e aparece na busca do paciente. Login e cadastro foram verificados nas seis larguras; capturas desktop/mobile foram inspecionadas.
 
-1. Executar `npm start`, abrir localhost:4200 e tentar credencial incorreta: deve haver erro. Entrar com a credencial pública ou botão de demonstração.
-2. Conferir dashboard com quatro consultas de exemplo na data do primeiro uso e quatro pacientes; mudar uma consulta para Concluído e conferir os indicadores.
-3. Criar paciente com telefone inválido/nascimento futuro: não salvar. Corrigir, salvar, buscar por nome, editar e conferir atualização.
-4. Criar especialidade e profissional; tentar CRM duplicado. Ajustar expediente em intervalos de 30 minutos.
-5. Criar consulta: selecionar paciente, profissional, data e slot. Conferir presença na agenda e registro no histórico.
-6. Tentar selecionar o mesmo horário para o mesmo profissional: não deve aparecer. A regra também deve bloquear tentativa direta pelo serviço (teste automatizado).
-7. Remarcar consulta. Conferir novo slot ocupado e anterior disponível. Fechar formulário sem salvar deve preservar dados anteriores.
-8. Cancelar e escolher Manter: nada muda. Confirmar cancelamento: status atualiza e horário é liberado.
-9. Buscar termo inexistente e filtrar outra data: conferir estado vazio. Limpar busca/filtros para recuperar resultados.
-10. Criar/editar usuário demonstrativo e tentar e-mail duplicado. O cadastro não deve ser apresentado como credencial real.
-11. Recarregar a página, entrar novamente e conferir persistência dos cadastros e histórico.
-12. Conferir 1440×900, 1024×768 e 390×844: sem rolagem horizontal global; tabelas podem rolar em seu contêiner; menus e botões acessíveis.
-13. Usar somente teclado: link de pular conteúdo, menu, formulário, modal, Escape e restauração de foco. Verificar zoom em 200% e contraste antes de declarar conformidade de acessibilidade.
+A varredura verifica ausência de overflow horizontal global e erros JavaScript. Não equivale a auditoria formal de acessibilidade ou teste com usuários reais.
 
-## Demonstração de cinco minutos
+## Executar
 
-Entrar → dashboard → novo paciente → profissional e expediente → novo agendamento → horário ocupado não oferecido → remarcar → cancelar → histórico. Mostrar o teste de conflito para a regra local e explicar que a proteção concorrente real só poderá ser demonstrada após a integração Java/banco.
+```powershell
+cd frontend/medflow-frontend
+npm test
+npm run test:e2e
+```
 
-Resultados atuais: interface implementada, build e testes locais aprovados. Limitações: sem revisão visual no navegador, sem usuários reais, sem API, sem concorrência entre sessões, sem controle de acesso real. Coletar screenshots e resultados manuais depois de executar o roteiro; não preencher evidências como se já tivessem ocorrido.
+`playwright.config.js` utiliza `channel: msedge`. Se Edge não estiver instalado, escolha um navegador Playwright disponível e adapte a configuração. O Vite é iniciado automaticamente. As fixtures de cada teste começam com armazenamento independente.
+
+## Roteiro de apresentação
+
+1. Entrar com `maria@medflow.demo`, senha `MedFlow123!`, e selecionar Agendar consulta.
+2. Escolher Dermatologia, Dra. Ana, uma data futura e horário livre. Ver horários ocupados/intervalo bloqueados.
+3. Revisar os dados fictícios, informar uma observação e confirmar.
+4. Abrir Meus agendamentos e conferir a consulta.
+5. Sair e entrar com `ana@medflow.demo`; abrir Minha agenda na mesma data.
+6. Sair e entrar com `medico2@medflow.demo`: a consulta não deve aparecer na agenda dele.
+7. Sair e entrar com `admin@medflow.demo`, abrir Agenda geral e filtrar a data: mesma consulta/paciente/profissional. Todas essas contas iniciais usam a senha `MedFlow123!`.
+8. Abrir detalhes, cancelar, confirmar. No paciente, conferir status Cancelado no Histórico.
+9. Agendar pela clínica com novo paciente; no médico iniciar atendimento; abrir o novo prontuário e salvar uma anotação fictícia.
+10. Conferir os perfis, notificações lidas, paginação de pacientes, filtros e exportação do relatório.
+11. Sair, usar Criar minha conta, preencher um paciente fictício e agendar. Conferir que ele não vê as consultas de Maria.
+12. Entrar como administrador, cadastrar um médico em Profissionais e testar seu novo login. Confirmar que paciente e médico não abrem rotas da clínica.
+
+## Capturas
+
+- [Paciente desktop](screenshots/paciente-desktop.png)
+- [Paciente mobile](screenshots/paciente-mobile.png)
+- [Agenda médica](screenshots/medico-agenda.png)
+- [Dashboard da clínica](screenshots/clinica-desktop.png)
+- [Login desktop](screenshots/login-1440.png)
+- [Login mobile](screenshots/login-390.png)
+- [Cadastro mobile](screenshots/cadastro-390.png)
+
+Não há teste de backend ou banco: esses componentes não fazem parte desta implementação. Os filtros de identidade são simulação de interface, não controles de segurança.

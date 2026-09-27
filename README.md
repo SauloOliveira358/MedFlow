@@ -1,12 +1,10 @@
-﻿# MedFlow
+﻿# MedFlow · Cuidado que conecta
 
-<img src="frontend/medflow-frontend/public/logo.svg" width="56" alt="Símbolo MedFlow">
+Frontend React com três experiências independentes e dados fictícios compartilhados. **Sem backend, banco de dados, API real ou TypeScript.**
 
-**Gestão que cuida.** Frontend para organizar a rotina de pequenas clínicas: agenda, pacientes, profissionais, especialidades, usuários demonstrativos, histórico e dashboard.
+## Executar
 
-## Executar o frontend
-
-Pré-requisitos: Node `^22.22.3`, `^24.15.0` ou `>=26.0.0`, conforme Angular 22 instalado; npm. Ambiente validado: Node 24.16.0.
+Requisitos: Node 22.12+ ou 24 e npm.
 
 ```powershell
 cd frontend/medflow-frontend
@@ -14,33 +12,56 @@ npm ci
 npm start
 ```
 
-Acesse `http://localhost:4200` e clique em **Explorar demonstração**. Alternativamente, use `admin@medflow.demo` / `MedFlow123!`.
+Abra http://localhost:4200 para entrar. Pacientes podem clicar em **Criar minha conta**, cadastrar seus dados fictícios e agendar sem comparecer à clínica. O acesso do médico é criado exclusivamente pelo administrador em **Profissionais → Cadastrar médico**.
+
+| Conta demonstrativa | E-mail | Senha |
+|---|---|---|
+| Administrador da clínica | `admin@medflow.demo` | `MedFlow123!` |
+| Paciente Maria | `maria@medflow.demo` | `MedFlow123!` |
+| Médica Ana | `ana@medflow.demo` | `MedFlow123!` |
+
+| Área | Rota | Experiência |
+|---|---|---|
+| Paciente | `/paciente` | Maria Oliveira: agendamento em cinco passos, consultas próprias, histórico, notificações e perfil |
+| Médico / especialista | `/medico` | Agenda em dia/semana/mês, pacientes, prontuários, atendimentos, notificações e perfil |
+| Clínica | `/clinica` | Agenda geral, agendamentos, cadastros, equipe, prontuários, especialidades, relatórios e configurações |
+
+Cada login abre a área correspondente. Para acompanhar uma consulta entre as experiências, use **Sair** e entre na outra conta no mesmo navegador. Não existe cadastro público de médico ou administrador. Veja o [guia de acessos](docs/front/ACESSO.md).
+
+## Dados compartilhados
+
+Context API mantém uma única lista de consultas. Criar, reagendar, iniciar, concluir ou cancelar atualiza todas as telas. A persistência opcional em `localStorage` mantém a demonstração ao recarregar; não é um banco de dados. A chave é `medflow-react-demo-v2`; a sessão usa `medflow-session-v1` no `sessionStorage`. Para reiniciar o exemplo, remova essas duas chaves nas ferramentas do navegador.
+
+Mocks iniciais: 10 pacientes, 8 especialistas, 8 especialidades, 20 consultas e 10 prontuários. Datas são relativas ao primeiro uso. Nomes, contatos, avaliações e retratos ilustrados são fictícios. Use somente dados de teste.
+
+## Verificar
 
 ```powershell
 npm run build
-npm test -- --watch=false
+npm test
+npm run test:e2e
 ```
 
-## Escopo desta versão
+Os testes de navegador usam Microsoft Edge em modo headless. Em outro ambiente, instale um navegador compatível com Playwright e ajuste `channel` em `playwright.config.js`. O teste inicia o Vite local automaticamente.
 
-Interface Angular responsiva com cadastro/edição, agenda por data, busca e filtros, horários livres, remarcação, cancelamento confirmado, conclusão e histórico. Dados fictícios persistem no navegador com `localStorage`; login e perfis são demonstrativos. Não use dados reais.
-
-O backend e o banco **não foram implementados nesta entrega**. Não é necessário configurar banco para executar o frontend. O diretório `backend/` existente foi preservado. Esta entrega ainda não corresponde ao MVP integrado exigido pelo PDF.
-
-## Organização
+## Estrutura
 
 ```text
-frontend/medflow-frontend/   Aplicação Angular
-backend/                    Scaffold existente, preservado
- docs/
-   front/                   Produto, frontend, UX, requisitos e testes
-   back/                    Contrato e arquitetura para integração futura
+frontend/medflow-frontend/
+  src/
+    components/common/   Componentes de interface e fluxos compartilhados
+    components/patient/  Cards de especialidades e profissionais
+    context/             Context API e operações de estado
+    data/                Dados fictícios
+    layouts/             Menus, cabeçalhos e navegação inferior
+    pages/               Páginas de paciente, médico e clínica
+    styles/              CSS responsivo
+    utils/               Datas e validações de agenda
+    test/                Testes de estado e integração React
+  public/portraits/      Retratos vetoriais locais
+  e2e/                   Fluxos de navegador e responsividade
 ```
 
-Arquitetura atual: componentes Angular → ClinicService → armazenamento local. Tecnologias: Angular 22, TypeScript, CSS, Forms, signals e Vitest. Sem bibliotecas de interface adicionais.
+O scaffold `backend/` preexistente foi preservado; ele não participa desta aplicação. A versão Angular anterior foi substituída, incluindo configurações do editor. Não há autenticação real, envio de mensagens ou arquivos, integrações clínicas nem concorrência entre navegadores.
 
-[Documentação completa](docs/README.md) · [Frontend](docs/front/README.md) · [Integração futura](docs/back/README.md) · [Changelog](CHANGELOG.md) · [Uso de IA](AI_USAGE.md)
-
-## Evidências e limitações
-
-Build de produção e 9 testes automatizados passaram em 26/09/2026. A verificação visual por navegador e as capturas ficaram pendentes por falha da ferramenta da sessão. Wireframes e decisões de layout estão em [UX/UI](docs/front/UX_UI.md), e o roteiro manual está em [Testes](docs/front/TESTES.md). Não foram criados commits, tags, releases ou deploy.
+[Documentação](docs/README.md) · [Frontend](docs/front/README.md) · [Testes](docs/front/TESTES.md) · [Changelog](CHANGELOG.md) · [Uso de IA](AI_USAGE.md)

@@ -1,9 +1,11 @@
 ﻿# Uso de inteligência artificial
 
-| Data | Ferramenta | Utilização | Componente | Validação realizada |
+| Data | Ferramenta | Utilização | Componente | Validação |
 |---|---|---|---|---|
-| 26/09/2026 | Codex | Leitura dos requisitos e delimitação do escopo frontend | Documentação e planejamento | PDF confrontado com o pedido de somente frontend |
-| 26/09/2026 | Codex | Criação de interface, identidade vetorial e fluxos locais | Angular, TypeScript, HTML e CSS | Build de produção e 9 testes automatizados aprovados |
-| 26/09/2026 | Codex + busca web | Pesquisa documental de referências e redação de documentação | docs/front e docs/back | Fontes oficiais identificadas; hipóteses e propostas distinguidas de implementação |
+| 26/09/2026 | Codex | Versão inicial e análise do PDF | Angular e documentação | Build e 9 testes da versão anterior |
+| 27/09/2026 | Codex | Migração solicitada para React/JavaScript, três experiências, mocks e Context API | Frontend | Build, testes de regras e integração React |
+| 27/09/2026 | Codex | Fluxos compartilhados, calendário, prontuários, responsive CSS e retratos vetoriais | Interface | Testes Playwright com Edge, seis larguras e capturas inspecionadas |
+| 27/09/2026 | Codex | Revisão dos guias de uso, arquitetura frontend, requisitos e testes | docs/front e README | Confronto com as funcionalidades implementadas |
+| 27/09/2026 | Codex | Login, cadastro público de paciente e criação de médico exclusiva da clínica | Context API, rotas e formulários | Testes de credenciais, permissões, fluxo de cadastro e navegação |
 
-Verificação visual automatizada não realizada devido a erro da ferramenta de navegador antes da conexão. Não houve entrevistas nem testes com usuários reais. Cabe à equipe revisar decisões, completar evidências visuais, validar o protótipo e dominar o código para a defesa. Nenhuma funcionalidade de backend foi gerada ou alterada nesta entrega.
+Na versão atual foi possível realizar validação em navegador headless, apesar da indisponibilidade da ferramenta integrada. Os dados são inteiramente fictícios. Não houve entrevistas nem estudo clínico. Nenhum backend, banco de dados ou API real foi criado. Cabe à equipe compreender o código, revisar hipóteses e preparar a defesa acadêmica.

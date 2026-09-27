@@ -1,75 +1,42 @@
-﻿# Identidade visual e UX/UI
+﻿# UX/UI — Cuidado que conecta
 
-## Marca
+## Identidade
 
-Nome: **MedFlow**. Slogan: **Gestão que cuida.** Símbolo: cruz branca em quadrado verde arredondado, em `frontend/medflow-frontend/public/logo.svg`. A cruz comunica cuidado; o nome associa saúde ao fluxo administrativo. O arquivo é vetorial e pode ser reutilizado na apresentação. Não há imagem gerada por IA ou dependência de banco de imagens.
+MedFlow utiliza off-white, branco, verde sálvia, rosé, bege e azul suaves. O símbolo de coração e os cantos arredondados reforçam o acolhimento. Títulos editoriais em Georgia na entrada/paciente contrastam com a tipografia de sistema legível da operação. Ícones Lucide e retratos SVG locais não exigem serviços de imagens.
 
-| Token | Valor | Uso |
-|---|---|---|
-| Verde principal | `#087f70` | Ações, marca e navegação ativa |
-| Texto principal | `#253c39` | Títulos e conteúdo |
-| Texto secundário | `#778781` | Apoio e descrições |
-| Fundo | `#f5f8f7` | Área de trabalho |
-| Borda | `#e5ece9` | Separação de conteúdo |
-| Branco | `#ffffff` | Superfícies e formulários |
+Tokens principais em `src/styles/global.css`: fundo `#f8f9f6`, texto `#35453f`, ação `#54867b`, borda `#e8ece5`. Status combinam texto e cor: verde Confirmado, amarelo Pendente, azul Em atendimento, cinza Concluído, vermelho suave Cancelado.
 
-Tipografia: Segoe UI, Arial e sans-serif, sem downloads. Títulos entre 18 e 30 px no aplicativo, hierarquia mais expressiva no login. Espaçamento baseado em intervalos próximos de 4/8 px; cartões com 10–12 px de raio; botões com 7 px. Verde suave e superfícies claras reduzem competição visual com os dados. Cores não são o único indicador: status e mensagens também usam texto.
+## Três experiências
 
-## Componentes e estados
+**Paciente:** saudação pessoal, banner acolhedor, próximo agendamento e atalhos por especialidade. O fluxo evita informação administrativa e permite apenas suas próprias consultas.
 
-Navegação lateral com item ativo, cabeçalho de contexto, cards de métricas, tabelas, cartões de profissionais, campos com rótulo, selects de disponibilidade, diálogo nativo e mensagens com `role=status`/`role=alert`. Busca sem resultado exibe estado vazio. Foco dos controles é destacado. O modal nativo contém o foco enquanto aberto e o devolve ao acionador ao fechar. Navegação por teclado e contraste precisam de auditoria manual antes de publicação.
+**Especialista:** indicadores do profissional conectado, agenda em três períodos, relação de pacientes, prontuários e ações de atendimento. Cada acesso está vinculado a um profissional cadastrado pela clínica.
 
-## User flow
+**Clínica:** visão da operação, agenda geral e filtros, tabela/card de pacientes, equipe, prontuários, relatórios e configurações compartilhadas.
+
+## Mobile
+
+Abaixo de 768 px: navegação inferior, menu completo recolhível, formulários de uma coluna, tabelas transformadas em cards com rótulos e agendas semanais empilhadas. A visão mensal mantém os sete dias, mostra o horário e abre detalhes pelo toque. O calendário completo usa o controle de data nativo do dispositivo. Áreas essenciais de toque ficam em torno de 44 px.
+
+## Fluxo
 
 ```mermaid
-flowchart TD
- L[Login / demonstração] --> D[Dashboard]
- D --> P[Paciente: cadastrar ou localizar]
- P --> A[Novo agendamento]
- A --> R[Escolher profissional]
- R --> H[Escolher data e horário disponível]
- H --> V{Validação local}
- V -->|Inválido| E[Corrigir campos]
- E --> A
- V -->|Válido| S[Salvar e confirmar]
- S --> G[Agenda e histórico atualizados]
- G --> M[Remarcar / cancelar / concluir]
+flowchart LR
+ E[Especialidade] --> P[Profissional]
+ P --> H[Data e horário]
+ H --> D[Dados do paciente]
+ D --> R[Revisão]
+ R --> C[Confirmar]
+ C --> S[Sucesso]
+ S --> A[Meus agendamentos]
+ C --> M[Agenda médica]
+ C --> K[Agenda da clínica]
 ```
 
-## Wireframe desktop
+## Estados e acessibilidade
 
-```text
-┌─────────────┬────────────────────────────────────────────┐
-│ Marca       │ Workspace / Tela                    Demo   │
-│ Clínica     ├────────────────────────────────────────────┤
-│             │ Título / descrição       [Nova consulta]   │
-│ Dashboard   │ Banner de boas-vindas                       │
-│ Agenda      │ [Total] [Confirmadas] [Concluídas] [Pessoas]│
-│ Pacientes   │ ┌ Agenda por data ──────────┐ ┌ Atalhos ┐ │
-│ Equipe      │ │ Busca / filtros / tabela │ │         │ │
-│ Histórico   │ └──────────────────────────┘ └─────────┘ │
-│ Perfil      │ Rodapé                                     │
-└─────────────┴────────────────────────────────────────────┘
-```
+Skeletons acompanham o carregamento real das rotas lazy; a confirmação exibe estado de processamento breve. Toasts comunicam operações. Modais nativos permitem Escape, foco contido e restauração do acionador. Formulários possuem labels e mensagens; horários bloqueados usam disabled. Os estados vazios orientam o próximo passo. Animações respeitam `prefers-reduced-motion`.
 
-## Wireframe mobile
+## Evidências
 
-```text
-┌─────────────────────────┐
-│ Marca                   │
-│ Menu horizontal rolável │
-│ Título / descrição      │
-│ [Novo agendamento]      │
-│ Banner                  │
-│ [Métrica] [Métrica]     │
-│ [Métrica] [Métrica]     │
-│ Agenda / data           │
-│ Busca / filtros         │
-│ Tabela com rolagem      │
-│ Atalhos                 │
-└─────────────────────────┘
-```
-
-## Protótipo de alta fidelidade
-
-A aplicação Angular executável é o protótipo navegável. Login, dashboard, agenda, cadastros e modais representam a identidade final proposta. Não foi criado arquivo Figma. Breakpoints fazem a barra lateral virar navegação horizontal, métricas passarem a duas colunas e formulários a uma coluna. Não há capturas verificadas nesta entrega: a ferramenta de navegador falhou antes de abrir a aplicação. Use o roteiro em TESTES.md para validar desktop e mobile e acrescentar evidências.
+As capturas geradas pelo teste de navegador ficam em `screenshots/`: paciente desktop/mobile, agenda médica e dashboard da clínica. Os retratos representam personagens fictícios e não fotografias. O protótipo de alta fidelidade é a aplicação navegável; não há arquivo Figma.

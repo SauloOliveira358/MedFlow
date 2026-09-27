@@ -1,4 +1,6 @@
-﻿# Contrato proposto da API
+> Referência histórica da versão de 26/09/2026. Não descreve o frontend React atual nem serviços implementados. Consulte [o guia atual](../front/README.md). Nenhuma API ou banco foi criado.
+
+# Contrato proposto da API
 
 Base sugerida: `/api/v1`. JSON UTF-8; IDs string/UUID; data `YYYY-MM-DD`; horário local `HH:mm`; instantes de auditoria ISO 8601 UTC. O fuso da clínica deve ser explícito na implementação final. Estes endpoints **não existem nesta entrega**. Nomes de campos acompanham os modelos TypeScript para facilitar integração.
 

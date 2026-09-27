@@ -1,23 +1,7 @@
-﻿# Backend — especificação para integração futura
+﻿# Backend — fora do escopo
 
-**Nenhum backend foi desenvolvido ou alterado nesta entrega.** Esta pasta documenta o contrato esperado pelo frontend e uma proposta de arquitetura. Não representa endpoints existentes, autenticação pronta ou banco implantado.
+Esta entrega contém somente frontend React/JavaScript com mocks e Context API. Não foi criado ou alterado backend, banco de dados ou API real. O scaffold `backend/` existente no repositório foi preservado.
 
-O diretório `backend/` já presente no repositório contém o scaffold Java. Sua evolução deve ser feita em uma etapa própria.
+`API.md` e `ARQUITETURA.md` são documentos conceituais históricos da versão anterior, sem implementação. Não descrevem serviços existentes nem são necessários para executar a aplicação. O contrato de integração futura deverá ser revisto a partir dos modelos React, especialmente os campos `doctorId`, os perfis e os prontuários.
 
-- [API proposta](API.md): recursos, payloads e erros.
-- [Arquitetura e modelagem propostas](ARQUITETURA.md): responsabilidade das camadas, UML, DER e três fluxos completos planejados.
-
-## Responsabilidades futuras
-
-Implementar autenticação e autorização reais; validar entradas e vínculos; persistir em banco; garantir unicidade de agenda em transação; tratar conflitos concorrentes; manter auditoria; definir disponibilidade semanal e exceções; integrar frontend por HTTP. As regras locais servem à experiência de uso, não constituem barreira de segurança.
-
-## Critérios para considerar a integração pronta
-
-1. Criar consulta persiste no servidor e reaparece em outra sessão autorizada.
-2. Duas requisições concorrentes para a mesma vaga resultam em uma criação e um conflito.
-3. Cancelamento e remarcação atualizam a disponibilidade de forma atômica.
-4. Usuário sem autorização recebe 403 e sessão inválida recebe 401.
-5. Senhas não são retornadas pela API nem armazenadas em texto puro.
-6. Frontend exibe carregamento, erros por campo, conflito e indisponibilidade de serviço.
-
-A implementação atual não satisfaz a exigência do PDF de produto com persistência real. Essa limitação é intencional para cumprir o escopo solicitado de somente frontend.
+A documentação da implementação atual está em [docs/front](../front/README.md). Não é preciso configurar Java, credenciais, endpoints ou banco para utilizar a demonstração.

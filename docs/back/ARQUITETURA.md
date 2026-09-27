@@ -1,4 +1,6 @@
-﻿# Arquitetura e modelagem propostas
+> Referência histórica da versão de 26/09/2026. Não descreve o frontend React atual nem serviços implementados. Consulte [o guia atual](../front/README.md). Nenhuma API ou banco foi criado.
+
+# Arquitetura e modelagem propostas
 
 Diagramas conceituais para o desenvolvimento futuro do servidor. O único fluxo implementado agora é Angular → ClinicService → localStorage.
 

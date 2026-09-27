@@ -1,17 +1,18 @@
-﻿# Frontend MedFlow
+﻿# MedFlow — frontend React
 
-Aplicação Angular do projeto MedFlow. Consulte o guia completo em [docs/front/README.md](../../docs/front/README.md).
+Consulte [o guia técnico](../../docs/front/README.md).
 
 ```powershell
 npm ci
 npm start
 ```
 
-Abra `http://localhost:4200` e selecione **Explorar demonstração**.
+Abra http://localhost:4200 para entrar. Pacientes usam **Criar minha conta**; a clínica cadastra médicos em **Profissionais → Cadastrar médico**. Administrador de teste: `admin@medflow.demo`, senha `MedFlow123!`. Consulte o [guia de acessos](../../docs/front/ACESSO.md).
 
 ```powershell
 npm run build
-npm test -- --watch=false
+npm test
+npm run test:e2e
 ```
 
-O frontend funciona com dados fictícios locais e não requer backend. Login alternativo: `admin@medflow.demo` / `MedFlow123!`.
+Somente React, JavaScript/JSX e CSS. Context API compartilha mocks entre as áreas; nenhum backend, banco ou API real é utilizado.
