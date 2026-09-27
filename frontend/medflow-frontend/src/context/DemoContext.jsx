@@ -1,29 +1,34 @@
-﻿import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { createMockData } from '../data/mockData';
 import { demoAccounts } from '../data/demoAccounts';
-import { bookAppointment, changeAppointmentStatus, patientError } from '../utils/appointments';
+import { bookAppointment, changeAppointmentStatus, patientError, getDoctorSlotsForDate } from '../utils/appointments';
 import {
   normalizeEmail,
   passwordHash,
   patientRegistration,
   doctorRegistration,
+  doctorSelfRegistration,
   requireRole,
 } from '../utils/auth';
+import { today, addDays } from '../utils/date';
 const Store = createContext(null);
 const KEY = 'medflow-react-demo-v2';
 const SESSION = 'medflow-session-v1';
 function withAccounts(data) {
-  if (Array.isArray(data.accounts)) return data;
-  const accounts = demoAccounts.filter(
-    (a) =>
-      a.role === 'clinica' ||
-      (a.patientId
-        ? data.patients.some((p) => p.id === a.patientId)
-        : data.doctors.some((d) => d.id === a.doctorId)),
-  );
+  const accounts = Array.isArray(data.accounts)
+    ? data.accounts
+    : demoAccounts.filter(
+        (a) =>
+          a.role === 'clinica' ||
+          (a.patientId
+            ? data.patients.some((p) => p.id === a.patientId)
+            : data.doctors.some((d) => d.id === a.doctorId)),
+      );
+  const doctorSchedules = Array.isArray(data.doctorSchedules) ? data.doctorSchedules : [];
   return {
     ...data,
     accounts,
+    doctorSchedules,
     patients: data.patients.map((p) => ({
       ...p,
       email: accounts.find((a) => a.patientId === p.id)?.email || p.email,
@@ -45,8 +50,12 @@ function load() {
           (k) => Array.isArray(d[k]),
         ) &&
         d.clinic
-      )
+      ) {
+        if (!Array.isArray(d.doctorSchedules) || d.doctorSchedules.length === 0) {
+          d.doctorSchedules = createMockData().doctorSchedules;
+        }
         return withAccounts(d);
+      }
     }
   } catch {}
   return withAccounts(createMockData());
@@ -130,9 +139,19 @@ export function DemoProvider({ children, initialData }) {
     return result.account;
   };
   const registerDoctor = async (form) => {
-    const result = await doctorRegistration(dataRef.current, actor(), form);
-    requireRole(actor(), 'clinica');
     const current = dataRef.current;
+    const currentActor = sessionRef.current
+      ? current.accounts.find((a) => a.id === sessionRef.current)
+      : null;
+
+    let result;
+    if (currentActor?.role === 'clinica') {
+      result = await doctorRegistration(current, currentActor, form);
+    } else {
+      if (sessionRef.current) throw new Error('Saia da conta atual para criar outro acesso.');
+      result = await doctorSelfRegistration(current, form);
+    }
+
     if (
       current.accounts.some((a) => a.email === result.account.email) ||
       current.doctors.some(
@@ -140,12 +159,53 @@ export function DemoProvider({ children, initialData }) {
       )
     )
       throw new Error('O e-mail ou registro profissional já está cadastrado.');
+
+    const standardSlots = [
+      '08:00',
+      '08:30',
+      '09:00',
+      '09:30',
+      '10:00',
+      '10:30',
+      '11:00',
+      '11:30',
+      '14:00',
+      '14:30',
+      '15:00',
+      '15:30',
+      '16:00',
+      '16:30',
+      '17:00',
+    ];
+    const newSchedules = [];
+    for (let dayOffset = 0; dayOffset <= 14; dayOffset++) {
+      newSchedules.push({
+        id: `ds-${result.doctor.id}-${addDays(today(), dayOffset)}`,
+        doctorId: result.doctor.id,
+        date: addDays(today(), dayOffset),
+        slots: [...standardSlots],
+        updatedAt: new Date().toISOString(),
+      });
+    }
+
+    const nextSpecialties = result.newSpecialty
+      ? [...current.specialties, result.newSpecialty]
+      : current.specialties;
+
     commit({
       ...current,
+      specialties: nextSpecialties,
       doctors: [...current.doctors, result.doctor],
       accounts: [...current.accounts, result.account],
+      doctorSchedules: [...(current.doctorSchedules || []), ...newSchedules],
     });
-    notify('Conta do médico criada. Ele já pode entrar com o e-mail e a senha cadastrados.');
+
+    if (!currentActor) {
+      setSession(result.account.id);
+      notify('Sua conta de médico foi criada com sucesso! Bem-vindo(a).');
+    } else {
+      notify('Conta do médico criada. Ele já pode entrar com o e-mail e a senha cadastrados.');
+    }
     return result.doctor;
   };
   const checkAppointment = (user, appointment) => {
@@ -182,11 +242,79 @@ export function DemoProvider({ children, initialData }) {
     if (user.role === 'paciente' && value !== 'Cancelado')
       throw new Error('Somente a equipe pode alterar o atendimento.');
     commit(changeAppointmentStatus(dataRef.current, id, value));
-    notify(
-      value === 'Cancelado'
-        ? 'Consulta cancelada. O horário foi liberado.'
-        : `Consulta atualizada: ${value.toLowerCase()}.`,
+    const labelMap = {
+      Cancelado: 'Consulta cancelada. O horário foi liberado.',
+      Compareceu: 'Presença confirmada! Paciente marcado como compareceu.',
+      'Não compareceu': 'Marcado como não compareceu (falta registrada).',
+      'Em atendimento': 'Atendimento iniciado.',
+      Concluído: 'Atendimento concluído com sucesso.',
+    };
+    notify(labelMap[value] || `Consulta atualizada: ${value.toLowerCase()}.`);
+  };
+  const saveDoctorSchedule = (targetDoctorId, date, slots) => {
+    const user = actor();
+    const docId = targetDoctorId || doctorId || user.doctorId;
+    if (user.role === 'medico' && docId !== user.doctorId) {
+      throw new Error('Você só pode editar a sua própria agenda.');
+    }
+    const current = dataRef.current;
+    const list = current.doctorSchedules || [];
+    const existingIndex = list.findIndex(
+      (s) => s.doctorId === docId && s.date === date,
     );
+    const updatedSchedules = [...list];
+    const entry = {
+      id: existingIndex >= 0 ? updatedSchedules[existingIndex].id : crypto.randomUUID(),
+      doctorId: docId,
+      date,
+      slots: [...slots].sort(),
+      updatedAt: new Date().toISOString(),
+    };
+    if (existingIndex >= 0) {
+      updatedSchedules[existingIndex] = entry;
+    } else {
+      updatedSchedules.push(entry);
+    }
+    commit({ ...current, doctorSchedules: updatedSchedules });
+    notify('Horários liberados para este dia salvos com sucesso!');
+    return entry;
+  };
+  const replicateDoctorSchedule = (targetDoctorId, sourceDate, targetDates) => {
+    const user = actor();
+    const docId = targetDoctorId || doctorId || user.doctorId;
+    if (user.role === 'medico' && docId !== user.doctorId) {
+      throw new Error('Você só pode editar a sua própria agenda.');
+    }
+    if (!Array.isArray(targetDates) || targetDates.length === 0) {
+      throw new Error('Selecione pelo menos uma data para replicar.');
+    }
+    const current = dataRef.current;
+    const list = current.doctorSchedules || [];
+    const sourceSchedule = list.find(
+      (s) => s.doctorId === docId && s.date === sourceDate,
+    );
+    const slotsToCopy = sourceSchedule?.slots || getDoctorSlotsForDate(current, docId, sourceDate);
+
+    const updatedSchedules = [...list];
+    for (const tDate of targetDates) {
+      const idx = updatedSchedules.findIndex(
+        (s) => s.doctorId === docId && s.date === tDate,
+      );
+      const entry = {
+        id: idx >= 0 ? updatedSchedules[idx].id : crypto.randomUUID(),
+        doctorId: docId,
+        date: tDate,
+        slots: [...slotsToCopy],
+        updatedAt: new Date().toISOString(),
+      };
+      if (idx >= 0) {
+        updatedSchedules[idx] = entry;
+      } else {
+        updatedSchedules.push(entry);
+      }
+    }
+    commit({ ...current, doctorSchedules: updatedSchedules });
+    notify(`Horários replicados para ${targetDates.length} dia(s) com sucesso!`);
   };
   const savePatient = (patient) => {
     const user = actor();
@@ -250,6 +378,41 @@ export function DemoProvider({ children, initialData }) {
     });
     notify('Anotação salva no prontuário fictício.');
   };
+  const addDocument = (recordId, document) => {
+    const user = actor();
+    const current = dataRef.current;
+    const record = current.records.find((r) => r.id === recordId);
+    if (!record) throw new Error('Prontuário não encontrado.');
+    if (user.role === 'medico' && record.doctorId !== user.doctorId) {
+      throw new Error('Este prontuário não pertence à sua conta.');
+    }
+    if (!document || !document.name?.trim()) {
+      throw new Error('Informe um documento válido.');
+    }
+    const newDoc = {
+      id: crypto.randomUUID(),
+      name: document.name.trim(),
+      text: document.text || 'Documento anexado ao prontuário do paciente.',
+      fileData: document.fileData || '',
+      fileType: document.fileType || '',
+      fileSize: document.fileSize || '',
+      uploadedAt: new Date().toISOString(),
+      author: user.role === 'medico' ? (current.doctors.find((d) => d.id === user.doctorId)?.name || 'Especialista') : 'Clínica',
+    };
+    commit({
+      ...current,
+      records: current.records.map((r) =>
+        r.id === recordId
+          ? {
+              ...r,
+              updatedAt: new Date().toISOString(),
+              documents: [...(r.documents || []), newDoc],
+            }
+          : r,
+      ),
+    });
+    notify(`Documento "${document.name}" anexado com sucesso!`);
+  };
   const markRead = () => {
     const user = actor();
     const viewer = user.patientId || user.doctorId;
@@ -275,10 +438,13 @@ export function DemoProvider({ children, initialData }) {
         registerDoctor,
         book,
         status,
+        saveDoctorSchedule,
+        replicateDoctorSchedule,
         savePatient,
         saveDoctor,
         saveClinic,
         addNote,
+        addDocument,
         markRead,
         notify,
         toast,

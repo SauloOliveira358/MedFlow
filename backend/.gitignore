@@ -1,10 +1,23 @@
+# ============================================================================
+# MEDFLOW BACKEND - .gitignore
+# ============================================================================
+
+# Arquivos de Ambiente e Credenciais
+.env
+.env.*
+.env.local
+!*.env.example
+!.env.example
+
+# Maven Build
 HELP.md
 target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+*.class
 
-### STS ###
+# STS & Eclipse
 .apt_generated
 .classpath
 .factorypath
@@ -13,13 +26,13 @@ target/
 .springBeans
 .sts4-cache
 
-### IntelliJ IDEA ###
+# IntelliJ IDEA
 .idea
 *.iws
 *.iml
 *.ipr
 
-### NetBeans ###
+# NetBeans
 /nbproject/private/
 /nbbuild/
 /dist/
@@ -29,5 +42,13 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
-### VS Code ###
+# VS Code
 .vscode/
+
+# Logs e Temporários
+*.log
+logs/
+temp/
+tmp/
+.DS_Store
+Thumbs.db

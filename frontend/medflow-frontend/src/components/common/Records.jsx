@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { useDemo } from '../../context/DemoContext';
 import { PageHeading, SearchInput, Avatar, EmptyState, Tabs, Modal, StatusBadge } from './UI';
@@ -140,12 +140,63 @@ export function Records({ area }) {
   );
 }
 export function RecordDetail({ area }) {
-  const { data, doctorId, addNote } = useDemo();
+  const { data, doctorId, addNote, addDocument, notify } = useDemo();
   const { id } = useParams();
+  const fileInputRef = useRef(null);
   const [tab, setTab] = useState('Resumo');
   const [note, setNote] = useState('');
   const [error, setError] = useState('');
   const [document, setDocument] = useState(null);
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 15 * 1024 * 1024) {
+      notify('O arquivo deve ter no máximo 15MB.', 'error');
+      return;
+    }
+
+    const reader = new FileReader();
+    const isImage = file.type.startsWith('image/');
+    const isText = file.type.startsWith('text/') || file.name.endsWith('.txt');
+
+    reader.onload = () => {
+      try {
+        const fileContent = reader.result;
+        const newDoc = {
+          name: file.name,
+          fileType: file.type || 'application/octet-stream',
+          fileSize:
+            file.size / 1024 < 1000
+              ? `${(file.size / 1024).toFixed(1)} KB`
+              : `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
+          fileData: typeof fileContent === 'string' ? fileContent : '',
+          text:
+            isText && typeof fileContent === 'string'
+              ? fileContent
+              : `Arquivo anexado: ${file.name}. Tipo: ${file.type || 'Documento digital'}.`,
+        };
+        addDocument(record.id, newDoc);
+      } catch (err) {
+        notify(err.message, 'error');
+      } finally {
+        if (fileInputRef.current) fileInputRef.current.value = '';
+      }
+    };
+
+    reader.onerror = () => {
+      notify('Erro ao ler o arquivo selecionado.', 'error');
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+
+    if (isText) {
+      reader.readAsText(file);
+    } else {
+      reader.readAsDataURL(file);
+    }
+  };
+
   const record = data.records.find(
     (r) => r.id === id && (area !== 'medico' || r.doctorId === doctorId),
   );
@@ -295,23 +346,100 @@ export function RecordDetail({ area }) {
         )}
         {tab === 'Documentos' && (
           <>
-            <h2>Documentos</h2>
-            {record.documents.map((d) => (
-              <button key={d.id} className="document-item" onClick={() => setDocument(d)}>
-                <span className="icon-box sage">
-                  <Icon name="file" />
-                </span>
-                <span>
-                  {d.name}
-                  <small>Documento fictício · Visualizar</small>
-                </span>
-                <Icon name="right" />
-              </button>
-            ))}
-            {!record.documents.length && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+              <div>
+                <h2 style={{ margin: 0 }}>Documentos do Prontuário</h2>
+                <small style={{ color: '#68776f' }}>Exames, laudos, receitas e arquivos anexados</small>
+              </div>
+
+              {area !== 'paciente' && (
+                <>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    style={{ display: 'none' }}
+                    onChange={handleFileUpload}
+                    accept="image/*,.pdf,.doc,.docx,.txt"
+                  />
+                  <button
+                    type="button"
+                    className="button primary"
+                    onClick={() => fileInputRef.current?.click()}
+                    style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                  >
+                    <Icon name="plus" size={16} /> Subir arquivo / documento
+                  </button>
+                </>
+              )}
+            </div>
+
+            {area !== 'paciente' && (
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                style={{
+                  border: '2px dashed #b8cebe',
+                  borderRadius: '12px',
+                  padding: '24px 16px',
+                  textAlign: 'center',
+                  background: '#f8faf7',
+                  cursor: 'pointer',
+                  marginBottom: '20px',
+                  transition: 'all 0.18s ease',
+                }}
+              >
+                <div style={{ color: '#3f6d63', marginBottom: '8px' }}>
+                  <Icon name="file" size={28} />
+                </div>
+                <strong style={{ display: 'block', color: '#273831', fontSize: '15px', marginBottom: '4px' }}>
+                  Clique aqui para selecionar e subir um arquivo
+                </strong>
+                <small style={{ color: '#68776f', fontSize: '13px' }}>
+                  Suporta PDF, Imagens (JPG, PNG), Exames laboratoriais, Laudos e Textos (até 15MB)
+                </small>
+              </div>
+            )}
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {(record.documents || []).map((d) => (
+                <button
+                  key={d.id}
+                  className="document-item"
+                  onClick={() => setDocument(d)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '12px 16px',
+                    borderRadius: '10px',
+                    border: '1px solid #dfe5dc',
+                    background: '#ffffff',
+                    width: '100%',
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <span className="icon-box sage">
+                      <Icon name="file" />
+                    </span>
+                    <div>
+                      <strong style={{ fontSize: '14px', color: '#26382f', display: 'block' }}>{d.name}</strong>
+                      <small style={{ color: '#697a70', fontSize: '12px' }}>
+                        {d.fileSize ? `${d.fileSize} · ` : ''}
+                        {d.uploadedAt ? `Enviado em ${formatDate(d.uploadedAt.slice(0, 10))} · ` : ''}
+                        Clique para visualizar
+                      </small>
+                    </div>
+                  </div>
+                  <Icon name="right" />
+                </button>
+              ))}
+            </div>
+
+            {(!record.documents || !record.documents.length) && (
               <EmptyState
                 title="Nenhum documento anexado"
-                description="Esta demonstração não envia arquivos para nenhum servidor."
+                description="Use o botão acima para subir exames, laudos e arquivos do paciente."
               />
             )}
           </>
@@ -319,7 +447,50 @@ export function RecordDetail({ area }) {
       </section>
       {document && (
         <Modal title={document.name} onClose={() => setDocument(null)}>
-          <p className="document-text">{document.text}</p>
+          <div style={{ padding: '6px 0' }}>
+            {document.fileData && document.fileType?.startsWith('image/') ? (
+              <div style={{ textAlign: 'center', marginBottom: '16px' }}>
+                <img
+                  src={document.fileData}
+                  alt={document.name}
+                  style={{ maxWidth: '100%', maxHeight: '420px', borderRadius: '8px', border: '1px solid #d5ded3' }}
+                />
+              </div>
+            ) : null}
+
+            {document.fileData && document.fileType === 'application/pdf' ? (
+              <div style={{ textAlign: 'center', padding: '24px 16px', background: '#f8faf7', borderRadius: '10px', marginBottom: '16px', border: '1px solid #e1e8df' }}>
+                <Icon name="file" size={42} style={{ color: '#c9302c', marginBottom: '10px' }} />
+                <h4 style={{ margin: '0 0 6px', color: '#26382f' }}>Documento PDF Anexado</h4>
+                <p style={{ margin: 0, fontSize: '13px', color: '#68776f' }}>Clique no botão abaixo para baixar ou visualizar:</p>
+                <a
+                  href={document.fileData}
+                  download={document.name}
+                  className="button primary small"
+                  style={{ marginTop: '14px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                >
+                  <Icon name="download" size={15} /> Baixar {document.name}
+                </a>
+              </div>
+            ) : null}
+
+            <p className="document-text" style={{ whiteSpace: 'pre-wrap', lineHeight: 1.5, background: '#fbfcfb', padding: '14px', borderRadius: '8px', border: '1px solid #eef2ed' }}>
+              {document.text}
+            </p>
+
+            {document.fileData && !document.fileType?.startsWith('image/') && document.fileType !== 'application/pdf' && (
+              <div style={{ marginTop: '14px' }}>
+                <a
+                  href={document.fileData}
+                  download={document.name}
+                  className="button secondary small"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                >
+                  <Icon name="download" size={15} /> Baixar arquivo ({document.name})
+                </a>
+              </div>
+            )}
+          </div>
         </Modal>
       )}
     </>

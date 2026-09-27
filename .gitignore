@@ -1,2 +1,80 @@
-﻿# Ferramentas temporárias usadas para leitura do documento de requisitos
+# ============================================================================
+# MEDFLOW - .gitignore Geral do Projeto
+# ============================================================================
+
+# 1. Arquivos de Ambiente e Segredos (NUNCA COMMITTAR)
+.env
+.env.*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+!*.env.example
+!.env.example
+
+# 2. Node & Frontend
+node_modules/
+frontend/medflow-frontend/node_modules/
+dist/
+frontend/medflow-frontend/dist/
+out-tsc/
+bazel-out/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+.angular/
+.sass-cache/
+connect.lock
+coverage/
+libpeerconnection.log
+testem.log
+typings/
+__screenshots__/
+test-results/
+playwright-report/
+
+# 3. Java & Maven (Backend)
+target/
+backend/target/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+*.class
+
+# 4. IDEs e Editores
+.idea/
+*.iws
+*.iml
+*.ipr
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache
+.c9/
+*.launch
+*.sublime-workspace
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/mcp.json
+.history/*
+
+# 5. Sistema Operacional
+.DS_Store
+Thumbs.db
+ehthumbs.db
+[Dd]esktop.ini
+
+# 6. Logs e Temporários
+*.log
+logs/
+temp/
+tmp/
 .tmp-tools/

@@ -1,11 +1,11 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useDemo } from '../../context/DemoContext';
-import { PageHeading, EmptyState, Tabs } from '../../components/common/UI';
+import { PageHeading, EmptyState, Tabs, Avatar, StatusBadge } from '../../components/common/UI';
 import { AppointmentCard, AppointmentDetailsModal } from '../../components/common/Appointment';
 import { SpecialtyCard } from '../../components/patient/Cards';
 import Icon from '../../components/common/Icon';
-import { future, sortAppointments } from '../../utils/date';
+import { future, sortAppointments, formatDate } from '../../utils/date';
 import { useNavigate } from 'react-router-dom';
 export function PatientDashboard() {
   const { data, patientId } = useDemo();
@@ -137,16 +137,20 @@ export function PatientAppointments({ history = false }) {
   const { data, patientId } = useDemo();
   const [tab, setTab] = useState(history ? 'Histórico' : 'Próximos');
   const [details, setDetails] = useState(null);
-  const rows = sortAppointments(
-    data.appointments.filter(
-      (a) => a.patientId === patientId && (tab === 'Próximos' ? future(a) : !future(a)),
-    ),
+
+  const upcomingRows = sortAppointments(
+    data.appointments.filter((a) => a.patientId === patientId && future(a)),
   );
-  if (tab === 'Histórico') rows.reverse();
+  const historyRows = sortAppointments(
+    data.appointments.filter((a) => a.patientId === patientId),
+  ).reverse();
+
+  const currentRows = tab === 'Próximos' ? upcomingRows : historyRows;
+
   return (
     <>
       <PageHeading
-        title={history ? 'Seu histórico de cuidado' : 'Meus agendamentos'}
+        title={history || tab === 'Histórico' ? 'Seu histórico de cuidado' : 'Meus agendamentos'}
         description="Seus encontros de cuidado, organizados em um só lugar."
         action={
           <Link className="button primary" to="/paciente/agendar">
@@ -156,12 +160,111 @@ export function PatientAppointments({ history = false }) {
         }
       />
       <Tabs items={['Próximos', 'Histórico']} value={tab} onChange={setTab} />
-      <div className="appointment-grid">
-        {rows.map((a) => (
-          <AppointmentCard key={a.id} appointment={a} onDetails={setDetails} />
-        ))}
-      </div>
-      {!rows.length && (
+
+      {tab === 'Próximos' ? (
+        <div className="appointment-grid">
+          {upcomingRows.map((a) => (
+            <AppointmentCard key={a.id} appointment={a} onDetails={setDetails} />
+          ))}
+        </div>
+      ) : (
+        historyRows.length > 0 && (
+          <div className="panel" style={{ padding: 0, overflow: 'hidden' }}>
+            <div className="responsive-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Data e horário</th>
+                    <th>Profissional</th>
+                    <th>Especialidade</th>
+                    <th>Local</th>
+                    <th>Status</th>
+                    <th style={{ textAlign: 'right' }}>Detalhes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {historyRows.map((a) => {
+                    const doctor = data.doctors.find((d) => d.id === a.doctorId);
+                    const specialty = data.specialties.find((s) => s.id === doctor?.specialtyId);
+                    return (
+                      <tr
+                        key={a.id}
+                        onClick={() => setDetails(a)}
+                        style={{
+                          cursor: 'pointer',
+                          transition: 'background 0.15s ease',
+                        }}
+                        className="history-row"
+                      >
+                        <td>
+                          <strong>{formatDate(a.date)}</strong>
+                          <small
+                            style={{
+                              color: '#64748b',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              marginTop: '2px',
+                            }}
+                          >
+                            <Icon name="clock" size={12} />
+                            {a.time} · 30 min
+                          </small>
+                        </td>
+                        <td>
+                          <div className="table-person">
+                            <Avatar person={doctor} />
+                            <div>
+                              <strong>{doctor?.name || 'Profissional'}</strong>
+                              {doctor?.crm && (
+                                <small style={{ color: '#64748b' }}>CRM {doctor.crm}</small>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <span style={{ fontWeight: 600, color: '#334155' }}>
+                            {specialty?.name || 'Especialidade'}
+                          </span>
+                        </td>
+                        <td>
+                          <span style={{ color: '#475569' }}>
+                            {data.clinic?.name || 'Clínica MedFlow'}
+                          </span>
+                        </td>
+                        <td>
+                          <StatusBadge status={a.status} />
+                        </td>
+                        <td style={{ textAlign: 'right' }}>
+                          <button
+                            type="button"
+                            className="button small secondary"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDetails(a);
+                            }}
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                              fontWeight: 600,
+                            }}
+                          >
+                            Ver detalhes
+                            <Icon name="arrow" size={13} />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )
+      )}
+
+      {!currentRows.length && (
         <div className="panel">
           <EmptyState
             title={
@@ -176,7 +279,7 @@ export function PatientAppointments({ history = false }) {
       )}
       {details && (
         <AppointmentDetailsModal
-          appointment={data.appointments.find((a) => a.id === details.id)}
+          appointment={data.appointments.find((a) => a.id === details.id) || details}
           area="paciente"
           onClose={() => setDetails(null)}
         />

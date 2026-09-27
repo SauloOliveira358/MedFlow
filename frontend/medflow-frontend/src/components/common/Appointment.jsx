@@ -1,9 +1,10 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useDemo } from '../../context/DemoContext';
 import { Avatar, StatusBadge, Modal, ConfirmationModal } from './UI';
 import { age, formatDate } from '../../utils/date';
 import Icon from './Icon';
+import LocationMap from './LocationMap';
 export function AppointmentCard({ appointment, area = 'paciente', onDetails }) {
   const { data, status, notify } = useDemo();
   const [cancelOpen, setCancelOpen] = useState(false);
@@ -28,10 +29,31 @@ export function AppointmentCard({ appointment, area = 'paciente', onDetails }) {
               {specialty.name}
               {area !== 'paciente' ? ` · ${doctor.name}` : ''}
             </p>
-            <small>
-              <Icon name="pin" size={13} />
-              {data.clinic.name}
-            </small>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginTop: '2px' }}>
+              <small>
+                <Icon name="pin" size={13} />
+                {doctor?.clinic || data.clinic.name}
+              </small>
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                  `${doctor?.clinic || data.clinic.name}, ${doctor?.address || data.clinic.address}`
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                title="Abrir no Google Maps"
+                style={{
+                  fontSize: '11px',
+                  color: '#0d9488',
+                  fontWeight: 600,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '3px',
+                }}
+              >
+                Maps ↗
+              </a>
+            </div>
           </div>
         </div>
         <div className="appointment-card-bottom">
@@ -45,11 +67,13 @@ export function AppointmentCard({ appointment, area = 'paciente', onDetails }) {
         </div>
         {area === 'paciente' && ['Confirmado', 'Pendente'].includes(appointment.status) && (
           <div className="patient-card-actions">
-            <Link className="text-button" to={`/paciente/agendar?reagendar=${appointment.id}`}>
-              Reagendar
-            </Link>
-            <button className="text-button cancel-link" onClick={() => setCancelOpen(true)}>
-              Cancelar
+            <button
+              className="text-button cancel-link"
+              onClick={() => setCancelOpen(true)}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+            >
+              <Icon name="x" size={14} />
+              Cancelar consulta
             </button>
           </div>
         )}
@@ -70,7 +94,7 @@ export function AppointmentCard({ appointment, area = 'paciente', onDetails }) {
     </>
   );
 }
-export function AppointmentDetailsModal({ appointment, area, onClose }) {
+export function AppointmentDetailsModal({ appointment, area, onClose, onlyCancel = false }) {
   const { data, status, notify } = useDemo();
   const [confirm, setConfirm] = useState(false);
   const doctor = data.doctors.find((d) => d.id === appointment.doctorId);
@@ -120,51 +144,168 @@ export function AppointmentDetailsModal({ appointment, area, onClose }) {
         </div>
         <div>
           <dt>Paciente</dt>
-          <dd>{patient.name}</dd>
-        </div>
-        <div className="full">
-          <dt>Local</dt>
           <dd>
-            {data.clinic.name}
-            <small>{data.clinic.address}</small>
+            {patient.name}
+            {area !== 'paciente' && patient.cpf ? (
+              <small style={{ display: 'block', color: '#68776f' }}>
+                CPF: {patient.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4')} · Tel: {patient.phone}
+              </small>
+            ) : null}
+            {area !== 'paciente' && patient.email ? (
+              <small style={{ display: 'block', color: '#68776f' }}>
+                E-mail: {patient.email}
+              </small>
+            ) : null}
           </dd>
         </div>
+        {area === 'paciente' && (
+          <div className="full">
+            <dt style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Icon name="pin" size={15} /> Local da Consulta no Maps
+            </dt>
+            <dd style={{ marginTop: '6px' }}>
+              <div style={{ marginBottom: '6px' }}>
+                <strong>{doctor?.clinic || data.clinic.name}</strong>
+                <small style={{ display: 'block', color: '#64748b' }}>
+                  {doctor?.address || data.clinic.address}
+                </small>
+              </div>
+              <LocationMap
+                clinicName={doctor?.clinic || data.clinic.name}
+                address={doctor?.address || data.clinic.address}
+                lat={doctor?.lat ?? data.clinic?.lat ?? -19.9227}
+                lng={doctor?.lng ?? data.clinic?.lng ?? -43.9451}
+                editable={false}
+                height={220}
+              />
+            </dd>
+          </div>
+        )}
         <div className="full">
           <dt>Motivo informado pelo paciente</dt>
           <dd>{appointment.reason || 'Nenhuma observação informada.'}</dd>
         </div>
       </dl>
-      <div className="modal-actions wrap">
-        {area !== 'paciente' && (
-          <Link
-            className="button secondary"
-            to={record ? `/${area}/prontuarios/${record.id}` : `/${area}/prontuarios`}
-            onClick={onClose}
-          >
-            Ver prontuário
-          </Link>
-        )}
-        {area !== 'paciente' && canEdit && (
-          <button className="button primary" onClick={() => update('Em atendimento')}>
-            Iniciar atendimento
-          </button>
-        )}
-        {area !== 'paciente' && appointment.status === 'Em atendimento' && (
-          <button className="button primary" onClick={() => update('Concluído')}>
-            Concluir atendimento
-          </button>
-        )}
-        {canEdit && (
+      <div className="modal-actions wrap" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        {onlyCancel ? (
           <>
-            <Link
+            {appointment.status !== 'Cancelado' && (
+              <button
+                type="button"
+                className="button danger-soft"
+                onClick={() => setConfirm(true)}
+                style={{
+                  background: '#fdf2f2',
+                  color: '#c9302c',
+                  border: '1px solid #f5c6cb',
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                }}
+              >
+                <Icon name="x" size={15} />
+                Cancelar Agendamento
+              </button>
+            )}
+            <button type="button" className="button primary" onClick={onClose} style={{ marginLeft: 'auto' }}>
+              Fechar
+            </button>
+          </>
+        ) : (
+          <>
+            {area !== 'paciente' && (
+              <Link
+                className="button secondary"
+                to={record ? `/${area}/prontuarios/${record.id}` : `/${area}/prontuarios`}
+                onClick={onClose}
+              >
+                Ver prontuário
+              </Link>
+            )}
+            {area !== 'paciente' && appointment.status !== 'Cancelado' && (
+              <>
+                <button
+                  type="button"
+                  className="button small"
+                  style={{
+                    background: appointment.status === 'Compareceu' ? '#488c43' : '#f0f8ee',
+                    color: appointment.status === 'Compareceu' ? '#ffffff' : '#31692d',
+                    border: '1px solid #bee0b9',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    fontWeight: 600,
+                  }}
+                  onClick={() => update('Compareceu')}
+                >
+                  <Icon name="check" size={14} />
+                  {appointment.status === 'Compareceu' ? 'Compareceu ✓' : 'Compareceu'}
+                </button>
+                <button
+                  type="button"
+                  className="button small"
+                  style={{
+                    background: appointment.status === 'Não compareceu' ? '#cb8a27' : '#fdf6eb',
+                    color: appointment.status === 'Não compareceu' ? '#ffffff' : '#8d5910',
+                    border: '1px solid #f6deb6',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    fontWeight: 600,
+                  }}
+                  onClick={() => update('Não compareceu')}
+                >
+                  <Icon name="x" size={14} />
+                  {appointment.status === 'Não compareceu' ? 'Não compareceu ✓' : 'Não compareceu'}
+                </button>
+              </>
+            )}
+            {area !== 'paciente' && area !== 'medico' && canEdit && (
+              <button className="button primary" onClick={() => update('Em atendimento')}>
+                Iniciar atendimento
+              </button>
+            )}
+            {area !== 'paciente' && area !== 'medico' && appointment.status === 'Em atendimento' && (
+              <button className="button primary" onClick={() => update('Concluído')}>
+                Concluir atendimento
+              </button>
+            )}
+            {area !== 'medico' && area !== 'paciente' && canEdit && (
+              <Link
+                className="button secondary"
+                to={`/${area}/agendar?reagendar=${appointment.id}`}
+                onClick={onClose}
+              >
+                Reagendar
+              </Link>
+            )}
+            {appointment.status !== 'Cancelado' && (
+              <button
+                type="button"
+                className="button danger-soft"
+                onClick={() => setConfirm(true)}
+                style={{
+                  background: '#fdf2f2',
+                  color: '#c9302c',
+                  border: '1px solid #f5c6cb',
+                  fontWeight: 600,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                }}
+              >
+                <Icon name="x" size={14} />
+                Cancelar
+              </button>
+            )}
+            <button
+              type="button"
               className="button secondary"
-              to={`/${area}/agendar?reagendar=${appointment.id}`}
               onClick={onClose}
+              style={{ marginLeft: 'auto' }}
             >
-              Reagendar
-            </Link>
-            <button className="button danger-soft" onClick={() => setConfirm(true)}>
-              Cancelar
+              Fechar
             </button>
           </>
         )}

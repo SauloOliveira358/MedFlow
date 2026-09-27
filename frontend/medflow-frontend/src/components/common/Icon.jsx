@@ -1,4 +1,4 @@
-﻿import {
+import {
   Heart,
   CalendarDays,
   Clock3,
@@ -35,8 +35,12 @@
   Mail,
   Phone,
   CircleHelp,
+  Camera,
+  Upload,
 } from 'lucide-react';
 const icons = {
+  camera: Camera,
+  upload: Upload,
   heart: Heart,
   calendar: CalendarDays,
   clock: Clock3,

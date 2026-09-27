@@ -1,4 +1,4 @@
-﻿import { patientError } from './appointments';
+import { patientError } from './appointments';
 export const normalizeEmail = (email) =>
   String(email || '')
     .trim()
@@ -80,8 +80,11 @@ export async function doctorRegistration(data, actor, form) {
     registration: form.registration.trim(),
     email: auth.email,
     phone: form.phone,
-    city: 'Belo Horizonte, MG',
-    clinic: data.clinic.name,
+    city: form.city?.trim() || 'Belo Horizonte, MG',
+    clinic: form.clinic?.trim() || data.clinic?.name || 'Clínica MedFlow',
+    address: form.address?.trim() || data.clinic?.address || 'Rua das Flores, 120 · Funcionários, Belo Horizonte - MG',
+    lat: typeof form.lat === 'number' ? form.lat : (data.clinic?.lat ?? -19.9227),
+    lng: typeof form.lng === 'number' ? form.lng : (data.clinic?.lng ?? -43.9451),
     start: '08:00',
     end: '18:00',
     photo: '',
@@ -93,3 +96,74 @@ export async function doctorRegistration(data, actor, form) {
     account: { id: crypto.randomUUID(), role: 'medico', doctorId: doctor.id, ...auth },
   };
 }
+
+export async function doctorSelfRegistration(data, form) {
+  assertUnique(data, form.email);
+  if (!form.name?.trim() || form.name.trim().length < 3)
+    throw new Error('Informe seu nome completo.');
+  if (!form.registration?.trim())
+    throw new Error('Informe seu CRM ou registro profissional.');
+  if (!/^\d{10,11}$/.test((form.phone || '').replace(/\D/g, '')))
+    throw new Error('Informe seu telefone com DDD.');
+
+  let specialty = data.specialties.find((s) => s.id === form.specialtyId);
+  let newSpecialty = null;
+  if (!specialty && form.specialtyName?.trim()) {
+    const existing = data.specialties.find(
+      (s) => s.name.toLowerCase() === form.specialtyName.trim().toLowerCase(),
+    );
+    if (existing) {
+      specialty = existing;
+    } else {
+      newSpecialty = {
+        id: `s_${crypto.randomUUID().slice(0, 8)}`,
+        name: form.specialtyName.trim(),
+        description: 'Atendimento e cuidado especializado.',
+        icon: 'stethoscope',
+        color: 'sage',
+      };
+      specialty = newSpecialty;
+    }
+  }
+
+  if (!specialty) {
+    throw new Error('Selecione ou informe sua especialidade médica.');
+  }
+
+  if (
+    data.doctors.some(
+      (d) => d.registration.toLowerCase() === form.registration.trim().toLowerCase(),
+    )
+  )
+    throw new Error('Este registro profissional já está cadastrado.');
+
+  const auth = await credentials(form.email, form.password);
+  const doctor = {
+    id: crypto.randomUUID(),
+    name: form.name.trim().startsWith('Dr') ? form.name.trim() : `Dr(a). ${form.name.trim()}`,
+    firstName: form.name.trim().split(' ').slice(0, 2).join(' '),
+    specialtyId: specialty.id,
+    registration: form.registration.trim().toUpperCase(),
+    email: auth.email,
+    phone: form.phone,
+    city: form.city?.trim() || 'Belo Horizonte, MG',
+    clinic: form.clinic?.trim() || data.clinic?.name || 'Consultório Médico Particular',
+    address: form.address?.trim() || data.clinic?.address || 'Rua das Flores, 120 · Funcionários, Belo Horizonte - MG',
+    lat: typeof form.lat === 'number' ? form.lat : (data.clinic?.lat ?? -19.9227),
+    lng: typeof form.lng === 'number' ? form.lng : (data.clinic?.lng ?? -43.9451),
+    start: '08:00',
+    end: '18:00',
+    photo: '',
+    rating: '5,0',
+    bio: form.bio?.trim() || 'Atendimento humanizado e focado no seu bem-estar.',
+  };
+
+  const account = { id: crypto.randomUUID(), role: 'medico', doctorId: doctor.id, ...auth };
+
+  return {
+    doctor,
+    account,
+    newSpecialty,
+  };
+}
+

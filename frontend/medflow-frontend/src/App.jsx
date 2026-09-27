@@ -1,5 +1,5 @@
 import { Suspense, lazy } from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, Navigate } from 'react-router-dom';
 import AreaLayout from './layouts/AreaLayout';
 import Welcome from './pages/Welcome';
 import RequireAccount from './components/common/RequireAccount';
@@ -18,6 +18,8 @@ const Records = lazy(() =>
 const RecordDetail = lazy(() =>
   import('./components/common/Records').then((m) => ({ default: m.RecordDetail })),
 );
+const DoctorAppointments = lazy(() => import('./pages/doctor/DoctorAppointments'));
+const DoctorScheduleManager = lazy(() => import('./components/doctor/DoctorScheduleManager'));
 export default function App() {
   return (
     <Suspense fallback={<LoadingSkeleton />}>
@@ -61,9 +63,11 @@ export default function App() {
             <Route path="prontuarios/:id" element={<RecordDetail area={area} />} />
             {area === 'medico' ? (
               <>
+                <Route path="horarios" element={<DoctorScheduleManager />} />
+                <Route path="agendados" element={<DoctorAppointments />} />
                 <Route
                   path="atendimentos"
-                  element={<Schedule key="attendances" area={area} attendances />}
+                  element={<Navigate to={`/${area}/agenda`} replace />}
                 />
                 <Route path="notificacoes" element={<Notifications area={area} />} />
                 <Route path="perfil" element={<Profile area={area} />} />

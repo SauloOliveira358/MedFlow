@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useDemo } from '../../context/DemoContext';
 import { PageHeading, SearchInput, EmptyState, Avatar } from '../../components/common/UI';
@@ -8,7 +8,536 @@ import PatientForm from '../../components/common/PatientForm';
 import { patientError, slotUnavailable } from '../../utils/appointments';
 import { today, formatDate, normalize } from '../../utils/date';
 import Icon from '../../components/common/Icon';
+
+function DoctorBooking() {
+  const { data, doctorId, book } = useDemo();
+  const [params] = useSearchParams();
+  const editId = params.get('reagendar');
+  const original = data.appointments.find((a) => a.id === editId);
+  const doctor = data.doctors.find((d) => d.id === doctorId) || data.doctors[0];
+  const specialty = data.specialties.find((s) => s.id === doctor?.specialtyId);
+
+  const [patientMode, setPatientMode] = useState('existing');
+  const [selectedPatientId, setSelectedPatientId] = useState(original?.patientId || '');
+  const [patientSearch, setPatientSearch] = useState('');
+  const [newPatient, setNewPatient] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    cpf: '',
+    birth: '',
+  });
+  const [date, setDate] = useState(original?.date >= today() ? original.date : today());
+  const [time, setTime] = useState(original?.time || '');
+  const [reason, setReason] = useState(original?.reason || '');
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [confirmedPatient, setConfirmedPatient] = useState(null);
+
+  const selectedPatient = data.patients.find((p) => p.id === selectedPatientId);
+
+  const filteredPatients = data.patients.filter((p) => {
+    if (!patientSearch) return true;
+    const term = normalize(patientSearch);
+    return (
+      normalize(p.name).includes(term) ||
+      (p.cpf && p.cpf.includes(term)) ||
+      (p.phone && p.phone.includes(term))
+    );
+  });
+
+  const handleReset = () => {
+    setSelectedPatientId('');
+    setPatientSearch('');
+    setNewPatient({ name: '', phone: '', email: '', cpf: '', birth: '' });
+    setDate(today());
+    setTime('');
+    setReason('');
+    setError('');
+    setSuccess(false);
+    setConfirmedPatient(null);
+  };
+
+  const handleConfirm = () => {
+    setError('');
+    let finalPatient;
+    if (patientMode === 'existing') {
+      if (!selectedPatient) {
+        setError('Por favor, selecione o paciente que deseja agendar.');
+        return;
+      }
+      finalPatient = selectedPatient;
+    } else {
+      if (!newPatient.name || newPatient.name.trim().length < 3) {
+        setError('Informe o nome completo do paciente.');
+        return;
+      }
+      const rawCpf = (newPatient.cpf || '').replace(/\D/g, '');
+      const validCpf = rawCpf.length === 11 ? rawCpf : '12345678901';
+      const cleanPhone = newPatient.phone?.trim() || '(31) 98765-4321';
+      const cleanEmail =
+        newPatient.email?.trim() ||
+        `${newPatient.name.trim().toLowerCase().replace(/\s+/g, '.').replace(/[^a-z0-9.]/g, '')}@medflow.demo`;
+
+      finalPatient = {
+        name: newPatient.name.trim(),
+        phone: cleanPhone,
+        email: cleanEmail,
+        cpf: validCpf,
+        birth: newPatient.birth || '1990-01-01',
+      };
+      const pErr = patientError(finalPatient);
+      if (pErr) {
+        setError(pErr);
+        return;
+      }
+    }
+
+    if (!time) {
+      setError('Por favor, selecione um horário disponível na agenda.');
+      return;
+    }
+
+    if (slotUnavailable(data, doctor.id, date, time, editId)) {
+      setError('Este horário já está ocupado. Por favor, escolha outro horário.');
+      return;
+    }
+
+    setBusy(true);
+    setTimeout(() => {
+      try {
+        book({
+          id: editId || undefined,
+          patient: finalPatient,
+          doctorId: doctor.id,
+          date,
+          time,
+          reason,
+          status: 'Pendente',
+        });
+        setConfirmedPatient(finalPatient);
+        setSuccess(true);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setBusy(false);
+      }
+    }, 250);
+  };
+
+  if (success && confirmedPatient) {
+    return (
+      <section className="booking-success">
+        <div className="success-orbit">
+          <Icon name="check" size={40} />
+        </div>
+        <span className="eyebrow">CONSULTA CONFIRMADA</span>
+        <h1>Consulta agendada com sucesso!</h1>
+        <p>A consulta foi registrada na sua agenda com status <b>Pendente</b>.</p>
+        <div className="success-summary">
+          <Avatar person={doctor} large />
+          <h3>{doctor.name}</h3>
+          <p>{specialty?.name}</p>
+          <div
+            style={{
+              marginTop: '12px',
+              padding: '10px 16px',
+              background: '#f8fafc',
+              borderRadius: '8px',
+              border: '1px solid #e2e8f0',
+              textAlign: 'left',
+              width: '100%',
+            }}
+          >
+            <div style={{ fontSize: '13px', color: '#64748b' }}>Paciente:</div>
+            <strong style={{ fontSize: '16px', color: '#1e293b' }}>{confirmedPatient.name}</strong>
+            <div style={{ fontSize: '13px', color: '#475569', marginTop: '2px' }}>
+              Tel: {confirmedPatient.phone} {confirmedPatient.email && `· ${confirmedPatient.email}`}
+            </div>
+            {reason && (
+              <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>
+                Obs: {reason}
+              </div>
+            )}
+          </div>
+          <strong style={{ marginTop: '8px', color: '#0f766e', fontSize: '16px' }}>
+            {formatDate(date)} às {time}
+          </strong>
+          <small>{data.clinic?.name || 'Clínica MedFlow'}</small>
+        </div>
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
+          <Link className="button primary" to="/medico/agenda">
+            Ver minha agenda
+            <Icon name="arrow" size={17} />
+          </Link>
+          <button type="button" className="button secondary" onClick={handleReset}>
+            Agendar outra consulta
+          </button>
+        </div>
+      </section>
+    );
+  }
+
+  const currentPatientName =
+    patientMode === 'existing'
+      ? selectedPatient?.name || ''
+      : newPatient.name || '';
+
+  return (
+    <>
+      <PageHeading
+        eyebrow="MINHA AGENDA · AGENDAMENTO DIRETO"
+        title="Nova consulta"
+        description="Agende uma consulta para um paciente selecionando a data e o horário disponíveis."
+      />
+
+      <div
+        className="panel"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '16px',
+          marginBottom: '24px',
+          background: 'linear-gradient(135deg, #f0fdf4 0%, #e6f7ff 100%)',
+          border: '1px solid #bbf7d0',
+          padding: '16px 20px',
+        }}
+      >
+        <Avatar person={doctor} large />
+        <div style={{ flex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <h3 style={{ margin: 0, fontSize: '18px', color: '#134e4a' }}>{doctor.name}</h3>
+            <span
+              style={{
+                fontSize: '11px',
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                background: '#0d9488',
+                color: '#ffffff',
+                padding: '2px 8px',
+                borderRadius: '12px',
+              }}
+            >
+              {specialty?.name}
+            </span>
+          </div>
+          <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#334155' }}>
+            CRM {doctor.crm} · {data.clinic?.name || 'Clínica MedFlow'} · Consulta presencial de 30 minutos
+          </p>
+        </div>
+      </div>
+
+      <div className="booking-layout">
+        <section className="booking-main panel">
+          {/* SEÇÃO 1: PACIENTE */}
+          <div className="booking-step-heading" style={{ marginBottom: '16px' }}>
+            <span className="eyebrow">PASSO 1 DE 2</span>
+            <h2>Para qual paciente é a consulta?</h2>
+          </div>
+
+          <div
+            style={{
+              display: 'flex',
+              gap: '10px',
+              marginBottom: '16px',
+              flexWrap: 'wrap',
+            }}
+          >
+            <button
+              type="button"
+              className={`button small ${patientMode === 'existing' ? 'primary' : 'secondary'}`}
+              onClick={() => {
+                setPatientMode('existing');
+                setError('');
+              }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+            >
+              <Icon name="search" size={14} />
+              Paciente já cadastrado
+            </button>
+            <button
+              type="button"
+              className={`button small ${patientMode === 'new' ? 'primary' : 'secondary'}`}
+              onClick={() => {
+                setPatientMode('new');
+                setSelectedPatientId('');
+                setError('');
+              }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+            >
+              <Icon name="plus" size={14} />
+              Cadastrar novo paciente
+            </button>
+          </div>
+
+          {patientMode === 'existing' ? (
+            <div style={{ marginBottom: '24px' }}>
+              <div style={{ marginBottom: '12px' }}>
+                <SearchInput
+                  value={patientSearch}
+                  onChange={setPatientSearch}
+                  placeholder="Filtrar por nome, CPF ou telefone..."
+                />
+              </div>
+              <label className="field">
+                <span>Selecionar paciente</span>
+                <select
+                  value={selectedPatientId}
+                  onChange={(e) => {
+                    setSelectedPatientId(e.target.value);
+                    setError('');
+                  }}
+                  style={{ fontSize: '15px', padding: '10px 14px' }}
+                >
+                  <option value="">-- Escolha um paciente --</option>
+                  {filteredPatients.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} {p.cpf ? `(CPF: ${p.cpf})` : ''} - {p.phone}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              {selectedPatient && (
+                <div
+                  style={{
+                    marginTop: '12px',
+                    padding: '12px 16px',
+                    background: '#f8fafc',
+                    borderRadius: '8px',
+                    border: '1px solid #e2e8f0',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <div>
+                    <strong style={{ fontSize: '15px', color: '#0f172a' }}>
+                      {selectedPatient.name}
+                    </strong>
+                    <div style={{ fontSize: '13px', color: '#64748b', marginTop: '2px' }}>
+                      Tel: {selectedPatient.phone} · E-mail: {selectedPatient.email} · CPF: {selectedPatient.cpf}
+                    </div>
+                  </div>
+                  <span
+                    style={{
+                      background: '#ecfdf5',
+                      color: '#065f46',
+                      border: '1px solid #a7f3d0',
+                      padding: '4px 10px',
+                      borderRadius: '16px',
+                      fontSize: '12px',
+                      fontWeight: 600,
+                    }}
+                  >
+                    ✓ Selecionado
+                  </span>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div
+              style={{
+                marginBottom: '24px',
+                padding: '16px',
+                background: '#f8fafc',
+                borderRadius: '8px',
+                border: '1px solid #e2e8f0',
+              }}
+            >
+              <h4 style={{ margin: '0 0 12px', fontSize: '14px', color: '#334155' }}>
+                Dados do novo paciente
+              </h4>
+              <div className="form-grid">
+                <div className="full">
+                  <label className="field">
+                    <span>Nome completo *</span>
+                    <input
+                      type="text"
+                      value={newPatient.name}
+                      onChange={(e) => setNewPatient({ ...newPatient, name: e.target.value })}
+                      placeholder="Ex: Carlos Eduardo Silveira"
+                      required
+                    />
+                  </label>
+                </div>
+                <label className="field">
+                  <span>Telefone celular (com DDD) *</span>
+                  <input
+                    type="tel"
+                    value={newPatient.phone}
+                    onChange={(e) => setNewPatient({ ...newPatient, phone: e.target.value })}
+                    placeholder="(31) 98765-4321"
+                    required
+                  />
+                </label>
+                <label className="field">
+                  <span>E-mail fictício</span>
+                  <input
+                    type="email"
+                    value={newPatient.email}
+                    onChange={(e) => setNewPatient({ ...newPatient, email: e.target.value })}
+                    placeholder="paciente@exemplo.com"
+                  />
+                </label>
+                <label className="field">
+                  <span>CPF fictício</span>
+                  <input
+                    type="text"
+                    value={newPatient.cpf}
+                    onChange={(e) => setNewPatient({ ...newPatient, cpf: e.target.value })}
+                    placeholder="123.456.789-00"
+                  />
+                </label>
+                <label className="field">
+                  <span>Data de nascimento</span>
+                  <input
+                    type="date"
+                    value={newPatient.birth}
+                    onChange={(e) => setNewPatient({ ...newPatient, birth: e.target.value })}
+                    max={today()}
+                  />
+                </label>
+              </div>
+            </div>
+          )}
+
+          {/* SEÇÃO 2: DATA E HORÁRIO */}
+          <div
+            className="booking-step-heading"
+            style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px solid #e2e8f0' }}
+          >
+            <span className="eyebrow">PASSO 2 DE 2</span>
+            <h2>Selecione a data e o horário</h2>
+          </div>
+
+          <DatePicker
+            value={date}
+            onChange={(v) => {
+              setDate(v);
+              setTime('');
+              setError('');
+            }}
+          />
+
+          <div style={{ marginTop: '16px' }}>
+            <TimeSlotPicker
+              doctorId={doctor.id}
+              date={date}
+              value={time}
+              onChange={(t) => {
+                setTime(t);
+                setError('');
+              }}
+              excludeId={editId}
+            />
+          </div>
+
+          {/* SEÇÃO 3: OBSERVAÇÕES */}
+          <div style={{ marginTop: '20px' }}>
+            <label className="field full">
+              <span>Motivo da consulta / Observações <small>(opcional)</small></span>
+              <textarea
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder="Ex: Paciente ligou relatando sintomas; primeira avaliação presencial..."
+                maxLength={500}
+                rows={2}
+              />
+            </label>
+          </div>
+
+          {error && (
+            <div
+              className="error-message"
+              role="alert"
+              style={{
+                marginTop: '16px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+              }}
+            >
+              <Icon name="x" size={16} />
+              <span>{error}</span>
+            </div>
+          )}
+
+          <div className="wizard-actions" style={{ marginTop: '24px' }}>
+            <Link className="button ghost" to="/medico/agenda">
+              <Icon name="back" size={17} />
+              Cancelar e voltar
+            </Link>
+            <button
+              type="button"
+              className="button primary"
+              onClick={handleConfirm}
+              disabled={busy}
+              style={{ minWidth: '220px' }}
+            >
+              {busy ? 'Agendando consulta...' : 'Confirmar agendamento'}
+              <Icon name="check" size={17} />
+            </button>
+          </div>
+        </section>
+
+        {/* ASIDE / RESUMO */}
+        <aside className="booking-aside">
+          <div className="panel summary-panel">
+            <span className="eyebrow">RESUMO DO AGENDAMENTO</span>
+            <h3>Agendamento pela Médica</h3>
+            <dl>
+              <dt>Profissional</dt>
+              <dd>{doctor.name}</dd>
+              <dt>Especialidade</dt>
+              <dd>{specialty?.name || 'Clínica Geral'}</dd>
+              <dt>Paciente</dt>
+              <dd style={{ fontWeight: 600, color: currentPatientName ? '#0f766e' : '#94a3b8' }}>
+                {currentPatientName || 'Nenhum paciente selecionado'}
+              </dd>
+              <dt>Data</dt>
+              <dd>{formatDate(date, { day: '2-digit', month: 'long', year: 'numeric' })}</dd>
+              <dt>Horário</dt>
+              <dd style={{ fontWeight: 700, color: time ? '#0f766e' : '#94a3b8' }}>
+                {time ? `${time} · 30 minutos` : 'Selecione um horário'}
+              </dd>
+              <dt>Status inicial</dt>
+              <dd>
+                <span
+                  style={{
+                    background: '#fef3c7',
+                    color: '#92400e',
+                    border: '1px solid #fde68a',
+                    padding: '2px 8px',
+                    borderRadius: '12px',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                  }}
+                >
+                  Pendente
+                </span>
+              </dd>
+            </dl>
+            <div className="summary-footer">
+              <Icon name="shield" />
+              <small>
+                A consulta entrará diretamente
+                <br />
+                na sua agenda diária.
+              </small>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </>
+  );
+}
+
 export default function Booking({ area = 'paciente' }) {
+  if (area === 'medico') {
+    return <DoctorBooking />;
+  }
   const { data, patientId, doctorId, book } = useDemo();
   const [params] = useSearchParams();
   const editId = params.get('reagendar');

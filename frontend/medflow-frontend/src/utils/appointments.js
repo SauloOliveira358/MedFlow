@@ -1,27 +1,55 @@
-﻿import { active, today, validDate } from './date';
+import { active, today, validDate } from './date';
 export const allSlots = Array.from(
   { length: 20 },
   (_, i) => `${String(8 + Math.floor(i / 2)).padStart(2, '0')}:${i % 2 ? '30' : '00'}`,
 );
+export function getDoctorSlotsForDate(data, doctorId, date) {
+  const doctor = data?.doctors?.find((d) => d.id === doctorId);
+  if (!doctor) return [];
+  const schedule = data?.doctorSchedules?.find(
+    (s) => s.doctorId === doctorId && s.date === date,
+  );
+  if (schedule && Array.isArray(schedule.slots)) {
+    return [...schedule.slots].sort();
+  }
+  return allSlots.filter(
+    (time) =>
+      time >= doctor.start &&
+      time < doctor.end &&
+      time !== '12:00' &&
+      time !== '12:30',
+  );
+}
+
 export function slotUnavailable(data, doctorId, date, time, excludeId, now = new Date()) {
   const doctor = data.doctors.find((d) => d.id === doctorId);
-  return (
-    !doctor ||
-    !validDate(date) ||
-    date < today() ||
-    time < doctor.start ||
-    time >= doctor.end ||
-    time === '12:00' ||
-    time === '12:30' ||
-    (date === today() && time <= now.toTimeString().slice(0, 5)) ||
-    data.appointments.some(
-      (a) =>
-        a.id !== excludeId &&
-        a.doctorId === doctorId &&
-        a.date === date &&
-        a.time === time &&
-        a.status !== 'Cancelado',
-    )
+  if (!doctor || !validDate(date) || date < today()) return true;
+
+  const schedule = data.doctorSchedules?.find(
+    (s) => s.doctorId === doctorId && s.date === date,
+  );
+  if (schedule && Array.isArray(schedule.slots)) {
+    if (!schedule.slots.includes(time)) return true;
+  } else {
+    if (
+      time < doctor.start ||
+      time >= doctor.end ||
+      time === '12:00' ||
+      time === '12:30'
+    ) {
+      return true;
+    }
+  }
+
+  if (date === today() && time <= now.toTimeString().slice(0, 5)) return true;
+
+  return data.appointments.some(
+    (a) =>
+      a.id !== excludeId &&
+      a.doctorId === doctorId &&
+      a.date === date &&
+      a.time === time &&
+      a.status !== 'Cancelado',
   );
 }
 export function patientError(p) {
@@ -44,8 +72,10 @@ export function bookAppointment(data, input) {
   if (error) throw new Error(error);
   if (!data.doctors.some((d) => d.id === input.doctorId))
     throw new Error('Selecione um profissional.');
+  const doctorLiberated = getDoctorSlotsForDate(data, input.doctorId, input.date);
+  const validTimes = Array.from(new Set([...allSlots, ...doctorLiberated]));
   if (
-    !allSlots.includes(input.time) ||
+    !validTimes.includes(input.time) ||
     slotUnavailable(data, input.doctorId, input.date, input.time, input.id)
   )
     throw new Error('Este horário está indisponível. Escolha outro horário.');
@@ -71,7 +101,7 @@ export function bookAppointment(data, input) {
     date: input.date,
     time: input.time,
     reason: input.reason?.trim() || '',
-    status: 'Confirmado',
+    status: input.status || (existing?.status || 'Pendente'),
     type: existing?.type || 'Consulta',
     createdAt: existing?.createdAt || new Date().toISOString(),
   };
@@ -80,7 +110,7 @@ export function bookAppointment(data, input) {
     id: crypto.randomUUID(),
     patientId,
     doctorId: appt.doctorId,
-    title: existing ? 'Consulta reagendada' : 'Consulta confirmada',
+    title: existing ? 'Consulta reagendada' : 'Consulta agendada',
     message: `${data.doctors.find((d) => d.id === appt.doctorId).name} · ${appt.date.split('-').reverse().join('/')} às ${appt.time}`,
     at: new Date().toISOString(),
     readBy: [],
@@ -102,9 +132,13 @@ export function bookAppointment(data, input) {
 export function changeAppointmentStatus(data, id, status) {
   const appointment = data.appointments.find((a) => a.id === id);
   const allowed = {
-    Confirmado: ['Cancelado', 'Em atendimento'],
-    Pendente: ['Cancelado', 'Em atendimento'],
-    'Em atendimento': ['Concluído', 'Cancelado'],
+    Confirmado: ['Cancelado', 'Em atendimento', 'Concluído', 'Compareceu', 'Não compareceu', 'Pendente'],
+    Pendente: ['Cancelado', 'Em atendimento', 'Concluído', 'Compareceu', 'Não compareceu', 'Confirmado'],
+    'Em atendimento': ['Concluído', 'Cancelado', 'Compareceu', 'Não compareceu', 'Pendente'],
+    Concluído: ['Cancelado', 'Compareceu', 'Não compareceu', 'Pendente'],
+    Compareceu: ['Não compareceu', 'Cancelado', 'Confirmado', 'Pendente'],
+    'Não compareceu': ['Compareceu', 'Cancelado', 'Confirmado', 'Pendente'],
+    Cancelado: ['Pendente', 'Confirmado'],
   };
   if (!appointment || !allowed[appointment.status]?.includes(status))
     throw new Error('Esta ação não está disponível para o status atual.');

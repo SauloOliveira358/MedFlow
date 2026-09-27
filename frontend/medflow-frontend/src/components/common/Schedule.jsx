@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useDemo } from '../../context/DemoContext';
 import { PageHeading, Tabs, StatusBadge, EmptyState, SearchInput } from './UI';
@@ -42,7 +42,7 @@ export function ScheduleCalendar({ rows, date, view, onDate, onDetails, area }) 
                 .filter((a) => a.date === day)
                 .map((a) => (
                   <button
-                    className={`month-event status-${a.status === 'Cancelado' ? 'cancelled' : a.status === 'Pendente' ? 'pending' : 'confirmed'}`}
+                    className={`month-event status-${a.status === 'Cancelado' ? 'cancelled' : a.status === 'Pendente' ? 'pending' : a.status === 'Compareceu' ? 'attended' : a.status === 'Não compareceu' ? 'no-show' : 'confirmed'}`}
                     key={a.id}
                     onClick={() => onDetails(a)}
                     title={`${a.time} ${data.patients.find((p) => p.id === a.patientId).name}`}
@@ -141,6 +141,7 @@ export default function Schedule({
           </Link>
         }
       />
+
       <section className="panel agenda-panel">
         <div className="calendar-toolbar">
           <div className="calendar-nav">
@@ -213,7 +214,10 @@ export default function Schedule({
             <span>Status</span>
             <select value={status} onChange={(e) => setStatus(e.target.value)}>
               <option value="">Todos os status</option>
-              {['Confirmado', 'Pendente', 'Em atendimento', 'Concluído', 'Cancelado'].map((s) => (
+              {(area === 'medico'
+                ? ['Pendente', 'Compareceu', 'Não compareceu', 'Cancelado']
+                : ['Confirmado', 'Pendente', 'Em atendimento', 'Concluído', 'Cancelado']
+              ).map((s) => (
                 <option key={s}>{s}</option>
               ))}
             </select>

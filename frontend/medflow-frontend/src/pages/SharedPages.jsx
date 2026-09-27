@@ -1,8 +1,9 @@
-﻿import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useDemo } from '../context/DemoContext';
 import { PageHeading, Avatar, Field, EmptyState } from '../components/common/UI';
 import PatientForm from '../components/common/PatientForm';
 import Icon from '../components/common/Icon';
+import LocationMap from '../components/common/LocationMap';
 export function Notifications({ area }) {
   const { data, patientId, doctorId, markRead } = useDemo();
   const viewer = area === 'paciente' ? patientId : doctorId;
@@ -66,15 +67,101 @@ export function Profile({ area }) {
 function ProfileForm({ source, area, save }) {
   const [form, setForm] = useState({ ...source });
   const [error, setError] = useState('');
+  const fileInputRef = useRef(null);
+
+  const handlePhotoChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      setError('A foto deve ter no máximo 5MB.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setForm((prev) => ({ ...prev, photo: ev.target.result }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemovePhoto = () => {
+    setForm((prev) => ({ ...prev, photo: '' }));
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
   return (
     <>
       <PageHeading title="Meu perfil" description="Seus dados, sempre por perto e atualizados." />
       <section className="panel profile-panel">
-        <div className="detail-person">
-          <Avatar person={form} large />
+        <div
+          className="detail-person"
+          style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}
+        >
+          <div style={{ position: 'relative', display: 'inline-block' }}>
+            <Avatar person={form} large />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              style={{
+                position: 'absolute',
+                bottom: '-2px',
+                right: '-2px',
+                background: '#0d9488',
+                color: '#ffffff',
+                width: '32px',
+                height: '32px',
+                borderRadius: '50%',
+                border: '2px solid #ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                boxShadow: '0 2px 5px rgba(0,0,0,0.15)',
+              }}
+              title="Carregar foto de perfil"
+              aria-label="Carregar foto de perfil"
+            >
+              <Icon name="camera" size={15} />
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={handlePhotoChange}
+            />
+          </div>
           <div>
             <h2>{form.name}</h2>
             <p>{area === 'paciente' ? 'Seu espaço de cuidado' : 'Seu perfil profissional'}</p>
+            <div style={{ display: 'flex', gap: '8px', marginTop: '8px', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                className="button small secondary"
+                onClick={() => fileInputRef.current?.click()}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              >
+                <Icon name="camera" size={14} />
+                {form.photo ? 'Alterar foto' : 'Adicionar foto'}
+              </button>
+              {form.photo && (
+                <button
+                  type="button"
+                  className="button small danger-soft"
+                  onClick={handleRemovePhoto}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    color: '#c9302c',
+                    background: '#fdf2f2',
+                    border: '1px solid #f5c6cb',
+                  }}
+                >
+                  <Icon name="x" size={14} />
+                  Remover foto
+                </button>
+              )}
+            </div>
           </div>
         </div>
         <form
@@ -119,6 +206,18 @@ function ProfileForm({ source, area, save }) {
                 required
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
               />
+              <Field
+                label="Nome do Consultório / Clínica"
+                value={form.clinic || ''}
+                placeholder="Ex: Consultório Particular"
+                onChange={(e) => setForm({ ...form, clinic: e.target.value })}
+              />
+              <Field
+                label="Endereço do Estabelecimento"
+                value={form.address || ''}
+                placeholder="Ex: Rua das Flores, 120"
+                onChange={(e) => setForm({ ...form, address: e.target.value })}
+              />
               <label className="field full">
                 <span>Sobre o seu atendimento</span>
                 <textarea
@@ -127,6 +226,16 @@ function ProfileForm({ source, area, save }) {
                   maxLength={500}
                 />
               </label>
+              <div className="full" style={{ marginTop: '8px' }}>
+                <LocationMap
+                  lat={typeof form.lat === 'number' ? form.lat : -19.9227}
+                  lng={typeof form.lng === 'number' ? form.lng : -43.9451}
+                  clinicName={form.clinic || form.name}
+                  address={form.address || form.city || 'Belo Horizonte, MG'}
+                  editable={true}
+                  onChange={({ lat, lng }) => setForm({ ...form, lat, lng })}
+                />
+              </div>
             </div>
           )}
           {error && (
@@ -145,6 +254,32 @@ function ProfileForm({ source, area, save }) {
 export function Settings() {
   const { data, saveClinic } = useDemo();
   const [form, setForm] = useState(data.clinic);
+  const [error, setError] = useState('');
+  const clinicFileInputRef = useRef(null);
+
+  const handleClinicPhotoChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      setError('A imagem deve ter no máximo 5MB.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setForm((prev) => ({
+        ...prev,
+        photo: ev.target.result,
+        logo: ev.target.result,
+      }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveClinicPhoto = () => {
+    setForm((prev) => ({ ...prev, photo: '', logo: '' }));
+    if (clinicFileInputRef.current) clinicFileInputRef.current.value = '';
+  };
+
   return (
     <>
       <PageHeading
@@ -152,10 +287,103 @@ export function Settings() {
         description="A identidade do seu espaço de cuidado."
       />
       <section className="panel profile-panel">
-        <h2>Informações da clínica</h2>
+        <h2>Informações e identidade da clínica</h2>
         <p className="form-intro">
-          As alterações aparecem nos resumos de agendamento das três áreas.
+          A logo ou foto da empresa aparece na navegação e nos resumos de agendamento das três áreas.
         </p>
+
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '20px',
+            marginBottom: '24px',
+            padding: '16px 20px',
+            background: '#f8fafc',
+            borderRadius: '12px',
+            border: '1px solid #e2e8f0',
+            flexWrap: 'wrap',
+          }}
+        >
+          <div style={{ position: 'relative', display: 'inline-block' }}>
+            <Avatar person={{ name: form.name, photo: form.photo || form.logo }} large />
+            <button
+              type="button"
+              onClick={() => clinicFileInputRef.current?.click()}
+              style={{
+                position: 'absolute',
+                bottom: '-2px',
+                right: '-2px',
+                background: '#0d9488',
+                color: '#ffffff',
+                width: '32px',
+                height: '32px',
+                borderRadius: '50%',
+                border: '2px solid #ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                boxShadow: '0 2px 5px rgba(0,0,0,0.15)',
+              }}
+              title="Carregar logo ou foto da empresa"
+              aria-label="Carregar logo ou foto da empresa"
+            >
+              <Icon name="camera" size={15} />
+            </button>
+            <input
+              ref={clinicFileInputRef}
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={handleClinicPhotoChange}
+            />
+          </div>
+          <div>
+            <h3 style={{ margin: '0 0 4px', fontSize: '18px', color: '#0f172a' }}>
+              {form.name || 'Clínica'}
+            </h3>
+            <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>
+              Logo ou foto principal da empresa
+            </p>
+            <div style={{ display: 'flex', gap: '8px', marginTop: '10px', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                className="button small secondary"
+                onClick={() => clinicFileInputRef.current?.click()}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              >
+                <Icon name="camera" size={14} />
+                {form.photo || form.logo ? 'Alterar foto da empresa' : 'Adicionar foto da empresa'}
+              </button>
+              {(form.photo || form.logo) && (
+                <button
+                  type="button"
+                  className="button small danger-soft"
+                  onClick={handleRemoveClinicPhoto}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    color: '#c9302c',
+                    background: '#fdf2f2',
+                    border: '1px solid #f5c6cb',
+                  }}
+                >
+                  <Icon name="x" size={14} />
+                  Remover foto
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {error && (
+          <p className="error-message" role="alert" style={{ marginBottom: '16px' }}>
+            {error}
+          </p>
+        )}
+
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -178,6 +406,17 @@ export function Settings() {
                 onChange={(e) => setForm({ ...form, [key]: e.target.value })}
               />
             ))}
+
+            <div className="full" style={{ marginTop: '8px' }}>
+              <LocationMap
+                lat={typeof form.lat === 'number' ? form.lat : -19.9227}
+                lng={typeof form.lng === 'number' ? form.lng : -43.9451}
+                clinicName={form.name}
+                address={form.address}
+                editable={true}
+                onChange={({ lat, lng }) => setForm({ ...form, lat, lng })}
+              />
+            </div>
           </div>
           <div className="modal-actions">
             <button className="button primary">Salvar configurações</button>

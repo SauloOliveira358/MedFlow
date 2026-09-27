@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Icon from './Icon';
 export function Brand() {
@@ -12,11 +12,12 @@ export function Brand() {
   );
 }
 export function Avatar({ person, large = false }) {
-  return person?.photo ? (
+  const photo = person?.photo || person?.logo;
+  return photo ? (
     <img
       className={`avatar ${large ? 'large' : ''}`}
-      src={person.photo}
-      alt={`Retrato ilustrado de ${person.name}`}
+      src={photo}
+      alt={`Foto ou logo de ${person?.name || 'usuário'}`}
     />
   ) : (
     <span className={`avatar initials ${large ? 'large' : ''}`}>
@@ -25,15 +26,23 @@ export function Avatar({ person, large = false }) {
         .filter((n) => !['Dra.', 'Dr.', 'Enf.'].includes(n))
         .map((n) => n[0])
         .slice(0, 2)
-        .join('')}
+        .join('') || 'MF'}
     </span>
   );
 }
 export function StatusBadge({ status }) {
+  const statusMap = {
+    Confirmado: 'confirmed',
+    Agendado: 'confirmed',
+    Pendente: 'pending',
+    'Em atendimento': 'ongoing',
+    Concluído: 'completed',
+    Compareceu: 'attended',
+    'Não compareceu': 'no-show',
+    Cancelado: 'cancelled',
+  };
   return (
-    <span
-      className={`status status-${{ Confirmado: 'confirmed', Pendente: 'pending', 'Em atendimento': 'ongoing', Concluído: 'completed', Cancelado: 'cancelled' }[status] || 'completed'}`}
-    >
+    <span className={`status status-${statusMap[status] || 'completed'}`}>
       <i />
       {status}
     </span>

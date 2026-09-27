@@ -1,10 +1,12 @@
-﻿import { useDemo } from '../../context/DemoContext';
-import { allSlots, slotUnavailable } from '../../utils/appointments';
+import { useDemo } from '../../context/DemoContext';
+import { allSlots, slotUnavailable, getDoctorSlotsForDate } from '../../utils/appointments';
 import { addDays, today, formatDate } from '../../utils/date';
 import Icon from './Icon';
 export function TimeSlotPicker({ doctorId, date, value, onChange, excludeId }) {
   const { data } = useDemo();
-  const free = allSlots.some((time) => !slotUnavailable(data, doctorId, date, time, excludeId));
+  const doctorLiberated = getDoctorSlotsForDate(data, doctorId, date);
+  const slotsToDisplay = Array.from(new Set([...allSlots, ...doctorLiberated])).sort();
+  const free = slotsToDisplay.some((time) => !slotUnavailable(data, doctorId, date, time, excludeId));
   return (
     <div>
       <div className="section-heading">
@@ -15,7 +17,7 @@ export function TimeSlotPicker({ doctorId, date, value, onChange, excludeId }) {
         </small>
       </div>
       <div className="time-slots">
-        {allSlots.map((time) => (
+        {slotsToDisplay.map((time) => (
           <button
             key={time}
             disabled={slotUnavailable(data, doctorId, date, time, excludeId)}
@@ -29,7 +31,7 @@ export function TimeSlotPicker({ doctorId, date, value, onChange, excludeId }) {
         ))}
       </div>
       {!free && (
-        <p className="inline-message">Não há horários livres nesta data. Escolha outro dia.</p>
+        <p className="inline-message">Não há horários liberados nesta data pelo especialista. Escolha outro dia.</p>
       )}
       <small className="schedule-help">
         <Icon name="clock" size={14} />

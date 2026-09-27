@@ -15,10 +15,11 @@ const menus = {
   ],
   medico: [
     ['', 'Dashboard', 'dashboard'],
+    ['horarios', 'Liberar horários', 'clock'],
     ['agenda', 'Minha agenda', 'calendar'],
+    ['agendados', 'Agendados & Presença', 'clipboard'],
     ['pacientes', 'Pacientes', 'users'],
     ['prontuarios', 'Prontuários', 'file'],
-    ['atendimentos', 'Atendimentos', 'stethoscope'],
     ['notificacoes', 'Notificações', 'bell'],
     ['perfil', 'Meu perfil', 'user'],
   ],
@@ -46,7 +47,10 @@ export function Sidebar({ area, open, onClose }) {
       ? data.patients.find((p) => p.id === patientId)
       : area === 'medico'
         ? data.doctors.find((d) => d.id === doctorId)
-        : { name: 'Equipe da clínica' };
+        : {
+            name: data.clinic?.name || 'Equipe da clínica',
+            photo: data.clinic?.photo || data.clinic?.logo,
+          };
   return (
     <>
       <div className={`sidebar-scrim ${open ? 'visible' : ''}`} onClick={onClose} />
@@ -126,8 +130,8 @@ export function MobileBottomNavigation({ area }) {
         ? [
             ['', 'Início', 'dashboard'],
             ['agenda', 'Agenda', 'calendar'],
+            ['agendados', 'Agendados', 'clipboard'],
             ['pacientes', 'Pacientes', 'users'],
-            ['prontuarios', 'Prontuários', 'file'],
           ]
         : [
             ['', 'Início', 'dashboard'],

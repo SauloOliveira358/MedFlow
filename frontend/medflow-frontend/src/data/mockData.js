@@ -1,4 +1,4 @@
-﻿import { addDays, today } from '../utils/date';
+import { addDays, today } from '../utils/date';
 export const specialties = [
   {
     id: 's1',
@@ -133,7 +133,10 @@ export const doctors = [
 ].map((d) => ({
   ...d,
   clinic: 'Clínica Saúde & Estética',
+  address: 'Rua das Flores, 120 · Funcionários, Belo Horizonte - MG',
   city: 'Belo Horizonte, MG',
+  lat: -19.9227,
+  lng: -43.9451,
   start: '08:00',
   end: '18:00',
   email: `${d.id}@medflow.example`,
@@ -205,6 +208,35 @@ export function createMockData() {
       },
     ],
   }));
+  const standardSlots = [
+    '08:00',
+    '08:30',
+    '09:00',
+    '09:30',
+    '10:00',
+    '10:30',
+    '11:00',
+    '11:30',
+    '14:00',
+    '14:30',
+    '15:00',
+    '15:30',
+    '16:00',
+    '16:30',
+    '17:00',
+  ];
+  const doctorSchedules = [];
+  for (const doc of doctors) {
+    for (let dayOffset = 0; dayOffset <= 14; dayOffset++) {
+      doctorSchedules.push({
+        id: `ds-${doc.id}-${addDays(today(), dayOffset)}`,
+        doctorId: doc.id,
+        date: addDays(today(), dayOffset),
+        slots: [...standardSlots],
+        updatedAt: new Date().toISOString(),
+      });
+    }
+  }
   return {
     version: 2,
     patients,
@@ -212,6 +244,7 @@ export function createMockData() {
     specialties,
     appointments,
     records,
+    doctorSchedules,
     notifications: [
       {
         id: 'welcome',
@@ -227,7 +260,9 @@ export function createMockData() {
       name: 'Clínica Saúde & Estética',
       phone: '(31) 3333-0000',
       email: 'contato@clinica.example',
-      address: 'Rua das Flores, 120 · Belo Horizonte, MG',
+      address: 'Rua das Flores, 120 · Funcionários, Belo Horizonte - MG',
+      lat: -19.9227,
+      lng: -43.9451,
     },
   };
 }
