@@ -1,4 +1,4 @@
-﻿import StaffDashboard from '../../components/common/StaffDashboard';
-export default function DoctorDashboard() {
-  return <StaffDashboard area="medico" />;
-}
+import PainelMedico from './PainelMedico';
+
+export default PainelMedico;
+export * from './PainelMedico';

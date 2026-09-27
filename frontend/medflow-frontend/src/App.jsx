@@ -1,83 +1,85 @@
 import { Suspense, lazy } from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
-import AreaLayout from './layouts/AreaLayout';
-import Welcome from './pages/Welcome';
-import RequireAccount from './components/common/RequireAccount';
-import { LoadingSkeleton, EmptyState } from './components/common/UI';
-import { PatientDashboard, PatientAppointments } from './pages/patient/PatientPages';
-import DoctorDashboard from './pages/doctor/Dashboard';
-import ClinicDashboard from './pages/clinic/Dashboard';
-import { Notifications, Profile, Settings } from './pages/SharedPages';
-import { Professionals, Specialties, Reports } from './pages/clinic/ClinicPages';
-const Booking = lazy(() => import('./pages/patient/Booking'));
-const Schedule = lazy(() => import('./components/common/Schedule'));
-const Patients = lazy(() => import('./components/common/Patients'));
-const Records = lazy(() =>
-  import('./components/common/Records').then((m) => ({ default: m.Records })),
+import LayoutArea from './layouts/LayoutArea';
+import BoasVindas from './pages/BoasVindas';
+import RequerConta from './components/common/RequerConta';
+import { EsqueletoCarregamento, EstadoVazio } from './components/common/InterfaceUI';
+import { PainelPaciente, ConsultasPaciente } from './pages/patient/PaginasPaciente';
+import PainelMedico from './pages/doctor/PainelMedico';
+import PainelClinica from './pages/clinic/PainelClinica';
+import { Notificacoes, Perfil, Configuracoes } from './pages/PaginasCompartilhadas';
+import { Profissionais, Especialidades, Relatorios } from './pages/clinic/PaginasClinica';
+
+const AgendamentoConsulta = lazy(() => import('./pages/patient/AgendamentoConsulta'));
+const Agenda = lazy(() => import('./components/common/Agenda'));
+const Pacientes = lazy(() => import('./components/common/Pacientes'));
+const Prontuarios = lazy(() =>
+  import('./components/common/Prontuarios').then((m) => ({ default: m.Prontuarios })),
 );
-const RecordDetail = lazy(() =>
-  import('./components/common/Records').then((m) => ({ default: m.RecordDetail })),
+const DetalhesProntuario = lazy(() =>
+  import('./components/common/Prontuarios').then((m) => ({ default: m.DetalhesProntuario })),
 );
-const DoctorAppointments = lazy(() => import('./pages/doctor/DoctorAppointments'));
-const DoctorScheduleManager = lazy(() => import('./components/doctor/DoctorScheduleManager'));
+const ConsultasMedico = lazy(() => import('./pages/doctor/ConsultasMedico'));
+const GerenciadorAgendaMedico = lazy(() => import('./components/doctor/GerenciadorAgendaMedico'));
+
 export default function App() {
   return (
-    <Suspense fallback={<LoadingSkeleton />}>
+    <Suspense fallback={<EsqueletoCarregamento />}>
       <Routes>
-        <Route path="/" element={<Welcome key="login" />} />
-        <Route path="/cadastro" element={<Welcome key="register" register />} />
+        <Route path="/" element={<BoasVindas key="login" />} />
+        <Route path="/cadastro" element={<BoasVindas key="register" register />} />
         <Route
           path="/paciente"
           element={
-            <RequireAccount area="paciente">
-              <AreaLayout area="paciente" />
-            </RequireAccount>
+            <RequerConta area="paciente">
+              <LayoutArea area="paciente" />
+            </RequerConta>
           }
         >
-          <Route index element={<PatientDashboard />} />
-          <Route path="agendar" element={<Booking key="paciente" />} />
-          <Route path="agendamentos" element={<PatientAppointments key="upcoming" />} />
-          <Route path="historico" element={<PatientAppointments key="history" history />} />
-          <Route path="notificacoes" element={<Notifications area="paciente" />} />
-          <Route path="perfil" element={<Profile area="paciente" />} />
+          <Route index element={<PainelPaciente />} />
+          <Route path="agendar" element={<AgendamentoConsulta key="paciente" />} />
+          <Route path="agendamentos" element={<ConsultasPaciente key="upcoming" />} />
+          <Route path="historico" element={<ConsultasPaciente key="history" history />} />
+          <Route path="notificacoes" element={<Notificacoes area="paciente" />} />
+          <Route path="perfil" element={<Perfil area="paciente" />} />
         </Route>
         {['medico', 'clinica'].map((area) => (
           <Route
             key={area}
             path={`/${area}`}
             element={
-              <RequireAccount area={area}>
-                <AreaLayout area={area} />
-              </RequireAccount>
+              <RequerConta area={area}>
+                <LayoutArea area={area} />
+              </RequerConta>
             }
           >
-            <Route index element={area === 'medico' ? <DoctorDashboard /> : <ClinicDashboard />} />
-            <Route path="agenda" element={<Schedule key={area + 'agenda'} area={area} />} />
-            <Route path="agendar" element={<Booking key={area} area={area} />} />
+            <Route index element={area === 'medico' ? <PainelMedico /> : <PainelClinica />} />
+            <Route path="agenda" element={<Agenda key={area + 'agenda'} area={area} />} />
+            <Route path="agendar" element={<AgendamentoConsulta key={area} area={area} />} />
             <Route
               path="agendamentos"
-              element={<Schedule key={area + 'appointments'} area={area} appointmentsPage />}
+              element={<Agenda key={area + 'appointments'} area={area} appointmentsPage />}
             />
-            <Route path="pacientes" element={<Patients area={area} />} />
-            <Route path="prontuarios" element={<Records key={area + 'records'} area={area} />} />
-            <Route path="prontuarios/:id" element={<RecordDetail area={area} />} />
+            <Route path="pacientes" element={<Pacientes area={area} />} />
+            <Route path="prontuarios" element={<Prontuarios key={area + 'records'} area={area} />} />
+            <Route path="prontuarios/:id" element={<DetalhesProntuario area={area} />} />
             {area === 'medico' ? (
               <>
-                <Route path="horarios" element={<DoctorScheduleManager />} />
-                <Route path="agendados" element={<DoctorAppointments />} />
+                <Route path="horarios" element={<GerenciadorAgendaMedico />} />
+                <Route path="agendados" element={<ConsultasMedico />} />
                 <Route
                   path="atendimentos"
                   element={<Navigate to={`/${area}/agenda`} replace />}
                 />
-                <Route path="notificacoes" element={<Notifications area={area} />} />
-                <Route path="perfil" element={<Profile area={area} />} />
+                <Route path="notificacoes" element={<Notificacoes area={area} />} />
+                <Route path="perfil" element={<Perfil area={area} />} />
               </>
             ) : (
               <>
-                <Route path="profissionais" element={<Professionals />} />
-                <Route path="especialidades" element={<Specialties />} />
-                <Route path="relatorios" element={<Reports />} />
-                <Route path="configuracoes" element={<Settings />} />
+                <Route path="profissionais" element={<Profissionais />} />
+                <Route path="especialidades" element={<Especialidades />} />
+                <Route path="relatorios" element={<Relatorios />} />
+                <Route path="configuracoes" element={<Configuracoes />} />
               </>
             )}
           </Route>
@@ -85,7 +87,7 @@ export default function App() {
         <Route
           path="*"
           element={
-            <EmptyState
+            <EstadoVazio
               title="Esse caminho não foi encontrado"
               description="Vamos voltar ao seu espaço de cuidado?"
               to="/"
