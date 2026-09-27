@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useDemo } from '../../context/DemoContext';
 import { CabecalhoPagina, CampoBusca, EstadoVazio, Avatar } from '../../components/common/InterfaceUI';
-import { CartaoEspecialidade, CartaoMedico } from '../../components/patient/CartoesPaciente';
+import { CartaoEspecialidade, CartaoMedico } from '../../components/paciente/CartoesPaciente';
 import { SeletorData, SeletorHorario } from '../../components/common/SeletorData';
 import FormularioPaciente from '../../components/common/FormularioPaciente';
 import { patientError, slotUnavailable } from '../../utils/appointments';

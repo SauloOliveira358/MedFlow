@@ -5,12 +5,12 @@ import { doctorSelfRegistration } from '../utils/auth';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { DemoProvider } from '../context/DemoContext';
-import { AppointmentDetailsModal } from '../components/common/Appointment';
-import Booking from '../pages/patient/Booking';
-import { PatientAppointments } from '../pages/patient/PatientPages';
-import { Profile, Settings } from '../pages/SharedPages';
-import LocationMap from '../components/common/LocationMap';
-import DoctorForm from '../components/common/DoctorForm';
+import { ModalDetalhesConsulta as AppointmentDetailsModal } from '../components/common/Consulta';
+import Booking from '../pages/paciente/AgendamentoConsulta';
+import { ConsultasPaciente as PatientAppointments } from '../pages/paciente/PaginasPaciente';
+import { Perfil as Profile, Configuracoes as Settings } from '../pages/PaginasCompartilhadas';
+import LocationMap from '../components/common/MapaLocalizacao';
+import DoctorForm from '../components/common/FormularioMedico';
 import {
   changeAppointmentStatus,
   getDoctorSlotsForDate,

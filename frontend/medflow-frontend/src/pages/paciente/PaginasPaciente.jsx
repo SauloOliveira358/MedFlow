@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useDemo } from '../../context/DemoContext';
 import { CabecalhoPagina, EstadoVazio, Abas, Avatar, CrachaStatus } from '../../components/common/InterfaceUI';
 import { CartaoConsulta, ModalDetalhesConsulta } from '../../components/common/Consulta';
-import { CartaoEspecialidade } from '../../components/patient/CartoesPaciente';
+import { CartaoEspecialidade } from '../../components/paciente/CartoesPaciente';
 import Icone from '../../components/common/Icone';
 import { future, sortAppointments, formatDate } from '../../utils/date';
 

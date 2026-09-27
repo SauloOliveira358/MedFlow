@@ -1,8 +1,10 @@
 import { useState, useRef } from 'react';
 import { useDemo } from '../../context/DemoContext';
-import { Modal } from '../common/UI';
-import { AppointmentDetailsModal } from '../common/Appointment';
-import Icon from '../common/Icon';
+import { Modal } from '../common/InterfaceUI';
+import { ModalDetalhesConsulta as AppointmentDetailsModal } from '../common/Consulta';
+import Icone from '../common/Icone';
+
+const Icon = Icone;
 import { today, addDays, formatDate, weekDays, validDate } from '../../utils/date';
 import { getDoctorSlotsForDate } from '../../utils/appointments';
 

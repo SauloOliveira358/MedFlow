@@ -4,13 +4,13 @@ import LayoutArea from './layouts/LayoutArea';
 import BoasVindas from './pages/BoasVindas';
 import RequerConta from './components/common/RequerConta';
 import { EsqueletoCarregamento, EstadoVazio } from './components/common/InterfaceUI';
-import { PainelPaciente, ConsultasPaciente } from './pages/patient/PaginasPaciente';
-import PainelMedico from './pages/doctor/PainelMedico';
-import PainelClinica from './pages/clinic/PainelClinica';
+import { PainelPaciente, ConsultasPaciente } from './pages/paciente/PaginasPaciente';
+import PainelMedico from './pages/doutor/PainelMedico';
+import PainelClinica from './pages/clinica/PainelClinica';
 import { Notificacoes, Perfil, Configuracoes } from './pages/PaginasCompartilhadas';
-import { Profissionais, Especialidades, Relatorios } from './pages/clinic/PaginasClinica';
+import { Profissionais, Especialidades, Relatorios } from './pages/clinica/PaginasClinica';
 
-const AgendamentoConsulta = lazy(() => import('./pages/patient/AgendamentoConsulta'));
+const AgendamentoConsulta = lazy(() => import('./pages/paciente/AgendamentoConsulta'));
 const Agenda = lazy(() => import('./components/common/Agenda'));
 const Pacientes = lazy(() => import('./components/common/Pacientes'));
 const Prontuarios = lazy(() =>
@@ -19,8 +19,8 @@ const Prontuarios = lazy(() =>
 const DetalhesProntuario = lazy(() =>
   import('./components/common/Prontuarios').then((m) => ({ default: m.DetalhesProntuario })),
 );
-const ConsultasMedico = lazy(() => import('./pages/doctor/ConsultasMedico'));
-const GerenciadorAgendaMedico = lazy(() => import('./components/doctor/GerenciadorAgendaMedico'));
+const ConsultasMedico = lazy(() => import('./pages/doutor/ConsultasMedico'));
+const GerenciadorAgendaMedico = lazy(() => import('./components/doutor/GerenciadorAgendaMedico'));
 
 export default function App() {
   return (
