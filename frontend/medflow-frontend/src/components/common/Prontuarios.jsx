@@ -229,7 +229,7 @@ export function DetalhesProntuario({ area }) {
       <section className="panel record-header">
         <Avatar person={patient} large />
         <div>
-          <span className="eyebrow">PRONTUÁRIO DEMONSTRATIVO</span>
+          <span className="eyebrow">PRONTUÁRIO</span>
           <h1>{patient.name}</h1>
           <p>
             {age(patient.birth)} anos · {patient.phone}
@@ -345,7 +345,7 @@ export function DetalhesProntuario({ area }) {
             {!record.procedures.length && (
               <EmptyState
                 title="Nenhum procedimento registrado"
-                description="Os procedimentos demonstrativos aparecerão aqui."
+                description="Os procedimentos realizados aparecerão aqui."
               />
             )}
           </>

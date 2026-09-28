@@ -190,7 +190,7 @@ export function createMockData() {
     patientId: p.id,
     doctorId: `d${(i % 8) + 1}`,
     updatedAt: new Date().toISOString(),
-    summary: 'Paciente em acompanhamento. Dados exclusivamente fictícios para demonstração.',
+    summary: 'Paciente em acompanhamento.',
     notes: [
       {
         id: `n${i}`,
@@ -203,8 +203,8 @@ export function createMockData() {
     documents: [
       {
         id: 'doc1',
-        name: 'Resumo do atendimento demonstrativo',
-        text: 'MedFlow — documento fictício. Registro de uma consulta de demonstração. Nenhum dado clínico real.',
+        name: 'Resumo do atendimento',
+        text: 'MedFlow — resumo do atendimento.',
       },
     ],
   }));

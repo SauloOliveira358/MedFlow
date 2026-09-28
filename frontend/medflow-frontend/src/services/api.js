@@ -16,7 +16,7 @@ async function handleResponse(response) {
 }
 
 /**
- * Autentica o usuário com email e senha no banco de dados.
+ * Autentica o usuário com e-mail e senha.
  */
 export async function apiLogin(email, senha) {
   const url = `${API_BASE}/api/auth/login`;
@@ -31,7 +31,7 @@ export async function apiLogin(email, senha) {
 }
 
 /**
- * Cadastra um novo paciente no banco de dados e retorna a conta autenticada.
+ * Cadastra um novo paciente e retorna a conta autenticada.
  */
 export async function apiRegisterPatient(payload) {
   const url = `${API_BASE}/api/auth/registro/paciente`;
@@ -46,7 +46,7 @@ export async function apiRegisterPatient(payload) {
 }
 
 /**
- * Cadastra um novo médico no banco de dados com CRM, especialidade e agenda.
+ * Cadastra um novo médico com CRM, especialidade e agenda.
  */
 export async function apiRegisterDoctor(payload) {
   const url = `${API_BASE}/api/auth/registro/medico`;
@@ -61,7 +61,7 @@ export async function apiRegisterDoctor(payload) {
 }
 
 /**
- * Atualiza a foto do usuário diretamente no banco de dados (Base64).
+ * Atualiza a foto do usuário.
  */
 export async function apiUpdatePhoto(usuarioId, fotoBase64) {
   const url = `${API_BASE}/api/usuarios/${usuarioId}/foto`;
@@ -76,7 +76,7 @@ export async function apiUpdatePhoto(usuarioId, fotoBase64) {
 }
 
 /**
- * Busca todas as especialidades salvas no banco de dados.
+ * Busca as especialidades disponíveis.
  */
 export async function apiGetSpecialties() {
   const url = `${API_BASE}/api/especialidades`;
@@ -85,7 +85,7 @@ export async function apiGetSpecialties() {
 }
 
 /**
- * Busca todos os médicos salvos no banco de dados.
+ * Busca os médicos disponíveis.
  */
 export async function apiGetDoctors() {
   const url = `${API_BASE}/api/medicos`;

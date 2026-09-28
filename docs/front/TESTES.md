@@ -32,13 +32,13 @@ npm run test:e2e
 
 ## Roteiro de apresentação
 
-1. Entrar com `maria@medflow.demo`, senha `MedFlow123!`, e selecionar Agendar consulta.
+1. Entrar com uma conta de paciente criada no backend e selecionar Agendar consulta.
 2. Escolher Dermatologia, Dra. Ana, uma data futura e horário livre. Ver horários ocupados/intervalo bloqueados.
 3. Revisar os dados fictícios, informar uma observação e confirmar.
 4. Abrir Meus agendamentos e conferir a consulta.
-5. Sair e entrar com `ana@medflow.demo`; abrir Minha agenda na mesma data.
+5. Sair e entrar com uma conta de médico criada no backend; abrir Minha agenda na mesma data.
 6. Sair e entrar com `medico2@medflow.demo`: a consulta não deve aparecer na agenda dele.
-7. Sair e entrar com `admin@medflow.demo`, abrir Agenda geral e filtrar a data: mesma consulta/paciente/profissional. Todas essas contas iniciais usam a senha `MedFlow123!`.
+7. Sair e entrar com uma conta de administrador criada no backend, abrir Agenda geral e filtrar a data: mesma consulta/paciente/profissional.
 8. Abrir detalhes, cancelar, confirmar. No paciente, conferir status Cancelado no Histórico.
 9. Agendar pela clínica com novo paciente; no médico iniciar atendimento; abrir o novo prontuário e salvar uma anotação fictícia.
 10. Conferir os perfis, notificações lidas, paginação de pacientes, filtros e exportação do relatório.

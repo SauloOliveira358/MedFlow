@@ -1,7 +1,7 @@
 ﻿import { createMockData } from '../data/mockData';
-import { demoAccounts } from '../data/demoAccounts';
+import { testAccounts } from './fixtures/accounts';
 import { doctorRegistration, patientRegistration, passwordHash } from '../utils/auth';
-const base = () => ({ ...createMockData(), accounts: structuredClone(demoAccounts) });
+const base = () => ({ ...createMockData(), accounts: structuredClone(testAccounts) });
 const patient = {
   name: 'Paula Teste',
   birth: '1994-01-20',
@@ -40,10 +40,10 @@ it('apenas administrador cria conta médica', async () => {
 });
 it('rejeita e-mail duplicado sem diferenciar maiúsculas e espaços', async () => {
   await expect(
-    patientRegistration(base(), { ...patient, email: ' MARIA@medflow.demo ' }),
+    patientRegistration(base(), { ...patient, email: ' MARIA@medflow.test ' }),
   ).rejects.toThrow('e-mail');
   await expect(
-    doctorRegistration(base(), demoAccounts[0], { ...doctor, email: 'admin@medflow.demo' }),
+    doctorRegistration(base(), testAccounts[0], { ...doctor, email: 'admin@medflow.test' }),
   ).rejects.toThrow('conta');
 });
 it('rejeita senha curta e registro profissional repetido', async () => {
@@ -51,14 +51,14 @@ it('rejeita senha curta e registro profissional repetido', async () => {
     '8 caracteres',
   );
   await expect(
-    doctorRegistration(base(), demoAccounts[0], { ...doctor, registration: 'CRM 123456' }),
+    doctorRegistration(base(), testAccounts[0], { ...doctor, registration: 'CRM 123456' }),
   ).rejects.toThrow('registro');
 });
-it('credenciais de demonstração conferem e senha errada é diferente', async () => {
-  expect(await passwordHash('MedFlow123!', demoAccounts[0].salt)).toBe(
-    demoAccounts[0].passwordHash,
+it('credenciais válidas produzem o hash esperado e senha errada é diferente', async () => {
+  expect(await passwordHash('MedFlow123!', testAccounts[0].salt)).toBe(
+    testAccounts[0].passwordHash,
   );
-  expect(await passwordHash('incorreta', demoAccounts[0].salt)).not.toBe(
-    demoAccounts[0].passwordHash,
+  expect(await passwordHash('incorreta', testAccounts[0].salt)).not.toBe(
+    testAccounts[0].passwordHash,
   );
 });

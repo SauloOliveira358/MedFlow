@@ -143,7 +143,7 @@ export function changeAppointmentStatus(data, id, status) {
         patientId: appointment.patientId,
         doctorId: appointment.doctorId,
         updatedAt: new Date().toISOString(),
-        summary: 'Novo acompanhamento demonstrativo.',
+        summary: 'Novo acompanhamento.',
         notes: [],
         procedures: [],
         documents: [],

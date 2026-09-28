@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { createMockData } from '../data/mockData';
-import { demoAccounts } from '../data/demoAccounts';
+import { testAccounts } from './fixtures/accounts';
 import { doctorSelfRegistration } from '../utils/auth';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
@@ -23,7 +23,7 @@ import { today, addDays } from '../utils/date';
 describe('Funcionalidades do Médico e Paciente (MedFlow)', () => {
   const getBaseData = () => ({
     ...createMockData(),
-    accounts: structuredClone(demoAccounts),
+    accounts: structuredClone(testAccounts),
   });
 
   it('permite o médico criar conta própria informando CRM e especialidade', async () => {
@@ -145,7 +145,7 @@ describe('Funcionalidades do Médico e Paciente (MedFlow)', () => {
     const appointment = data.appointments[0];
 
     render(
-      <DemoProvider>
+      <DemoProvider initialData={data}>
         <MemoryRouter>
           <AppointmentDetailsModal
             appointment={appointment}
@@ -172,7 +172,7 @@ describe('Funcionalidades do Médico e Paciente (MedFlow)', () => {
 
   it('na tela de nova consulta do médico exibe seleção direta de paciente, data e horário', () => {
     render(
-      <DemoProvider>
+      <DemoProvider initialData={getBaseData()}>
         <MemoryRouter>
           <Booking area="medico" />
         </MemoryRouter>
@@ -196,7 +196,7 @@ describe('Funcionalidades do Médico e Paciente (MedFlow)', () => {
   it('em agendamentos do paciente não exibe reagendar (somente cancelar) e no histórico exibe em linha/tabela com detalhes', () => {
     sessionStorage.setItem('medflow-session-v1', 'account-patient');
     render(
-      <DemoProvider>
+      <DemoProvider initialData={getBaseData()}>
         <MemoryRouter>
           <PatientAppointments />
         </MemoryRouter>
@@ -228,7 +228,7 @@ describe('Funcionalidades do Médico e Paciente (MedFlow)', () => {
     // 1. Perfil do usuário (paciente)
     sessionStorage.setItem('medflow-session-v1', 'account-patient');
     const { unmount } = render(
-      <DemoProvider>
+      <DemoProvider initialData={getBaseData()}>
         <MemoryRouter>
           <Profile area="paciente" />
         </MemoryRouter>

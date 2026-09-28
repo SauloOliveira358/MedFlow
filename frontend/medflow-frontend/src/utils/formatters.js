@@ -23,7 +23,7 @@ export function formatarNomeMedico(nome) {
 
 /**
  * Remove qualquer prefixo como 'Dr.', 'Dra.' ou 'Dr(a).' do nome.
- * Usado antes de enviar ao banco de dados para garantir armazenamento limpo.
+ * Normaliza valores antes de enviar dados ao serviço.
  */
 export function limparNomeMedico(nome) {
   if (!nome || typeof nome !== 'string') return '';

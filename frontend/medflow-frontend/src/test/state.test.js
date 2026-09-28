@@ -14,7 +14,7 @@ const input = (data) => ({
   time: '16:00',
   reason: 'Consulta fictícia',
 });
-describe('Estado global demonstrativo', () => {
+describe('Estado global da aplicação', () => {
   it('contém as quantidades e relações solicitadas', () => {
     const d = createMockData();
     expect(d.patients).toHaveLength(10);

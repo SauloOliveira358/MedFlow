@@ -1,6 +1,5 @@
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { createMockData } from '../data/mockData';
-import { demoAccounts } from '../data/demoAccounts';
 import { bookAppointment, changeAppointmentStatus, patientError, getDoctorSlotsForDate } from '../utils/appointments';
 import {
   normalizeEmail,
@@ -19,18 +18,11 @@ import {
   apiGetSpecialties,
 } from '../services/api';
 const Store = createContext(null);
-const KEY = 'medflow-react-demo-v2';
+const KEY = 'medflow-react-v3';
 const SESSION = 'medflow-session-v1';
+const apiEntityId = (type, id) => `api-${type}-${id}`;
 function withAccounts(data) {
-  const accounts = Array.isArray(data.accounts)
-    ? data.accounts
-    : demoAccounts.filter(
-        (a) =>
-          a.role === 'clinica' ||
-          (a.patientId
-            ? data.patients.some((p) => p.id === a.patientId)
-            : data.doctors.some((d) => d.id === a.doctorId)),
-      );
+  const accounts = Array.isArray(data.accounts) ? data.accounts : [];
   const doctorSchedules = Array.isArray(data.doctorSchedules) ? data.doctorSchedules : [];
   return {
     ...data,
@@ -52,7 +44,7 @@ function load() {
     if (raw) {
       const d = JSON.parse(raw);
       if (
-        d.version === 2 &&
+        d.version === 3 &&
         ['patients', 'doctors', 'specialties', 'appointments', 'records', 'notifications'].every(
           (k) => Array.isArray(d[k]),
         ) &&
@@ -65,7 +57,18 @@ function load() {
       }
     }
   } catch {}
-  return withAccounts(createMockData());
+  const cleanData = createMockData();
+  return withAccounts({
+    ...cleanData,
+    version: 3,
+    patients: [],
+    doctors: [],
+    appointments: [],
+    records: [],
+    doctorSchedules: [],
+    notifications: [],
+    accounts: [],
+  });
 }
 function loadSession() {
   try {
@@ -151,8 +154,8 @@ export function DemoProvider({ children, initialData }) {
       const response = await apiLogin(email, password);
       const role = response.perfil;
       const accountId = `user-${response.usuarioId}`;
-      const doctorIdVal = response.medicoId ? `d${response.medicoId}` : null;
-      const patientIdVal = response.pacienteId ? `p${response.pacienteId}` : null;
+      const doctorIdVal = response.medicoId ? apiEntityId('d', response.medicoId) : null;
+      const patientIdVal = response.pacienteId ? apiEntityId('p', response.pacienteId) : null;
 
       const userAccount = {
         id: accountId,
@@ -272,7 +275,7 @@ export function DemoProvider({ children, initialData }) {
       });
 
       const accountId = `user-${response.usuarioId}`;
-      const patientIdVal = `p${response.pacienteId}`;
+      const patientIdVal = apiEntityId('p', response.pacienteId);
       const userAccount = {
         id: accountId,
         role: 'paciente',
@@ -296,12 +299,22 @@ export function DemoProvider({ children, initialData }) {
       const current = dataRef.current;
       commit({
         ...current,
-        patients: [...current.patients.filter((p) => p.id !== patientIdVal), patientObj],
-        accounts: [...current.accounts.filter((a) => a.id !== accountId), userAccount],
+        patients: [
+          ...current.patients.filter(
+            (p) => p.id !== patientIdVal && p.email?.toLowerCase() !== response.email.toLowerCase(),
+          ),
+          patientObj,
+        ],
+        accounts: [
+          ...current.accounts.filter(
+            (a) => a.id !== accountId && a.email?.toLowerCase() !== response.email.toLowerCase(),
+          ),
+          userAccount,
+        ],
       });
 
       setSession(userAccount.id);
-      notify('Sua conta de paciente foi criada e salva no banco de dados!');
+      notify('Sua conta de paciente foi criada com sucesso!');
       return userAccount;
     } catch (apiErr) {
       throw apiErr;
@@ -357,7 +370,7 @@ export function DemoProvider({ children, initialData }) {
       });
 
       const accountId = `user-${response.usuarioId}`;
-      const doctorIdVal = `d${response.medicoId}`;
+      const doctorIdVal = apiEntityId('d', response.medicoId);
       const userAccount = {
         id: accountId,
         role: 'medico',
@@ -399,9 +412,9 @@ export function DemoProvider({ children, initialData }) {
 
       if (!currentActor) {
         setSession(userAccount.id);
-        notify('Sua conta de médico foi criada e salva no banco de dados com sucesso!');
+        notify('Sua conta de médico foi criada com sucesso!');
       } else {
-        notify('Conta do médico criada no banco de dados. Ele já pode entrar com o e-mail e senha.');
+        notify('Conta do médico criada. Ele já pode entrar com o e-mail e senha.');
       }
       return doctorObj;
     } catch (apiErr) {
@@ -563,12 +576,12 @@ export function DemoProvider({ children, initialData }) {
         a.id === user.id ? { ...a, photo: doctor.photo || a.photo, name: doctor.name } : a
       ),
     });
-    notify('Perfil atualizado com sucesso no banco de dados!');
+    notify('Perfil atualizado com sucesso!');
   };
   const saveClinic = (clinic) => {
     requireRole(actor(), 'clinica');
     commit({ ...dataRef.current, clinic });
-    notify('Configurações salvas nesta demonstração.');
+    notify('Configurações salvas com sucesso.');
   };
   const addNote = (recordId, text) => {
     const user = actor();

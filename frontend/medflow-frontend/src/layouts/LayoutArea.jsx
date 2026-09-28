@@ -110,7 +110,11 @@ export function BarraLateral({ area, open, onClose }) {
             <span>
               <strong>{area === 'medico' ? formatarNomeMedico(person.name) : person.name}</strong>
               <small>
-                {area === 'paciente' ? 'Seu bem-estar importa' : 'Perfil demonstrativo'}
+                {area === 'paciente'
+                  ? 'Seu bem-estar importa'
+                  : area === 'medico'
+                    ? 'Sua agenda em foco'
+                    : 'Gestão da clínica'}
               </small>
             </span>
             <Icone name="right" size={15} />
@@ -168,7 +172,9 @@ export function CabecalhoSuperior({ area, onMenu }) {
           <Icone name="menu" />
         </button>
         <span className="header-area">{titulos[area]}</span>
-        <span className="demo-pill">{area === 'clinica' ? 'Administrador' : 'Demonstração'}</span>
+        <span className="demo-pill">
+          {area === 'clinica' ? 'Administrador' : area === 'medico' ? 'Especialista' : 'Paciente'}
+        </span>
       </div>
       <div className="header-tools">
         <span className="signed-in-email">{account.email}</span>
@@ -228,7 +234,7 @@ export default function LayoutArea({ area }) {
           <span>
             medflow. <span>Cuidado que conecta.</span>
           </span>
-          <small>Dados fictícios · Feito para demonstrar</small>
+          <small>Cuidado que conecta.</small>
         </footer>
       </div>
       <NavegacaoInferiorMobile area={area} />

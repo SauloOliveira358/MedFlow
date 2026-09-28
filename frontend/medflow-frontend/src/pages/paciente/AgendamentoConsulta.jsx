@@ -87,9 +87,7 @@ function DoctorBooking() {
       const rawCpf = (newPatient.cpf || '').replace(/\D/g, '');
       const validCpf = rawCpf.length === 11 ? rawCpf : '12345678901';
       const cleanPhone = newPatient.phone?.trim() || '(31) 98765-4321';
-      const cleanEmail =
-        newPatient.email?.trim() ||
-        `${newPatient.name.trim().toLowerCase().replace(/\s+/g, '.').replace(/[^a-z0-9.]/g, '')}@medflow.demo`;
+      const cleanEmail = newPatient.email?.trim();
 
       finalPatient = {
         name: newPatient.name.trim(),
@@ -863,7 +861,7 @@ export function AgendamentoConsulta({ area = 'paciente' }) {
               <PatientForm value={person} onChange={setPerson} notes />
               <small className="privacy-note">
                 <Icon name="shield" size={15} />
-                Ambiente demonstrativo. Utilize apenas informações fictícias.
+                Informe os dados necessários para realizar o agendamento.
               </small>
             </>
           )}

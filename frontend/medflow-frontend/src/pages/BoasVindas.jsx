@@ -110,18 +110,6 @@ export default function BoasVindas({ register = false }) {
     }
   };
 
-  const handleQuickLogin = async (email, pass) => {
-    setError('');
-    setBusy(true);
-    try {
-      await login(email, pass);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setBusy(false);
-    }
-  };
-
   return (
     <div className="auth-page">
       <header>
@@ -172,27 +160,6 @@ export default function BoasVindas({ register = false }) {
             ))}
           </div>
 
-          <div className="auth-demo-shortcuts">
-            <small style={{ display: 'block', marginBottom: '8px', color: '#6d7f75', fontWeight: 600 }}>
-              TESTE RÁPIDO (1 CLIQUE):
-            </small>
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-              <button
-                type="button"
-                className="button small secondary"
-                onClick={() => handleQuickLogin('ana@medflow.demo', 'MedFlow123!')}
-              >
-                <Icon name="stethoscope" size={14} /> Entrar como Médica (Dra. Ana)
-              </button>
-              <button
-                type="button"
-                className="button small secondary"
-                onClick={() => handleQuickLogin('maria@medflow.demo', 'MedFlow123!')}
-              >
-                <Icon name="user" size={14} /> Entrar como Paciente (Maria)
-              </button>
-            </div>
-          </div>
         </section>
 
         <section className="auth-card">
@@ -360,24 +327,8 @@ export default function BoasVindas({ register = false }) {
             )}
           </p>
 
-          {!register && (
-            <details className="demo-credentials" style={{ marginTop: '15px' }}>
-              <summary>Contas de teste pré-configuradas</summary>
-              <div style={{ marginTop: '8px', fontSize: '12px', lineHeight: '1.6' }}>
-                <p>
-                  <strong>Médica:</strong> ana@medflow.demo (Dermatologia)<br />
-                  <strong>Paciente:</strong> maria@medflow.demo<br />
-                  <strong>Administrador:</strong> admin@medflow.demo
-                </p>
-                <p>
-                  Senha padrão: <strong>MedFlow123!</strong>
-                </p>
-              </div>
-            </details>
-          )}
-
           <small className="auth-local-note" style={{ display: 'block', marginTop: '15px' }}>
-            MedFlow conectado ao banco de dados PostgreSQL com autenticação real e imagens armazenadas no banco.
+            Seu cuidado, com simplicidade e segurança.
           </small>
         </section>
       </main>

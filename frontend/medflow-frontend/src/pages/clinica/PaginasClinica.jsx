@@ -172,10 +172,10 @@ export function Relatorios() {
     const url = URL.createObjectURL(new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' }));
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'medflow-relatorio-demo.csv';
+    a.download = 'medflow-relatorio.csv';
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-    notify('Relatório demonstrativo exportado.');
+    notify('Relatório exportado com sucesso.');
   };
   return (
     <>

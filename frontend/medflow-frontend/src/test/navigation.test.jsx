@@ -3,17 +3,19 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { DemoProvider } from '../context/DemoContext';
 import App from '../App';
+import { createMockData } from '../data/mockData';
+import { testAccounts } from './fixtures/accounts';
 import { today, addDays } from '../utils/date';
 it('agenda pela interface e encontra o mesmo registro no paciente, médico e clínica', async () => {
   const user = userEvent.setup();
   render(
-    <DemoProvider>
+    <DemoProvider initialData={{ ...createMockData(), accounts: structuredClone(testAccounts) }}>
       <MemoryRouter initialEntries={['/paciente/agendar']}>
         <App />
       </MemoryRouter>
     </DemoProvider>,
   );
-  await user.type(await screen.findByLabelText('E-mail'), 'maria@medflow.demo');
+  await user.type(await screen.findByLabelText('E-mail'), 'maria@medflow.test');
   await user.type(screen.getByLabelText('Senha', { exact: true }), 'MedFlow123!');
   await user.click(screen.getByRole('button', { name: 'Entrar', exact: true }));
   await user.click(await screen.findByRole('button', { name: /Dermatologia Cuidado/ }));
@@ -31,7 +33,7 @@ it('agenda pela interface e encontra o mesmo registro no paciente, médico e cl�
   await user.click(screen.getByRole('link', { name: 'Ver meus agendamentos', exact: true }));
   expect(await screen.findByText('· 16:00')).toBeInTheDocument();
   await user.click(screen.getByRole('button', { name: 'Sair', exact: true }));
-  await user.type(await screen.findByLabelText('E-mail'), 'ana@medflow.demo');
+  await user.type(await screen.findByLabelText('E-mail'), 'ana@medflow.test');
   await user.type(screen.getByLabelText('Senha', { exact: true }), 'MedFlow123!');
   await user.click(screen.getByRole('button', { name: 'Entrar', exact: true }));
   await user.click(await screen.findByRole('link', { name: 'Minha agenda', exact: true }));
@@ -40,7 +42,7 @@ it('agenda pela interface e encontra o mesmo registro no paciente, médico e cl�
   });
   expect(await screen.findByRole('button', { name: /16:00.*Maria Oliveira/ })).toBeInTheDocument();
   await user.click(screen.getByRole('button', { name: 'Sair', exact: true }));
-  await user.type(await screen.findByLabelText('E-mail'), 'admin@medflow.demo');
+  await user.type(await screen.findByLabelText('E-mail'), 'admin@medflow.test');
   await user.type(screen.getByLabelText('Senha', { exact: true }), 'MedFlow123!');
   await user.click(screen.getByRole('button', { name: 'Entrar', exact: true }));
   await user.click(await screen.findByRole('link', { name: 'Agenda geral', exact: true }));

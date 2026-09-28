@@ -45,7 +45,7 @@ flowchart LR
 
 Operações de criação/remarcação validam o estado mais recente por referência síncrona antes de publicar o próximo estado React. Salvar consulta também atualiza o cadastro demonstrativo e cria notificação. Cancelar libera o slot; iniciar cria prontuário para novo vínculo paciente/profissional; concluir muda o status. As contagens dos dashboards são calculadas, não números decorativos.
 
-Persistência: `medflow-react-demo-v2`, independente da antiga chave Angular. Ao recarregar, os dados do primeiro uso mantêm suas datas. Armazenamento bloqueado produz aviso; a sessão continua em memória. Não há sincronização entre dispositivos ou tratamento de concorrência entre abas. Perfis não representam autenticação ou proteção real de dados.
+O frontend não popula perfis demonstrativos. A sessão usa `sessionStorage`; autenticação, perfis e persistência dependem do backend. Armazenamento bloqueado produz aviso; não há sincronização entre dispositivos ou tratamento de concorrência entre abas.
 
 ## Agenda e formulários
 
