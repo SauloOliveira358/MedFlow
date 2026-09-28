@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Field } from './InterfaceUI';
 import { useDemo } from '../../context/DemoContext';
 import Icone from './Icone';
@@ -8,12 +8,34 @@ export default function FormularioMedico({ value, onChange }) {
   const { data } = useDemo();
   const [customSpecialty, setCustomSpecialty] = useState(false);
 
+  const valueRef = useRef(value);
+  useEffect(() => {
+    valueRef.current = value;
+  }, [value]);
+
+  const updateData = (patch) => {
+    if (typeof onChange === 'function') {
+      const merged = { ...valueRef.current, ...patch };
+      valueRef.current = merged;
+      try {
+        onChange((prev) => {
+          if (typeof prev === 'object' && prev !== null) {
+            return { ...prev, ...patch };
+          }
+          return merged;
+        });
+      } catch {
+        onChange(merged);
+      }
+    }
+  };
+
   const field = (key, label, type = 'text', props = {}) => (
     <Field
       label={label}
       type={type}
       value={value[key] || ''}
-      onChange={(e) => onChange({ ...value, [key]: e.target.value })}
+      onChange={(e) => updateData({ [key]: e.target.value })}
       required
       {...props}
     />
@@ -25,7 +47,7 @@ export default function FormularioMedico({ value, onChange }) {
         {field('name', 'Nome completo do médico(a)', 'text', {
           autoComplete: 'name',
           maxLength: 100,
-          placeholder: 'Ex: Dra. Mariana Costa',
+          placeholder: 'Ex: Mariana Costa (sem Dr/Dra)',
         })}
       </div>
 
@@ -56,9 +78,9 @@ export default function FormularioMedico({ value, onChange }) {
                 onChange={(e) => {
                   if (e.target.value === '__custom__') {
                     setCustomSpecialty(true);
-                    onChange({ ...value, specialtyId: '', specialtyName: '' });
+                    updateData({ specialtyId: '', specialtyName: '' });
                   } else {
-                    onChange({ ...value, specialtyId: e.target.value, specialtyName: '' });
+                    updateData({ specialtyId: e.target.value, specialtyName: '' });
                   }
                 }}
               >
@@ -78,14 +100,14 @@ export default function FormularioMedico({ value, onChange }) {
                 placeholder="Ex: Cardiologia, Pediatria, Ortopedia..."
                 required
                 value={value.specialtyName || ''}
-                onChange={(e) => onChange({ ...value, specialtyName: e.target.value, specialtyId: '' })}
+                onChange={(e) => updateData({ specialtyName: e.target.value, specialtyId: '' })}
               />
               <button
                 type="button"
                 className="button small secondary"
                 onClick={() => {
                   setCustomSpecialty(false);
-                  onChange({ ...value, specialtyName: '', specialtyId: data.specialties[0]?.id || '' });
+                  updateData({ specialtyName: '', specialtyId: data.specialties[0]?.id || '' });
                 }}
               >
                 Voltar à lista
@@ -135,7 +157,7 @@ export default function FormularioMedico({ value, onChange }) {
           value={value.lat !== undefined ? value.lat : ''}
           onChange={(e) => {
             const val = e.target.value === '' ? '' : Number(e.target.value);
-            onChange({ ...value, lat: val });
+            updateData({ lat: val });
           }}
         />
       </div>
@@ -150,7 +172,7 @@ export default function FormularioMedico({ value, onChange }) {
           value={value.lng !== undefined ? value.lng : ''}
           onChange={(e) => {
             const val = e.target.value === '' ? '' : Number(e.target.value);
-            onChange({ ...value, lng: val });
+            updateData({ lng: val });
           }}
         />
       </div>
@@ -163,9 +185,11 @@ export default function FormularioMedico({ value, onChange }) {
           address={value.address || 'Belo Horizonte, MG'}
           editable={true}
           onChange={({ lat, lng, address }) => {
-            const next = { ...value, lat, lng };
-            if (address && !value.address) next.address = address;
-            onChange(next);
+            updateData({
+              lat,
+              lng,
+              ...(address ? { address } : {}),
+            });
           }}
         />
       </div>

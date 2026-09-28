@@ -4,6 +4,7 @@ import { useDemo } from '../../context/DemoContext';
 import { PageHeading, SearchInput, Avatar, EmptyState, Modal, Field } from './InterfaceUI';
 import FormularioPaciente from './FormularioPaciente';
 import { age, future, normalize, sortAppointments, formatDate } from '../../utils/date';
+import { formatarNomeMedico } from '../../utils/formatters';
 import Icone from './Icone';
 
 export default function Pacientes({ area }) {
@@ -73,7 +74,7 @@ export default function Pacientes({ area }) {
               <option value="">Todos os profissionais</option>
               {data.doctors.map((d) => (
                 <option value={d.id} key={d.id}>
-                  {d.name}
+                  {formatarNomeMedico(d.name)}
                 </option>
               ))}
             </select>

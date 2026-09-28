@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useDemo } from '../../context/DemoContext';
 import { Avatar, CrachaStatus, Modal, ModalConfirmacao } from './InterfaceUI';
 import { age, formatDate } from '../../utils/date';
+import { formatarNomeMedico } from '../../utils/formatters';
 import Icone from './Icone';
 import MapaLocalizacao from './MapaLocalizacao';
 
@@ -25,10 +26,10 @@ export function CartaoConsulta({ appointment, area = 'paciente', onDetails }) {
         <div className="appointment-person">
           <Avatar person={area === 'paciente' ? doctor : patient} large />
           <div>
-            <h3>{area === 'paciente' ? doctor.name : patient.name}</h3>
+            <h3>{area === 'paciente' ? formatarNomeMedico(doctor.name) : patient.name}</h3>
             <p>
-              {specialty.name}
-              {area !== 'paciente' ? ` · ${doctor.name}` : ''}
+              {specialty?.name || 'Especialidade'}
+              {area !== 'paciente' ? ` · ${formatarNomeMedico(doctor.name)}` : ''}
             </p>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginTop: '2px' }}>
               <small>
@@ -121,10 +122,10 @@ export function ModalDetalhesConsulta({ appointment, area, onClose, onlyCancel =
       <div className="detail-person">
         <Avatar person={area === 'paciente' ? doctor : patient} large />
         <div>
-          <h3>{area === 'paciente' ? doctor.name : patient.name}</h3>
+          <h3>{area === 'paciente' ? formatarNomeMedico(doctor.name) : patient.name}</h3>
           <p>
             {area === 'paciente'
-              ? data.specialties.find((s) => s.id === doctor.specialtyId).name
+              ? data.specialties.find((s) => s.id === doctor.specialtyId)?.name || 'Especialidade'
               : `${age(patient.birth)} anos · ${patient.phone}`}
           </p>
         </div>
@@ -143,7 +144,7 @@ export function ModalDetalhesConsulta({ appointment, area, onClose, onlyCancel =
         </div>
         <div>
           <dt>Profissional</dt>
-          <dd>{doctor.name}</dd>
+          <dd>{formatarNomeMedico(doctor.name)}</dd>
         </div>
         <div>
           <dt>Paciente</dt>

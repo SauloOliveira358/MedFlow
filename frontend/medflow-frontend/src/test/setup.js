@@ -8,6 +8,7 @@ beforeEach(() => {
   sessionStorage.clear();
 });
 window.scrollTo = vi.fn();
+window.__VITEST__ = true;
 HTMLDialogElement.prototype.showModal = function () {
   this.setAttribute('open', '');
 };

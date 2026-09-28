@@ -4,6 +4,7 @@ import { Avatar } from '../common/InterfaceUI';
 import Icone from '../common/Icone';
 import { allSlots, slotUnavailable } from '../../utils/appointments';
 import { addDays, today, formatDate } from '../../utils/date';
+import { formatarNomeMedico } from '../../utils/formatters';
 
 export function CartaoEspecialidade({ specialty, onSelect }) {
   return (
@@ -38,8 +39,8 @@ export function CartaoMedico({ doctor, onSelect }) {
           {doctor.rating}
         </span>
       </div>
-      <h3>{doctor.name}</h3>
-      <p>{data.specialties.find((s) => s.id === doctor.specialtyId).name}</p>
+      <h3>{formatarNomeMedico(doctor.name)}</h3>
+      <p>{data.specialties.find((s) => s.id === doctor.specialtyId)?.name || 'Especialidade'}</p>
       <small>
         <Icone name="pin" size={14} />
         {data.clinic.name}

@@ -84,3 +84,7 @@ export default function Icone({ name, size = 20, ...props }) {
   const Component = icones[name] || Heart;
   return <Component size={size} strokeWidth={1.7} aria-hidden="true" {...props} />;
 }
+
+export const Icon = Icone;
+export { Icone };
+

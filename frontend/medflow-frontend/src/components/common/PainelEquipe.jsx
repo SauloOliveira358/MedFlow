@@ -4,6 +4,7 @@ import { useDemo } from '../../context/DemoContext';
 import { PageHeading, DashboardCard, StatusBadge, EmptyState, Avatar } from './InterfaceUI';
 import { ModalDetalhesConsulta } from './Consulta';
 import { today, sortAppointments, future } from '../../utils/date';
+import { formatarNomeMedico } from '../../utils/formatters';
 import Icone from './Icone';
 
 export default function PainelEquipe({ area }) {
@@ -72,7 +73,7 @@ export default function PainelEquipe({ area }) {
   return (
     <>
       <PageHeading
-        title={isDoctor ? `Olá, ${doctor.firstName}` : 'Um olhar para toda a clínica.'}
+        title={isDoctor ? `Olá, ${formatarNomeMedico(doctor?.firstName || doctor?.name)}` : 'Um olhar para toda a clínica.'}
         description={
           isDoctor
             ? 'Seu espaço para cuidar com atenção e tranquilidade.'
@@ -131,9 +132,9 @@ export default function PainelEquipe({ area }) {
                           <strong>{p.name}</strong>
                         </div>
                       </td>
-                      {!isDoctor && <td data-label="Profissional">{d.name}</td>}
+                      {!isDoctor && <td data-label="Profissional">{formatarNomeMedico(d?.name)}</td>}
                       <td data-label="Especialidade">
-                        {data.specialties.find((s) => s.id === d.specialtyId).name}
+                        {data.specialties.find((s) => s.id === d?.specialtyId)?.name || 'Especialidade'}
                       </td>
                       <td data-label="Status">
                         <StatusBadge status={a.status} />

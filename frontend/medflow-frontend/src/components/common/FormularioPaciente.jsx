@@ -2,12 +2,22 @@ import { Field } from './InterfaceUI';
 import { today } from '../../utils/date';
 
 export default function FormularioPaciente({ value, onChange, notes = false }) {
+  const updateData = (patch) => {
+    if (typeof onChange === 'function') {
+      try {
+        onChange((prev) => (typeof prev === 'object' && prev !== null ? { ...prev, ...patch } : { ...value, ...patch }));
+      } catch {
+        onChange({ ...value, ...patch });
+      }
+    }
+  };
+
   const field = (key, label, type = 'text', props = {}) => (
     <Field
       label={label}
       type={type}
       value={value[key] || ''}
-      onChange={(e) => onChange({ ...value, [key]: e.target.value })}
+      onChange={(e) => updateData({ [key]: e.target.value })}
       required
       {...props}
     />

@@ -12,13 +12,7 @@ export function getDoctorSlotsForDate(data, doctorId, date) {
   if (schedule && Array.isArray(schedule.slots)) {
     return [...schedule.slots].sort();
   }
-  return allSlots.filter(
-    (time) =>
-      time >= doctor.start &&
-      time < doctor.end &&
-      time !== '12:00' &&
-      time !== '12:30',
-  );
+  return [];
 }
 
 export function slotUnavailable(data, doctorId, date, time, excludeId, now = new Date()) {
@@ -31,14 +25,7 @@ export function slotUnavailable(data, doctorId, date, time, excludeId, now = new
   if (schedule && Array.isArray(schedule.slots)) {
     if (!schedule.slots.includes(time)) return true;
   } else {
-    if (
-      time < doctor.start ||
-      time >= doctor.end ||
-      time === '12:00' ||
-      time === '12:30'
-    ) {
-      return true;
-    }
+    return true;
   }
 
   if (date === today() && time <= now.toTimeString().slice(0, 5)) return true;

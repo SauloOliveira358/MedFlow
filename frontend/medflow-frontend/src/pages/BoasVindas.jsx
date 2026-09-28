@@ -377,7 +377,7 @@ export default function BoasVindas({ register = false }) {
           )}
 
           <small className="auth-local-note" style={{ display: 'block', marginTop: '15px' }}>
-            Protótipo funcional MedFlow. Seus dados são salvos localmente no navegador.
+            MedFlow conectado ao banco de dados PostgreSQL com autenticação real e imagens armazenadas no banco.
           </small>
         </section>
       </main>

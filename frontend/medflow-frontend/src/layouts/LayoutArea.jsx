@@ -3,6 +3,7 @@ import useDrawerFocus from '../hooks/useDrawerFocus';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useDemo } from '../context/DemoContext';
 import { Marca, Avatar } from '../components/common/InterfaceUI';
+import { formatarNomeMedico } from '../utils/formatters';
 import Icone from '../components/common/Icone';
 
 const menus = {
@@ -107,7 +108,7 @@ export function BarraLateral({ area, open, onClose }) {
           >
             <Avatar person={person} />
             <span>
-              <strong>{person.name}</strong>
+              <strong>{area === 'medico' ? formatarNomeMedico(person.name) : person.name}</strong>
               <small>
                 {area === 'paciente' ? 'Seu bem-estar importa' : 'Perfil demonstrativo'}
               </small>

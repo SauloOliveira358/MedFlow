@@ -12,6 +12,7 @@ import {
   sortAppointments,
   normalize,
 } from '../../utils/date';
+import { formatarNomeMedico } from '../../utils/formatters';
 import Icone from './Icone';
 
 export function CalendarioAgenda({ rows, date, view, onDate, onDetails, area }) {
@@ -73,9 +74,9 @@ export function CalendarioAgenda({ rows, date, view, onDate, onDetails, area }) 
                   <small>30 min</small>
                 </time>
                 <div>
-                  <strong>{data.patients.find((p) => p.id === a.patientId).name}</strong>
-                  <p>{data.specialties.find((s) => s.id === doctor.specialtyId).name}</p>
-                  {area === 'clinica' && <small>{doctor.name}</small>}
+                  <strong>{data.patients.find((p) => p.id === a.patientId)?.name || 'Paciente'}</strong>
+                  <p>{data.specialties.find((s) => s.id === doctor?.specialtyId)?.name || 'Especialidade'}</p>
+                  {area === 'clinica' && <small>{formatarNomeMedico(doctor?.name)}</small>}
                 </div>
                 <StatusBadge status={a.status} />
                 <Icone name="right" size={16} />
@@ -195,7 +196,7 @@ export default function Agenda({
                   <option value="">Todos os profissionais</option>
                   {data.doctors.map((d) => (
                     <option key={d.id} value={d.id}>
-                      {d.name}
+                      {formatarNomeMedico(d.name)}
                     </option>
                   ))}
                 </select>

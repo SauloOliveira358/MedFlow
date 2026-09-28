@@ -10,6 +10,7 @@ import {
   CartaoMetrica,
 } from '../../components/common/InterfaceUI';
 import { normalize, today } from '../../utils/date';
+import { formatarNomeMedico } from '../../utils/formatters';
 import Icone from '../../components/common/Icone';
 import FormularioContaMedico from '../../components/common/FormularioContaMedico';
 
@@ -63,8 +64,8 @@ export function Profissionais() {
                   {day.some((a) => a.status === 'Em atendimento') ? 'Atendendo' : 'Disponível'}
                 </span>
               </div>
-              <h3>{d.name}</h3>
-              <p>{data.specialties.find((s) => s.id === d.specialtyId).name}</p>
+              <h3>{formatarNomeMedico(d.name)}</h3>
+              <p>{data.specialties.find((s) => s.id === d.specialtyId)?.name || 'Especialidade'}</p>
               <small>{d.registration}</small>
               <div className="next-slot">
                 <strong>{day.length} consultas hoje</strong>
@@ -86,8 +87,8 @@ export function Profissionais() {
           <div className="detail-person">
             <Avatar person={selected} large />
             <div>
-              <h3>{selected.name}</h3>
-              <p>{data.specialties.find((s) => s.id === selected.specialtyId).name}</p>
+              <h3>{formatarNomeMedico(selected.name)}</h3>
+              <p>{data.specialties.find((s) => s.id === selected.specialtyId)?.name || 'Especialidade'}</p>
             </div>
           </div>
           <p>{selected.bio}</p>

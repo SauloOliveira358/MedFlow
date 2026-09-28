@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useDemo } from '../../context/DemoContext';
 import { PageHeading, StatusBadge, EmptyState, SearchInput, Avatar, ConfirmationModal } from '../../components/common/InterfaceUI';
-import Icone from '../../components/common/Icone';
+import Icone, { Icon } from '../../components/common/Icone';
 import { today, formatDate, sortAppointments, normalize, age } from '../../utils/date';
 
 export default function ConsultasMedico() {

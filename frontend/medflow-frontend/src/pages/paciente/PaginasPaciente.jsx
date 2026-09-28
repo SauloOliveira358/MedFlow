@@ -6,6 +6,7 @@ import { CartaoConsulta, ModalDetalhesConsulta } from '../../components/common/C
 import { CartaoEspecialidade } from '../../components/paciente/CartoesPaciente';
 import Icone from '../../components/common/Icone';
 import { future, sortAppointments, formatDate } from '../../utils/date';
+import { formatarNomeMedico } from '../../utils/formatters';
 
 const PageHeading = CabecalhoPagina;
 const EmptyState = EstadoVazio;
@@ -224,7 +225,7 @@ export function ConsultasPaciente({ history = false }) {
                           <div className="table-person">
                             <Avatar person={doctor} />
                             <div>
-                              <strong>{doctor?.name || 'Profissional'}</strong>
+                              <strong>{formatarNomeMedico(doctor?.name) || 'Profissional'}</strong>
                               {doctor?.crm && (
                                 <small style={{ color: '#64748b' }}>CRM {doctor.crm}</small>
                               )}

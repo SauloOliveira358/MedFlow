@@ -67,6 +67,7 @@ export default function App() {
               <>
                 <Route path="horarios" element={<GerenciadorAgendaMedico />} />
                 <Route path="agendados" element={<ConsultasMedico />} />
+                <Route path="agendado" element={<Navigate to="/medico/agendados" replace />} />
                 <Route
                   path="atendimentos"
                   element={<Navigate to={`/${area}/agenda`} replace />}
@@ -84,6 +85,10 @@ export default function App() {
             )}
           </Route>
         ))}
+        <Route path="/medicos/agendado" element={<Navigate to="/medico/agendados" replace />} />
+        <Route path="/medicos/agendados" element={<Navigate to="/medico/agendados" replace />} />
+        <Route path="/medicos/*" element={<Navigate to="/medico" replace />} />
+        <Route path="/medico/agendado" element={<Navigate to="/medico/agendados" replace />} />
         <Route
           path="*"
           element={

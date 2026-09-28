@@ -7,6 +7,7 @@ import { SeletorData, SeletorHorario } from '../../components/common/SeletorData
 import FormularioPaciente from '../../components/common/FormularioPaciente';
 import { patientError, slotUnavailable } from '../../utils/appointments';
 import { today, formatDate, normalize } from '../../utils/date';
+import { formatarNomeMedico } from '../../utils/formatters';
 import Icone from '../../components/common/Icone';
 
 const Icon = Icone;
@@ -147,7 +148,7 @@ function DoctorBooking() {
         <p>A consulta foi registrada na sua agenda com status <b>Pendente</b>.</p>
         <div className="success-summary">
           <Avatar person={doctor} large />
-          <h3>{doctor.name}</h3>
+          <h3>{formatarNomeMedico(doctor.name)}</h3>
           <p>{specialty?.name}</p>
           <div
             style={{
@@ -217,7 +218,7 @@ function DoctorBooking() {
         <Avatar person={doctor} large />
         <div style={{ flex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            <h3 style={{ margin: 0, fontSize: '18px', color: '#134e4a' }}>{doctor.name}</h3>
+            <h3 style={{ margin: 0, fontSize: '18px', color: '#134e4a' }}>{formatarNomeMedico(doctor.name)}</h3>
             <span
               style={{
                 fontSize: '11px',
@@ -499,7 +500,7 @@ function DoctorBooking() {
             <h3>Agendamento pela Médica</h3>
             <dl>
               <dt>Profissional</dt>
-              <dd>{doctor.name}</dd>
+              <dd>{formatarNomeMedico(doctor.name)}</dd>
               <dt>Especialidade</dt>
               <dd>{specialty?.name || 'Clínica Geral'}</dd>
               <dt>Paciente</dt>
@@ -660,7 +661,7 @@ export function AgendamentoConsulta({ area = 'paciente' }) {
         <p>Seu cuidado já tem dia e hora marcados.</p>
         <div className="success-summary">
           <Avatar person={doctor} large />
-          <h3>{doctor.name}</h3>
+          <h3>{formatarNomeMedico(doctor.name)}</h3>
           <p>{specialty.name}</p>
           <strong>
             {formatDate(date)} · {time}
@@ -871,7 +872,7 @@ export function AgendamentoConsulta({ area = 'paciente' }) {
               <div className="confirmation-person">
                 <Avatar person={doctor} large />
                 <div>
-                  <h3>{doctor?.name}</h3>
+                  <h3>{formatarNomeMedico(doctor?.name)}</h3>
                   <p>{specialty?.name}</p>
                 </div>
               </div>

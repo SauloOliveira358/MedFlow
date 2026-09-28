@@ -11,6 +11,7 @@ import { ConsultasPaciente as PatientAppointments } from '../pages/paciente/Pagi
 import { Perfil as Profile, Configuracoes as Settings } from '../pages/PaginasCompartilhadas';
 import LocationMap from '../components/common/MapaLocalizacao';
 import DoctorForm from '../components/common/FormularioMedico';
+import ConsultasMedico from '../pages/doutor/ConsultasMedico';
 import {
   changeAppointmentStatus,
   getDoctorSlotsForDate,
@@ -395,5 +396,39 @@ describe('Funcionalidades do Médico e Paciente (MedFlow)', () => {
     // Cidade não deve mais estar presente
     expect(screen.queryByLabelText(/Cidade e Estado/)).toBeNull();
   });
+
+  it('renderiza a tela de Agendados & Presença (ConsultasMedico) sem erros de ícones ou crash de rota', () => {
+    sessionStorage.setItem('medflow-session-v1', 'account-doctor');
+    render(
+      <DemoProvider>
+        <MemoryRouter initialEntries={['/medico/agendados']}>
+          <ConsultasMedico />
+        </MemoryRouter>
+      </DemoProvider>,
+    );
+
+    expect(screen.getByRole('heading', { name: 'Pacientes Agendados' })).toBeInTheDocument();
+    expect(screen.getByText('Agendados Hoje')).toBeInTheDocument();
+    expect(screen.getAllByText('Compareceu').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('Não compareceu').length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('garante que um médico novo venha sem horários cadastrados (lista vazia para cadastrar)', () => {
+    const data = getBaseData();
+    const newDoctorId = 'd-novo-123';
+    data.doctors.push({
+      id: newDoctorId,
+      name: 'Dr. Lucas Novo',
+      start: '08:00',
+      end: '18:00',
+    });
+
+    const anyDate = addDays(today(), 2);
+    // Para um médico recém cadastrado, não deve vir com horários pré-gerados
+    const slots = getDoctorSlotsForDate(data, newDoctorId, anyDate);
+    expect(slots).toEqual([]);
+    expect(slotUnavailable(data, newDoctorId, anyDate, '08:00')).toBe(true);
+  });
 });
+
 

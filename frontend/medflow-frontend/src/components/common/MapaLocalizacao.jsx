@@ -28,6 +28,11 @@ export default function MapaLocalizacao({
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const markerRef = useRef(null);
+  const onChangeRef = useRef(onChange);
+
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
 
   // Inicializa mapa Leaflet com camadas do Google Maps
   useEffect(() => {
@@ -84,7 +89,7 @@ export default function MapaLocalizacao({
           marker.setLatLng([newLat, newLng]);
           setPinPos({ lat: newLat, lng: newLng });
           setSearchMessage('Ponto marcado no mapa!');
-          onChange?.({ lat: newLat, lng: newLng });
+          onChangeRef.current?.({ lat: newLat, lng: newLng });
         });
 
         // Arrastar o marcador atualiza as coordenadas em tempo real
@@ -94,7 +99,7 @@ export default function MapaLocalizacao({
           const newLng = Number(pos.lng.toFixed(6));
           setPinPos({ lat: newLat, lng: newLng });
           setSearchMessage('Ponto reposicionado com sucesso!');
-          onChange?.({ lat: newLat, lng: newLng });
+          onChangeRef.current?.({ lat: newLat, lng: newLng });
         });
       }
 
@@ -151,7 +156,7 @@ export default function MapaLocalizacao({
         markerRef.current.setLatLng([parsedLat, parsedLng]);
         mapInstanceRef.current.setView([parsedLat, parsedLng], 16);
       }
-      if (onChange) onChange({ lat: parsedLat, lng: parsedLng });
+      onChangeRef.current?.({ lat: parsedLat, lng: parsedLng });
       return;
     }
 
@@ -179,13 +184,11 @@ export default function MapaLocalizacao({
           markerRef.current.setLatLng([newLat, newLng]);
           mapInstanceRef.current.setView([newLat, newLng], 16);
         }
-        if (onChange) {
-          onChange({
-            lat: newLat,
-            lng: newLng,
-            address: top.display_name,
-          });
-        }
+        onChangeRef.current?.({
+          lat: newLat,
+          lng: newLng,
+          address: top.display_name,
+        });
       } else {
         setSearchMessage('Nenhum endereço encontrado para esta busca. Tente rua e número.');
       }
@@ -208,13 +211,11 @@ export default function MapaLocalizacao({
       markerRef.current.setLatLng([newLat, newLng]);
       mapInstanceRef.current.setView([newLat, newLng], 16);
     }
-    if (onChange) {
-      onChange({
-        lat: newLat,
-        lng: newLng,
-        address: item.display_name,
-      });
-    }
+    onChangeRef.current?.({
+      lat: newLat,
+      lng: newLng,
+      address: item.display_name,
+    });
   };
 
   const handleUseGeolocation = () => {
@@ -235,7 +236,7 @@ export default function MapaLocalizacao({
           markerRef.current.setLatLng([newLat, newLng]);
           mapInstanceRef.current.setView([newLat, newLng], 16);
         }
-        if (onChange) onChange({ lat: newLat, lng: newLng });
+        onChangeRef.current?.({ lat: newLat, lng: newLng });
       },
       () => {
         setIsLocating(false);
@@ -266,8 +267,9 @@ export default function MapaLocalizacao({
     const newLng = Number(((pinPos.lng - 0.006) + relX * 0.012).toFixed(6));
     const newLat = Number(((pinPos.lat + 0.004) - relY * 0.008).toFixed(6));
     setPinPos({ lat: newLat, lng: newLng });
-    onChange?.({ lat: newLat, lng: newLng });
+    onChangeRef.current?.({ lat: newLat, lng: newLng });
   };
+
 
   return (
     <div className={`medflow-location-map ${editable ? 'editable' : 'readonly'}`}>

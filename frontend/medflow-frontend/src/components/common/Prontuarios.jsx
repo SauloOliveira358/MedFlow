@@ -3,6 +3,7 @@ import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { useDemo } from '../../context/DemoContext';
 import { PageHeading, SearchInput, Avatar, EmptyState, Tabs, Modal, StatusBadge } from './InterfaceUI';
 import { age, normalize, formatDate, sortAppointments } from '../../utils/date';
+import { formatarNomeMedico } from '../../utils/formatters';
 import Icone from './Icone';
 
 export function CartaoProntuario({ record, area }) {
@@ -27,7 +28,7 @@ export function CartaoProntuario({ record, area }) {
       <dl>
         <div>
           <dt>Profissional responsável</dt>
-          <dd>{doctor.name}</dd>
+          <dd>{formatarNomeMedico(doctor?.name)}</dd>
         </div>
         <div>
           <dt>Última consulta</dt>
@@ -94,7 +95,7 @@ export function Prontuarios({ area }) {
               <option value="">Todos os profissionais</option>
               {data.doctors.map((d) => (
                 <option key={d.id} value={d.id}>
-                  {d.name}
+                  {formatarNomeMedico(d.name)}
                 </option>
               ))}
             </select>
@@ -237,7 +238,7 @@ export function DetalhesProntuario({ area }) {
         <div className="record-header-meta">
           <small>Última consulta</small>
           <strong>{last ? formatDate(last.date) : 'Sem consulta concluída'}</strong>
-          <small>{doctor.name}</small>
+          <small>{formatarNomeMedico(doctor?.name)}</small>
         </div>
       </section>
       <Tabs

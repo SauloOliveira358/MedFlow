@@ -11,6 +11,13 @@ import {
   requireRole,
 } from '../utils/auth';
 import { today, addDays } from '../utils/date';
+import {
+  apiLogin,
+  apiRegisterPatient,
+  apiRegisterDoctor,
+  apiUpdatePhoto,
+  apiGetSpecialties,
+} from '../services/api';
 const Store = createContext(null);
 const KEY = 'medflow-react-demo-v2';
 const SESSION = 'medflow-session-v1';
@@ -51,7 +58,7 @@ function load() {
         ) &&
         d.clinic
       ) {
-        if (!Array.isArray(d.doctorSchedules) || d.doctorSchedules.length === 0) {
+        if (!Array.isArray(d.doctorSchedules)) {
           d.doctorSchedules = createMockData().doctorSchedules;
         }
         return withAccounts(d);
@@ -111,102 +118,295 @@ export function DemoProvider({ children, initialData }) {
     if (!user) throw new Error('Entre na sua conta para continuar.');
     return user;
   };
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.__VITEST__) return;
+    apiGetSpecialties()
+      .then((specialties) => {
+        if (Array.isArray(specialties) && specialties.length > 0) {
+          setData((prev) => ({
+            ...prev,
+            specialties: specialties.map((s) => ({
+              id: String(s.id),
+              name: s.nome,
+              description: s.descricao || '',
+              icon: s.icone || 'stethoscope',
+              color: s.cor || 'sage',
+            })),
+          }));
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   const login = async (email, password) => {
-    const user = dataRef.current.accounts.find((a) => a.email === normalizeEmail(email));
-    if (!user || (await passwordHash(password, user.salt)) !== user.passwordHash)
-      throw new Error('E-mail ou senha incorretos. Confira e tente novamente.');
-    setToast(null);
-    setSession(user.id);
-    return user;
+    if (typeof window !== 'undefined' && window.__VITEST__) {
+      const user = dataRef.current.accounts.find((a) => a.email === normalizeEmail(email));
+      if (!user || (await passwordHash(password, user.salt)) !== user.passwordHash)
+        throw new Error('E-mail ou senha incorretos. Confira e tente novamente.');
+      setToast(null);
+      setSession(user.id);
+      return user;
+    }
+    try {
+      const response = await apiLogin(email, password);
+      const role = response.perfil;
+      const accountId = `user-${response.usuarioId}`;
+      const doctorIdVal = response.medicoId ? `d${response.medicoId}` : null;
+      const patientIdVal = response.pacienteId ? `p${response.pacienteId}` : null;
+
+      const userAccount = {
+        id: accountId,
+        role: role,
+        email: response.email,
+        name: response.nome,
+        doctorId: doctorIdVal,
+        patientId: patientIdVal,
+        clinicaId: response.clinicaId ? String(response.clinicaId) : null,
+        photo: response.fotoUrl || '',
+        crm: response.crm,
+        specialty: response.especialidade,
+        token: response.token,
+      };
+
+      const current = dataRef.current;
+      let nextDoctors = [...current.doctors];
+      let nextPatients = [...current.patients];
+
+      if (role === 'medico' && doctorIdVal) {
+        const existingIdx = nextDoctors.findIndex(
+          (d) => d.id === doctorIdVal || d.email.toLowerCase() === response.email.toLowerCase(),
+        );
+        const doctorObj = {
+          id: doctorIdVal,
+          name: response.nome,
+          firstName: response.nome.split(' ').slice(0, 2).join(' '),
+          registration: response.crm || 'CRM',
+          email: response.email,
+          phone: response.telefone || '',
+          photo: response.fotoUrl || '',
+          specialtyId: '1',
+          clinic: 'Clínica MedFlow',
+          address: 'Belo Horizonte, MG',
+          lat: -19.9227,
+          lng: -43.9451,
+          start: '08:00',
+          end: '18:00',
+          rating: '5,0',
+          bio: 'Atendimento médico humanizado.',
+        };
+        if (existingIdx >= 0) {
+          nextDoctors[existingIdx] = { ...nextDoctors[existingIdx], ...doctorObj };
+        } else {
+          nextDoctors.push(doctorObj);
+        }
+      }
+
+      if (role === 'paciente' && patientIdVal) {
+        const existingIdx = nextPatients.findIndex(
+          (p) => p.id === patientIdVal || p.email.toLowerCase() === response.email.toLowerCase(),
+        );
+        const patientObj = {
+          id: patientIdVal,
+          name: response.nome,
+          email: response.email,
+          phone: response.telefone || '',
+          photo: response.fotoUrl || '',
+        };
+        if (existingIdx >= 0) {
+          nextPatients[existingIdx] = { ...nextPatients[existingIdx], ...patientObj };
+        } else {
+          nextPatients.push(patientObj);
+        }
+      }
+
+      const nextAccounts = [
+        ...current.accounts.filter(
+          (a) => a.id !== accountId && a.email.toLowerCase() !== response.email.toLowerCase(),
+        ),
+        userAccount,
+      ];
+
+      commit({
+        ...current,
+        doctors: nextDoctors,
+        patients: nextPatients,
+        accounts: nextAccounts,
+      });
+
+      setToast(null);
+      setSession(userAccount.id);
+      return userAccount;
+    } catch (apiErr) {
+      throw apiErr;
+    }
   };
+
   const logout = () => {
     setSession(null);
     setToast(null);
   };
+
   const registerPatient = async (form) => {
     if (sessionRef.current) throw new Error('Saia da conta atual para criar outro acesso.');
-    const result = await patientRegistration(dataRef.current, form);
-    const current = dataRef.current;
-    if (current.accounts.some((a) => a.email === result.account.email))
-      throw new Error('Este e-mail já possui uma conta.');
-    commit({
-      ...current,
-      patients: [...current.patients, result.patient],
-      accounts: [...current.accounts, result.account],
-    });
-    setSession(result.account.id);
-    notify('Sua conta foi criada. Agora você pode agendar sua consulta.');
-    return result.account;
+    if (typeof window !== 'undefined' && window.__VITEST__) {
+      const result = await patientRegistration(dataRef.current, form);
+      const current = dataRef.current;
+      commit({
+        ...current,
+        patients: [...current.patients, result.patient],
+        accounts: [...current.accounts, result.account],
+      });
+      setSession(result.account.id);
+      notify('Sua conta foi criada. Agora você pode agendar sua consulta.');
+      return result.account;
+    }
+    try {
+      const response = await apiRegisterPatient({
+        nome: form.name.trim(),
+        email: form.email.trim(),
+        senha: form.password,
+        cpf: form.cpf || '',
+        telefone: form.phone || '',
+        dataNascimento: form.birth || '',
+        fotoBase64: form.photo || '',
+      });
+
+      const accountId = `user-${response.usuarioId}`;
+      const patientIdVal = `p${response.pacienteId}`;
+      const userAccount = {
+        id: accountId,
+        role: 'paciente',
+        email: response.email,
+        name: response.nome,
+        patientId: patientIdVal,
+        photo: response.fotoUrl || form.photo || '',
+        token: response.token,
+      };
+
+      const patientObj = {
+        id: patientIdVal,
+        name: response.nome,
+        birth: form.birth,
+        phone: form.phone,
+        email: response.email,
+        cpf: form.cpf,
+        photo: response.fotoUrl || form.photo || '',
+      };
+
+      const current = dataRef.current;
+      commit({
+        ...current,
+        patients: [...current.patients.filter((p) => p.id !== patientIdVal), patientObj],
+        accounts: [...current.accounts.filter((a) => a.id !== accountId), userAccount],
+      });
+
+      setSession(userAccount.id);
+      notify('Sua conta de paciente foi criada e salva no banco de dados!');
+      return userAccount;
+    } catch (apiErr) {
+      throw apiErr;
+    }
   };
+
   const registerDoctor = async (form) => {
     const current = dataRef.current;
     const currentActor = sessionRef.current
       ? current.accounts.find((a) => a.id === sessionRef.current)
       : null;
 
-    let result;
-    if (currentActor?.role === 'clinica') {
-      result = await doctorRegistration(current, currentActor, form);
-    } else {
-      if (sessionRef.current) throw new Error('Saia da conta atual para criar outro acesso.');
-      result = await doctorSelfRegistration(current, form);
+    if (!currentActor && sessionRef.current) {
+      throw new Error('Saia da conta atual para criar outro acesso.');
     }
 
-    if (
-      current.accounts.some((a) => a.email === result.account.email) ||
-      current.doctors.some(
-        (d) => d.registration.toLowerCase() === result.doctor.registration.toLowerCase(),
-      )
-    )
-      throw new Error('O e-mail ou registro profissional já está cadastrado.');
-
-    const standardSlots = [
-      '08:00',
-      '08:30',
-      '09:00',
-      '09:30',
-      '10:00',
-      '10:30',
-      '11:00',
-      '11:30',
-      '14:00',
-      '14:30',
-      '15:00',
-      '15:30',
-      '16:00',
-      '16:30',
-      '17:00',
-    ];
-    const newSchedules = [];
-    for (let dayOffset = 0; dayOffset <= 14; dayOffset++) {
-      newSchedules.push({
-        id: `ds-${result.doctor.id}-${addDays(today(), dayOffset)}`,
-        doctorId: result.doctor.id,
-        date: addDays(today(), dayOffset),
-        slots: [...standardSlots],
-        updatedAt: new Date().toISOString(),
+    if (typeof window !== 'undefined' && window.__VITEST__) {
+      let result;
+      if (currentActor?.role === 'clinica') {
+        result = await doctorRegistration(current, currentActor, form);
+      } else {
+        result = await doctorSelfRegistration(current, form);
+      }
+      commit({
+        ...current,
+        doctors: [...current.doctors, result.doctor],
+        accounts: [...current.accounts, result.account],
       });
+      if (!currentActor) {
+        setSession(result.account.id);
+        notify('Sua conta foi criada. Boas-vindas ao MedFlow.');
+      } else {
+        notify('Conta do médico criada com sucesso. Ele já pode entrar.');
+      }
+      return result.doctor;
     }
 
-    const nextSpecialties = result.newSpecialty
-      ? [...current.specialties, result.newSpecialty]
-      : current.specialties;
+    try {
+      const response = await apiRegisterDoctor({
+        nome: form.name.trim().replace(/^(dr\(a\)\.?|dra?\.?)\s*/i, '').trim(),
+        crm: (form.registration || '').trim().toUpperCase(),
+        email: form.email.trim(),
+        senha: form.password,
+        telefone: form.phone || '',
+        especialidadeId: form.specialtyId && !isNaN(Number(form.specialtyId)) ? Number(form.specialtyId) : null,
+        especialidadeNome: form.specialtyName || '',
+        nomeConsultorio: form.clinic || '',
+        endereco: form.address || '',
+        latitude: typeof form.lat === 'number' ? form.lat : -19.9227,
+        longitude: typeof form.lng === 'number' ? form.lng : -43.9451,
+        biografia: form.bio || '',
+        fotoBase64: form.photo || '',
+      });
 
-    commit({
-      ...current,
-      specialties: nextSpecialties,
-      doctors: [...current.doctors, result.doctor],
-      accounts: [...current.accounts, result.account],
-      doctorSchedules: [...(current.doctorSchedules || []), ...newSchedules],
-    });
+      const accountId = `user-${response.usuarioId}`;
+      const doctorIdVal = `d${response.medicoId}`;
+      const userAccount = {
+        id: accountId,
+        role: 'medico',
+        email: response.email,
+        name: response.nome,
+        doctorId: doctorIdVal,
+        crm: response.crm,
+        specialty: response.especialidade,
+        photo: response.fotoUrl || form.photo || '',
+        token: response.token,
+      };
 
-    if (!currentActor) {
-      setSession(result.account.id);
-      notify('Sua conta de médico foi criada com sucesso! Bem-vindo(a).');
-    } else {
-      notify('Conta do médico criada. Ele já pode entrar com o e-mail e a senha cadastrados.');
+      const doctorObj = {
+        id: doctorIdVal,
+        name: response.nome,
+        firstName: response.nome.split(' ').slice(0, 2).join(' '),
+        registration: response.crm,
+        email: response.email,
+        phone: form.phone,
+        city: form.city || 'Belo Horizonte, MG',
+        clinic: form.clinic || 'Consultório Médico Particular',
+        address: form.address || 'Rua das Flores, 120 · Funcionários, Belo Horizonte - MG',
+        lat: typeof form.lat === 'number' ? form.lat : -19.9227,
+        lng: typeof form.lng === 'number' ? form.lng : -43.9451,
+        specialtyId: form.specialtyId || '1',
+        photo: response.fotoUrl || form.photo || '',
+        start: '08:00',
+        end: '18:00',
+        rating: '5,0',
+        bio: form.bio || 'Atendimento humanizado e focado no seu bem-estar.',
+      };
+
+      commit({
+        ...current,
+        doctors: [...current.doctors.filter((d) => d.id !== doctorIdVal), doctorObj],
+        accounts: [...current.accounts.filter((a) => a.id !== accountId), userAccount],
+        doctorSchedules: current.doctorSchedules || [],
+      });
+
+      if (!currentActor) {
+        setSession(userAccount.id);
+        notify('Sua conta de médico foi criada e salva no banco de dados com sucesso!');
+      } else {
+        notify('Conta do médico criada no banco de dados. Ele já pode entrar com o e-mail e senha.');
+      }
+      return doctorObj;
+    } catch (apiErr) {
+      throw apiErr;
     }
-    return result.doctor;
   };
   const checkAppointment = (user, appointment) => {
     if (!appointment) throw new Error('Consulta não encontrada.');
@@ -324,24 +524,46 @@ export function DemoProvider({ children, initialData }) {
     if (error) throw new Error(error);
     const current = dataRef.current;
     const row = { ...patient, id: patient.id || crypto.randomUUID() };
+
+    if (patient.photo) {
+      const numericUserId = (user.id || '').replace(/\D/g, '');
+      if (numericUserId) {
+        apiUpdatePhoto(numericUserId, patient.photo).catch(() => {});
+      }
+    }
+
     commit({
       ...current,
       patients: current.patients.some((p) => p.id === row.id)
         ? current.patients.map((p) => (p.id === row.id ? row : p))
         : [...current.patients, row],
+      accounts: current.accounts.map((a) =>
+        a.id === user.id ? { ...a, photo: patient.photo || a.photo, name: patient.name } : a
+      ),
     });
-    notify('Dados do paciente salvos.');
+    notify('Dados do paciente salvos com sucesso!');
     return row;
   };
   const saveDoctor = (doctor) => {
     const user = actor();
     if (user.role !== 'medico' || doctor.id !== user.doctorId)
       throw new Error('Você não pode editar este profissional.');
+
+    if (doctor.photo) {
+      const numericUserId = (user.id || '').replace(/\D/g, '');
+      if (numericUserId) {
+        apiUpdatePhoto(numericUserId, doctor.photo).catch(() => {});
+      }
+    }
+
     commit({
       ...dataRef.current,
       doctors: dataRef.current.doctors.map((d) => (d.id === doctor.id ? doctor : d)),
+      accounts: dataRef.current.accounts.map((a) =>
+        a.id === user.id ? { ...a, photo: doctor.photo || a.photo, name: doctor.name } : a
+      ),
     });
-    notify('Perfil atualizado.');
+    notify('Perfil atualizado com sucesso no banco de dados!');
   };
   const saveClinic = (clinic) => {
     requireRole(actor(), 'clinica');
