@@ -1,3 +1,4 @@
+import { useRemoteAgenda } from '../../hooks/useRemoteAgenda';
 import { useDemo } from '../../context/DemoContext';
 import { allSlots, slotUnavailable, getDoctorSlotsForDate } from '../../utils/appointments';
 import { addDays, today, formatDate } from '../../utils/date';
@@ -5,6 +6,7 @@ import Icone from './Icone';
 
 export function SeletorHorario({ doctorId, date, value, onChange, excludeId }) {
   const { data } = useDemo();
+  const { loading, error } = useRemoteAgenda(doctorId, [date]);
   const doctorLiberated = getDoctorSlotsForDate(data, doctorId, date);
   const slotsToDisplay = Array.from(new Set([...allSlots, ...doctorLiberated])).sort();
   const free = slotsToDisplay.some((time) => !slotUnavailable(data, doctorId, date, time, excludeId));
@@ -17,11 +19,13 @@ export function SeletorHorario({ doctorId, date, value, onChange, excludeId }) {
           Indisponível
         </small>
       </div>
+      {loading && <p role="status">Carregando horários...</p>}
+      {error && <p role="alert">Não foi possível carregar os horários: {error}</p>}
       <div className="time-slots">
         {slotsToDisplay.map((time) => (
           <button
             key={time}
-            disabled={slotUnavailable(data, doctorId, date, time, excludeId)}
+            disabled={loading || !!error || slotUnavailable(data, doctorId, date, time, excludeId)}
             className={value === time ? 'selected' : ''}
             onClick={() => onChange(time)}
             type="button"

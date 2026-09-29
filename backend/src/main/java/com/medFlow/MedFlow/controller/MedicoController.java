@@ -16,6 +16,11 @@ public class MedicoController {
 
     private final MedicoService medicoService;
 
+    @GetMapping("/catalogo")
+    public List<com.medFlow.MedFlow.dto.MedicoCatalogoDTO> catalogo() {
+        return medicoService.catalogo();
+    }
+
     @GetMapping
     public ResponseEntity<List<Medico>> listarTodos(
             @RequestParam(required = false) Long especialidadeId

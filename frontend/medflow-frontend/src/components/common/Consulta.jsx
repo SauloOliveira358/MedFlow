@@ -83,9 +83,9 @@ export function CartaoConsulta({ appointment, area = 'paciente', onDetails }) {
       {cancelOpen && (
         <ModalConfirmacao
           onClose={() => setCancelOpen(false)}
-          onConfirm={() => {
+          onConfirm={async () => {
             try {
-              status(appointment.id, 'Cancelado');
+              await status(appointment.id, 'Cancelado');
               setCancelOpen(false);
             } catch (error) {
               notify(error.message, 'error');
@@ -105,9 +105,9 @@ export function ModalDetalhesConsulta({ appointment, area, onClose, onlyCancel =
   const patient = data.patients.find((p) => p.id === appointment.patientId);
   const record = data.records.find((r) => r.patientId === patient.id && r.doctorId === doctor.id);
   const canEdit = ['Confirmado', 'Pendente'].includes(appointment.status);
-  const update = (value) => {
+  const update = async (value) => {
     try {
-      status(appointment.id, value);
+      await status(appointment.id, value);
       onClose();
     } catch (e) {
       notify(e.message, 'error');

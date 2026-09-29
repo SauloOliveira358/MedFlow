@@ -21,7 +21,7 @@ const TimeSlotPicker = SeletorHorario;
 const PatientForm = FormularioPaciente;
 
 function DoctorBooking() {
-  const { data, doctorId, book } = useDemo();
+  const { data, doctorId, book, remote } = useDemo();
   const [params] = useSearchParams();
   const editId = params.get('reagendar');
   const original = data.appointments.find((a) => a.id === editId);
@@ -80,13 +80,14 @@ function DoctorBooking() {
       }
       finalPatient = selectedPatient;
     } else {
+      if (remote) { setError('Use um paciente já cadastrado. O cadastro avulso ainda não está disponível.'); return; }
       if (!newPatient.name || newPatient.name.trim().length < 3) {
         setError('Informe o nome completo do paciente.');
         return;
       }
       const rawCpf = (newPatient.cpf || '').replace(/\D/g, '');
-      const validCpf = rawCpf.length === 11 ? rawCpf : '12345678901';
-      const cleanPhone = newPatient.phone?.trim() || '(31) 98765-4321';
+      const validCpf = rawCpf;
+      const cleanPhone = newPatient.phone?.trim() || '';
       const cleanEmail = newPatient.email?.trim();
 
       finalPatient = {
@@ -94,7 +95,7 @@ function DoctorBooking() {
         phone: cleanPhone,
         email: cleanEmail,
         cpf: validCpf,
-        birth: newPatient.birth || '1990-01-01',
+        birth: newPatient.birth || '',
       };
       const pErr = patientError(finalPatient);
       if (pErr) {
@@ -114,9 +115,9 @@ function DoctorBooking() {
     }
 
     setBusy(true);
-    setTimeout(() => {
+    setTimeout(async () => {
       try {
-        book({
+        await book({
           id: editId || undefined,
           patient: finalPatient,
           doctorId: doctor.id,
@@ -134,6 +135,8 @@ function DoctorBooking() {
       }
     }, 250);
   };
+
+  if (!doctor) return <p className="inline-message">Aguarde a disponibilidade do profissional.</p>;
 
   if (success && confirmedPatient) {
     return (
@@ -621,9 +624,9 @@ export function AgendamentoConsulta({ area = 'paciente' }) {
     }
     setBusy(true);
     setError('');
-    setTimeout(() => {
+    setTimeout(async () => {
       try {
-        book({
+        await book({
           id: editId || undefined,
           patient: person,
           doctorId: selectedDoctor,

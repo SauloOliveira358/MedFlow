@@ -23,7 +23,7 @@ export function slotUnavailable(data, doctorId, date, time, excludeId, now = new
     (s) => s.doctorId === doctorId && s.date === date,
   );
   if (schedule && Array.isArray(schedule.slots)) {
-    if (!schedule.slots.includes(time)) return true;
+    if (!schedule.slots.includes(time) || schedule.unavailable?.includes(time)) return true;
   } else {
     return true;
   }

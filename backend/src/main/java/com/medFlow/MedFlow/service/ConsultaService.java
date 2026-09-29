@@ -73,6 +73,36 @@ public class ConsultaService {
         return resposta(consultaRepository.saveAndFlush(consulta));
     }
 
+    @Transactional
+    public ConsultaResponseDTO reagendar(Long id, AgendamentoRequestDTO request) {
+        Long antigoMedico = consultaRepository.buscarMedicoId(id)
+            .orElseThrow(() -> new RecursoNaoEncontradoException("Consulta não encontrada."));
+        // Lock doctors in a stable order when moving between doctors.
+        java.util.stream.Stream.of(antigoMedico, request.getMedicoId()).distinct().sorted().forEach(agenda::bloquearMedico);
+        var antiga = consultaRepository.buscarParaAtualizar(id).orElseThrow();
+        if (!antiga.getPaciente().getId().equals(request.getPacienteId()))
+            throw new RegraNegocioException("O paciente não pode ser alterado.");
+        cancelar(id, "Reagendamento");
+        return agendar(request);
+    }
+
+    @Transactional
+    public ConsultaResponseDTO atualizarStatus(Long id, String status) {
+        Long medicoId = consultaRepository.buscarMedicoId(id)
+            .orElseThrow(() -> new RecursoNaoEncontradoException("Consulta não encontrada."));
+        agenda.bloquearMedico(medicoId);
+        var consulta = consultaRepository.buscarParaAtualizar(id).orElseThrow();
+        var permitidos = java.util.Map.of(
+            "Pendente", List.of("Confirmado", "Compareceu", "Nao compareceu"),
+            "Confirmado", List.of("Compareceu", "Nao compareceu", "Em atendimento"),
+            "Compareceu", List.of("Em atendimento"),
+            "Em atendimento", List.of("Concluído"));
+        if (!permitidos.getOrDefault(consulta.getStatus(), List.of()).contains(status))
+            throw new RegraNegocioException("Transição de status inválida.");
+        consulta.setStatus(status);
+        return resposta(consultaRepository.saveAndFlush(consulta));
+    }
+
     private ConsultaResponseDTO resposta(Consulta c) {
         var m = c.getMedico();
         return ConsultaResponseDTO.builder().id(c.getId()).pacienteId(c.getPaciente().getId())

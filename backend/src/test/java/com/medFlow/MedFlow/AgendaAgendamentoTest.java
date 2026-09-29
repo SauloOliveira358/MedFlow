@@ -78,4 +78,20 @@ class AgendaAgendamentoTest {
         assertThrows(RegraNegocioException.class, () -> svc.salvar(1L, data, new AgendaRequestDTO(List.of())));
         verify(horarios, never()).deleteAll(any());
     }
+    @Test void rejeitaAlterarPacienteNoReagendamento() {
+        var c = Consulta.builder().id(3L).paciente(Paciente.builder().id(99L).build()).build();
+        when(consultas.buscarMedicoId(3L)).thenReturn(Optional.of(1L));
+        when(consultas.buscarParaAtualizar(3L)).thenReturn(Optional.of(c));
+        assertThrows(RegraNegocioException.class, () -> service.reagendar(3L, request()));
+        verify(consultas, never()).saveAndFlush(any());
+    }
+    @Test void persisteTransicaoDeAtendimentoERejeitaRetrocesso() {
+        var c = Consulta.builder().id(3L).medico(Medico.builder().id(1L).build())
+            .paciente(Paciente.builder().id(2L).build()).status("Confirmado").build();
+        when(consultas.buscarMedicoId(3L)).thenReturn(Optional.of(1L));
+        when(consultas.buscarParaAtualizar(3L)).thenReturn(Optional.of(c));
+        when(consultas.saveAndFlush(any())).thenAnswer(i -> i.getArgument(0));
+        assertEquals("Em atendimento", service.atualizarStatus(3L, "Em atendimento").getStatus());
+        assertThrows(RegraNegocioException.class, () -> service.atualizarStatus(3L, "Confirmado"));
+    }
 }

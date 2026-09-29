@@ -1,6 +1,6 @@
 # Backend: agenda médica e agendamentos
 
-Spring Boot/JPA com persistência no PostgreSQL do Supabase. O frontend permanece com os mocks existentes.
+Spring Boot/JPA com persistência no PostgreSQL do Supabase. O frontend consulta a API para agenda, disponibilidade e consultas.
 
 Configure `backend/.env` com `DB_URL` (JDBC PostgreSQL com `sslmode=require`), `DB_USERNAME` e `DB_PASSWORD`, conforme `backend/.env.example`. Execute na raiz:
 
@@ -63,3 +63,14 @@ mvn -f backend/pom.xml -Dtest=AgendaSupabaseIntegrationTest test
 ```
 
 `API.md` e `ARQUITETURA.md` são documentos históricos; o contrato deste módulo está descrito acima.
+
+
+## Integração do frontend
+
+Inicie o backend e o frontend. Configure `VITE_API_URL=http://localhost:8085` no `.env` do frontend se necessário (reinicie o Vite após alterar). Use contas cadastradas no banco e entre novamente caso a sessão antiga use IDs locais.
+
+A agenda do médico salva os horários pela API. O seletor do paciente carrega a disponibilidade real. Consultas são listadas pela conta conectada, e o cancelamento é persistido. As telas atualizam ao ganhar foco e a cada 15 segundos. Falhas da API não são convertidas em gravações locais bem-sucedidas. Dados de agenda antigos no navegador não são enviados automaticamente ao banco.
+
+`GET /api/medicos/catalogo` retorna o catálogo de profissionais sem entidades JPA ou dados de autenticação. `PUT /api/consultas/{id}` reagenda atomicamente: cancela a consulta anterior e cria outra; falha na nova reserva desfaz o cancelamento. `PATCH /api/consultas/{id}/status` persiste transições de atendimento válidas.
+
+O cadastro avulso de novos pacientes na tela do médico ainda não está integrado: é necessário usar paciente com ID real, já cadastrado. Nenhuma nova rota pública de pacientes foi criada. Os demais módulos (prontuários, notificações e edição de perfis) mantêm o comportamento anterior.

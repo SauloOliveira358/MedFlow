@@ -16,6 +16,12 @@ public class MedicoService {
     private final MedicoRepository medicoRepository;
 
     @Transactional(readOnly = true)
+    public List<com.medFlow.MedFlow.dto.MedicoCatalogoDTO> catalogo() {
+        return medicoRepository.findByAtivoTrueOrderByNomeAsc().stream()
+            .map(com.medFlow.MedFlow.dto.MedicoCatalogoDTO::from).toList();
+    }
+
+    @Transactional(readOnly = true)
     public List<Medico> listarTodos() {
         return medicoRepository.findByAtivoTrueOrderByNomeAsc();
     }

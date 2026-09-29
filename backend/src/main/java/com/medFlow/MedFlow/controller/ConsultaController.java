@@ -39,6 +39,17 @@ public class ConsultaController {
         return ResponseEntity.status(HttpStatus.CREATED).body(consultaService.agendar(consulta));
     }
 
+    @PutMapping("/{id}")
+    public ConsultaResponseDTO reagendar(@PathVariable Long id, @Valid @RequestBody AgendamentoRequestDTO request) {
+        return consultaService.reagendar(id, request);
+    }
+
+    public record StatusRequest(@jakarta.validation.constraints.NotBlank String status) {}
+    @PatchMapping("/{id}/status")
+    public ConsultaResponseDTO status(@PathVariable Long id, @Valid @RequestBody StatusRequest request) {
+        return consultaService.atualizarStatus(id, request.status());
+    }
+
     @PatchMapping("/{id}/cancelar")
     public ResponseEntity<ConsultaResponseDTO> cancelar(
             @PathVariable Long id,

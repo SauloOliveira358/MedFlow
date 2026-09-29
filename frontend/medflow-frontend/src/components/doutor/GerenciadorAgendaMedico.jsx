@@ -1,3 +1,4 @@
+import { useRemoteAgenda } from '../../hooks/useRemoteAgenda';
 import { useState, useRef } from 'react';
 import { useDemo } from '../../context/DemoContext';
 import { Modal } from '../common/InterfaceUI';
@@ -34,6 +35,9 @@ export default function GerenciadorAgendaMedico({ doctorId: propDoctorId }) {
   // Week Reference date (starts on Monday)
   const [currentWeekReference, setCurrentWeekReference] = useState(today());
   const currentWeek = weekDays(currentWeekReference);
+  const { loading, error } = useRemoteAgenda(currentDoctorId, currentWeek);
+  const [saving, setSaving] = useState(false);
+  const savingRef = useRef(false);
 
   // State for Add Hours Modal
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -53,6 +57,15 @@ export default function GerenciadorAgendaMedico({ doctorId: propDoctorId }) {
   // State for Selected Booked Appointment Modal
   const [selectedAppointment, setSelectedAppointment] = useState(null);
 
+  useRemoteAgenda(currentDoctorId, [modalTargetDate, sourceReplicateDate]);
+  const persist = async (date, slots) => {
+    if (savingRef.current) return false;
+    savingRef.current = true;
+    setSaving(true);
+    try { await saveDoctorSchedule(currentDoctorId, date, slots); return true; }
+    catch (e) { notify(e.message, 'error'); return false; }
+    finally { savingRef.current = false; setSaving(false); }
+  };
   if (!doctor) {
     return <div className="panel" style={{ padding: '24px' }}>Especialista não encontrado.</div>;
   }
@@ -72,7 +85,7 @@ export default function GerenciadorAgendaMedico({ doctorId: propDoctorId }) {
     setIsAddModalOpen(true);
   };
 
-  const removeSlot = (dateStr, timeToRemove, e) => {
+  const removeSlot = async (dateStr, timeToRemove, e) => {
     e?.stopPropagation();
     const booked = isBooked(dateStr, timeToRemove);
     if (booked) {
@@ -82,10 +95,10 @@ export default function GerenciadorAgendaMedico({ doctorId: propDoctorId }) {
 
     const currentSlots = getDoctorSlotsForDate(data, currentDoctorId, dateStr);
     const updated = currentSlots.filter((t) => t !== timeToRemove);
-    saveDoctorSchedule(currentDoctorId, dateStr, updated);
+    await persist(dateStr, updated);
   };
 
-  const handleAddSingleSlot = (e) => {
+  const handleAddSingleSlot = async (e) => {
     e?.preventDefault();
     if (!singleTimeInput || !/^\d{2}:\d{2}$/.test(singleTimeInput)) {
       notify('Informe um horário válido (HH:MM).', 'error');
@@ -99,11 +112,11 @@ export default function GerenciadorAgendaMedico({ doctorId: propDoctorId }) {
     }
 
     const updated = [...currentSlots, singleTimeInput].sort();
-    saveDoctorSchedule(currentDoctorId, modalTargetDate, updated);
+    if (!(await persist(modalTargetDate, updated))) return;
     notify(`Horário ${singleTimeInput} adicionado com sucesso!`);
   };
 
-  const handleAddInterval = (e) => {
+  const handleAddInterval = async (e) => {
     e?.preventDefault();
     if (!intervalStart || !intervalEnd || intervalStart >= intervalEnd) {
       notify('O horário de início deve ser menor que o horário de término.', 'error');
@@ -128,11 +141,11 @@ export default function GerenciadorAgendaMedico({ doctorId: propDoctorId }) {
 
     const currentSlots = getDoctorSlotsForDate(data, currentDoctorId, modalTargetDate);
     const updated = Array.from(new Set([...currentSlots, ...generated])).sort();
-    saveDoctorSchedule(currentDoctorId, modalTargetDate, updated);
+    if (!(await persist(modalTargetDate, updated))) return;
     notify(`${generated.length} horários adicionados com sucesso!`);
   };
 
-  const togglePopularSlot = (time) => {
+  const togglePopularSlot = async (time) => {
     const currentSlots = getDoctorSlotsForDate(data, currentDoctorId, modalTargetDate);
     let updated;
     if (currentSlots.includes(time)) {
@@ -145,7 +158,7 @@ export default function GerenciadorAgendaMedico({ doctorId: propDoctorId }) {
     } else {
       updated = [...currentSlots, time].sort();
     }
-    saveDoctorSchedule(currentDoctorId, modalTargetDate, updated);
+    if (!(await persist(modalTargetDate, updated))) return;
   };
 
   const openReplicationModalForDay = (sourceDate) => {
@@ -156,7 +169,7 @@ export default function GerenciadorAgendaMedico({ doctorId: propDoctorId }) {
     setIsReplicateModalOpen(true);
   };
 
-  const handleConfirmReplication = () => {
+  const handleConfirmReplication = async () => {
     if (!validDate(sourceReplicateDate)) {
       notify('Informe uma data de origem válida (dia, mês e ano).', 'error');
       return;
@@ -174,7 +187,8 @@ export default function GerenciadorAgendaMedico({ doctorId: propDoctorId }) {
       notify('Não há horários configurados na data de origem selecionada.', 'error');
       return;
     }
-    replicateDoctorSchedule(currentDoctorId, sourceReplicateDate, [targetReplicateDate]);
+    try { await replicateDoctorSchedule(currentDoctorId, sourceReplicateDate, [targetReplicateDate]); }
+    catch (e) { notify(e.message, 'error'); return; }
     setIsReplicateModalOpen(false);
   };
 
@@ -188,6 +202,9 @@ export default function GerenciadorAgendaMedico({ doctorId: propDoctorId }) {
 
   return (
     <div className="panel doctor-schedule-manager" style={{ padding: '24px' }}>
+      {loading && <p role="status">Carregando agenda...</p>}
+      {error && <p role="alert">Não foi possível carregar a agenda: {error}</p>}
+      <fieldset disabled={loading || saving || !!error} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
       {/* Top Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '20px' }}>
         <div>
@@ -948,6 +965,7 @@ export default function GerenciadorAgendaMedico({ doctorId: propDoctorId }) {
           onClose={() => setSelectedAppointment(null)}
         />
       )}
+      </fieldset>
     </div>
   );
 }

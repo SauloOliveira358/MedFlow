@@ -1,4 +1,5 @@
-import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { apiReschedule, apiStatus, apiDoctorCatalog, apiGetAgenda, apiSaveAgenda, apiAppointments, apiBook, apiCancel, databaseId, mapAppointment } from '../services/api';
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { createMockData } from '../data/mockData';
 import { bookAppointment, changeAppointmentStatus, patientError, getDoctorSlotsForDate } from '../utils/appointments';
 import {
@@ -79,6 +80,7 @@ function loadSession() {
 }
 export function DemoProvider({ children, initialData }) {
   const [data, setData] = useState(() => (initialData ? withAccounts(initialData) : load()));
+  const remote = !initialData && !window.__VITEST__;
   const dataRef = useRef(data);
   const [sessionId, setSessionId] = useState(loadSession);
   const sessionRef = useRef(sessionId);
@@ -121,25 +123,44 @@ export function DemoProvider({ children, initialData }) {
     if (!user) throw new Error('Entre na sua conta para continuar.');
     return user;
   };
+  const refreshAgenda = useCallback(async (id, dates) => {
+    if (!remote || !id) return;
+    const results = await Promise.all(dates.map(date => apiGetAgenda(id, date)));
+    const current = dataRef.current;
+    const entries = results.map(a => ({ id: `${id}-${a.data}`, doctorId: id, date: a.data,
+      slots: a.horarios.map(h => h.horario), unavailable: a.horarios.filter(h => !h.disponivel).map(h => h.horario) }));
+    commit({ ...current, doctorSchedules: [...current.doctorSchedules.filter(s => s.doctorId !== id || !dates.includes(s.date)), ...entries] });
+  }, [remote]);
+
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.__VITEST__) return;
-    apiGetSpecialties()
-      .then((specialties) => {
-        if (Array.isArray(specialties) && specialties.length > 0) {
-          setData((prev) => ({
-            ...prev,
-            specialties: specialties.map((s) => ({
-              id: String(s.id),
-              name: s.nome,
-              description: s.descricao || '',
-              icon: s.icone || 'stethoscope',
-              color: s.cor || 'sage',
-            })),
-          }));
-        }
-      })
-      .catch(() => {});
-  }, []);
+    if (!remote) return;
+    commit({ ...dataRef.current, appointments: [], doctorSchedules: [] });
+    let alive = true;
+    let running = false;
+    const refresh = async () => {
+      if (running) return;
+      running = true;
+      try {
+        const [doctors, specialties] = await Promise.all([apiDoctorCatalog(), apiGetSpecialties()]);
+        const user = dataRef.current.accounts.find(a => a.id === sessionRef.current);
+        const rows = user?.doctorId ? await apiAppointments('medico', user.doctorId)
+          : user?.patientId ? await apiAppointments('paciente', user.patientId) : [];
+        if (!alive) return;
+        const current = dataRef.current;
+        const patients = current.patients.filter(p => /^api-p-[1-9][0-9]*$/.test(p.id));
+        rows.forEach(c => {
+          if (!patients.some(p => p.id === `api-p-${c.pacienteId}`)) patients.push({ id: `api-p-${c.pacienteId}`, name: c.pacienteNome, phone: '', email: '', birth: '' });
+        });
+        commit({ ...current, doctors, patients, appointments: rows.map(mapAppointment),
+          specialties: specialties.map(s => ({ id: String(s.id), name: s.nome, description: s.descricao || '', icon: s.icone || 'stethoscope', color: s.cor || 'sage' })) });
+      } catch (e) { if (alive) { notify(`Não foi possível atualizar a agenda: ${e.message}`, 'error'); } }
+      finally { running = false; }
+    };
+    refresh();
+    const timer = setInterval(refresh, 15000);
+    window.addEventListener('focus', refresh);
+    return () => { alive = false; clearInterval(timer); window.removeEventListener('focus', refresh); };
+  }, [remote, sessionId]);
 
   const login = async (email, password) => {
     if (typeof window !== 'undefined' && window.__VITEST__) {
@@ -429,7 +450,7 @@ export function DemoProvider({ children, initialData }) {
     )
       throw new Error('Esta consulta não pertence à sua conta.');
   };
-  const book = (input) => {
+  const book = async (input) => {
     const user = actor();
     const current = dataRef.current;
     if (input.id)
@@ -441,12 +462,21 @@ export function DemoProvider({ children, initialData }) {
       throw new Error('Você só pode agendar para sua própria conta.');
     if (user.role === 'medico' && input.doctorId !== user.doctorId)
       throw new Error('Você só pode gerenciar sua própria agenda.');
+    if (remote) {
+      if (!input.patient?.id && !input.patientId) throw new Error('O paciente precisa ter uma conta cadastrada no sistema antes do agendamento.');
+      const send = input.id ? body => apiReschedule(input.id, body) : apiBook;
+      const row = await send({ pacienteId: databaseId(input.patient?.id || input.patientId), medicoId: databaseId(input.doctorId), dataConsulta: input.date, horarioConsulta: input.time, motivo: input.reason, tipo: 'Primeira consulta' });
+      const appointment = mapAppointment(row);
+      commit({ ...dataRef.current, appointments: [...dataRef.current.appointments.filter(a => a.id !== appointment.id).map(a => a.id === input.id ? { ...a, status: 'Cancelado' } : a), appointment] });
+      notify('Consulta salva no banco com sucesso!');
+      return appointment;
+    }
     const result = bookAppointment(current, input);
     commit(result.data);
     notify(input.id ? 'Consulta reagendada com sucesso!' : 'Consulta agendada com sucesso!');
     return result.appointment;
   };
-  const status = (id, value) => {
+  const status = async (id, value) => {
     const user = actor();
     checkAppointment(
       user,
@@ -454,6 +484,12 @@ export function DemoProvider({ children, initialData }) {
     );
     if (user.role === 'paciente' && value !== 'Cancelado')
       throw new Error('Somente a equipe pode alterar o atendimento.');
+    if (remote) {
+      const row = mapAppointment(await (value === 'Cancelado' ? apiCancel(id) : apiStatus(id, value)));
+      commit({ ...dataRef.current, appointments: dataRef.current.appointments.map(a => a.id === row.id ? row : a) });
+      notify('Consulta atualizada no banco.');
+      return;
+    }
     commit(changeAppointmentStatus(dataRef.current, id, value));
     const labelMap = {
       Cancelado: 'Consulta cancelada. O horário foi liberado.',
@@ -464,11 +500,17 @@ export function DemoProvider({ children, initialData }) {
     };
     notify(labelMap[value] || `Consulta atualizada: ${value.toLowerCase()}.`);
   };
-  const saveDoctorSchedule = (targetDoctorId, date, slots) => {
+  const saveDoctorSchedule = async (targetDoctorId, date, slots) => {
     const user = actor();
     const docId = targetDoctorId || doctorId || user.doctorId;
     if (user.role === 'medico' && docId !== user.doctorId) {
       throw new Error('Você só pode editar a sua própria agenda.');
+    }
+    if (remote) {
+      await apiSaveAgenda(docId, date, slots);
+      await refreshAgenda(docId, [date]);
+      notify('Agenda salva no banco.');
+      return;
     }
     const current = dataRef.current;
     const list = current.doctorSchedules || [];
@@ -492,7 +534,7 @@ export function DemoProvider({ children, initialData }) {
     notify('Horários liberados para este dia salvos com sucesso!');
     return entry;
   };
-  const replicateDoctorSchedule = (targetDoctorId, sourceDate, targetDates) => {
+  const replicateDoctorSchedule = async (targetDoctorId, sourceDate, targetDates) => {
     const user = actor();
     const docId = targetDoctorId || doctorId || user.doctorId;
     if (user.role === 'medico' && docId !== user.doctorId) {
@@ -500,6 +542,11 @@ export function DemoProvider({ children, initialData }) {
     }
     if (!Array.isArray(targetDates) || targetDates.length === 0) {
       throw new Error('Selecione pelo menos uma data para replicar.');
+    }
+    if (remote) {
+      const source = await apiGetAgenda(docId, sourceDate);
+      for (const date of targetDates) await saveDoctorSchedule(docId, date, source.horarios.map(h => h.horario));
+      return;
     }
     const current = dataRef.current;
     const list = current.doctorSchedules || [];
@@ -673,6 +720,8 @@ export function DemoProvider({ children, initialData }) {
         registerDoctor,
         book,
         status,
+        remote,
+        refreshAgenda,
         saveDoctorSchedule,
         replicateDoctorSchedule,
         savePatient,
