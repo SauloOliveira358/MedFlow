@@ -1,6 +1,7 @@
 package com.medFlow.MedFlow.config;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -39,7 +40,7 @@ public class CorsConfig {
     }
 
     @Bean
-    public CorsFilter corsFilter(CorsConfigurationSource corsConfigurationSource) {
+    public CorsFilter corsFilter(@Qualifier("corsConfigurationSource") CorsConfigurationSource corsConfigurationSource) {
         return new CorsFilter(corsConfigurationSource);
     }
 }

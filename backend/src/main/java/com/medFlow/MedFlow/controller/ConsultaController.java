@@ -1,6 +1,8 @@
 package com.medFlow.MedFlow.controller;
 
-import com.medFlow.MedFlow.model.Consulta;
+import com.medFlow.MedFlow.dto.ConsultaResponseDTO;
+import com.medFlow.MedFlow.dto.AgendamentoRequestDTO;
+import jakarta.validation.Valid;
 import com.medFlow.MedFlow.service.ConsultaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,27 +20,27 @@ public class ConsultaController {
     private final ConsultaService consultaService;
 
     @GetMapping("/paciente/{pacienteId}")
-    public ResponseEntity<List<Consulta>> listarPorPaciente(@PathVariable Long pacienteId) {
+    public ResponseEntity<List<ConsultaResponseDTO>> listarPorPaciente(@PathVariable Long pacienteId) {
         return ResponseEntity.ok(consultaService.listarPorPaciente(pacienteId));
     }
 
     @GetMapping("/medico/{medicoId}")
-    public ResponseEntity<List<Consulta>> listarPorMedico(@PathVariable Long medicoId) {
+    public ResponseEntity<List<ConsultaResponseDTO>> listarPorMedico(@PathVariable Long medicoId) {
         return ResponseEntity.ok(consultaService.listarPorMedico(medicoId));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Consulta> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<ConsultaResponseDTO> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.ok(consultaService.buscarPorId(id));
     }
 
     @PostMapping
-    public ResponseEntity<Consulta> agendar(@RequestBody Consulta consulta) {
+    public ResponseEntity<ConsultaResponseDTO> agendar(@Valid @RequestBody AgendamentoRequestDTO consulta) {
         return ResponseEntity.status(HttpStatus.CREATED).body(consultaService.agendar(consulta));
     }
 
     @PatchMapping("/{id}/cancelar")
-    public ResponseEntity<Consulta> cancelar(
+    public ResponseEntity<ConsultaResponseDTO> cancelar(
             @PathVariable Long id,
             @RequestBody(required = false) Map<String, String> payload
     ) {

@@ -49,6 +49,20 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 
+    @ExceptionHandler({org.springframework.dao.DataIntegrityViolationException.class,
+            org.springframework.dao.ConcurrencyFailureException.class})
+    public ResponseEntity<Map<String, Object>> handleConflict(Exception ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of(
+            "status", 409, "message", "Conflito ao salvar. Atualize a agenda e tente novamente."));
+    }
+
+    @ExceptionHandler({org.springframework.http.converter.HttpMessageNotReadableException.class,
+            org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class,
+            org.springframework.web.bind.MissingServletRequestParameterException.class})
+    public ResponseEntity<Map<String, Object>> handleInvalidRequest(Exception ex) {
+        return ResponseEntity.badRequest().body(Map.of("status", 400, "message", "Requisição inválida. Verifique datas, horários e campos obrigatórios."));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneral(Exception ex) {
         Map<String, Object> body = new HashMap<>();
