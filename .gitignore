@@ -13,6 +13,7 @@
 !.env.example
 
 # 2. Node & Frontend
+.firebase/
 node_modules/
 frontend/medflow-frontend/node_modules/
 dist/

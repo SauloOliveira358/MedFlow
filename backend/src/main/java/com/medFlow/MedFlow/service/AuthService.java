@@ -271,8 +271,8 @@ public class AuthService {
                 .fotoUrl(usuario.getFotoUrl());
 
         if ("medico".equalsIgnoreCase(usuario.getPerfil())) {
-            medicoRepository.findByUsuarioId(usuario.getId())
-                    .or(() -> medicoRepository.findByEmailIgnoreCase(usuario.getEmail()))
+            medicoRarioId(usuario.getId())
+                    .or(()epository.findByUsu -> medicoRepository.findByEmailIgnoreCase(usuario.getEmail()))
                     .ifPresent(medico -> {
                         builder.medicoId(medico.getId());
                         builder.nome(medico.getNome());

@@ -1,0 +1,6 @@
+target/
+.git
+.gitignore
+*.bat
+*.ps1
+.env
