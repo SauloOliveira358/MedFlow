@@ -1,4 +1,4 @@
-import { apiReschedule, apiStatus, apiDoctorCatalog, apiGetAgenda, apiSaveAgenda, apiAppointments, apiBook, apiCancel, databaseId, mapAppointment } from '../services/api';
+import { apiReschedule, apiStatus, apiDoctorCatalog, apiGetAgenda, apiGetAgendaLote, apiSaveAgenda, apiAppointments, apiBook, apiCancel, databaseId, mapAppointment } from '../services/api';
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { createMockData } from '../data/mockData';
 import { bookAppointment, changeAppointmentStatus, patientError, getDoctorSlotsForDate } from '../utils/appointments';
@@ -124,8 +124,18 @@ export function DemoProvider({ children, initialData }) {
     return user;
   };
   const refreshAgenda = useCallback(async (id, dates) => {
-    if (!remote || !id) return;
-    const results = await Promise.all(dates.map(date => apiGetAgenda(id, date)));
+    if (!remote || !id || !dates?.length) return;
+    let results;
+    if (dates.length === 1) {
+      results = [await apiGetAgenda(id, dates[0])];
+    } else {
+      try {
+        const batch = await apiGetAgendaLote(id, dates);
+        results = Array.isArray(batch) ? batch : [batch];
+      } catch {
+        results = await Promise.all(dates.map(date => apiGetAgenda(id, date)));
+      }
+    }
     const current = dataRef.current;
     const entries = results.map(a => ({ id: `${id}-${a.data}`, doctorId: id, date: a.data,
       slots: a.horarios.map(h => h.horario), unavailable: a.horarios.filter(h => !h.disponivel).map(h => h.horario) }));
@@ -467,8 +477,26 @@ export function DemoProvider({ children, initialData }) {
       const send = input.id ? body => apiReschedule(input.id, body) : apiBook;
       const row = await send({ pacienteId: databaseId(input.patient?.id || input.patientId), medicoId: databaseId(input.doctorId), dataConsulta: input.date, horarioConsulta: input.time, motivo: input.reason, tipo: 'Primeira consulta' });
       const appointment = mapAppointment(row);
-      commit({ ...dataRef.current, appointments: [...dataRef.current.appointments.filter(a => a.id !== appointment.id).map(a => a.id === input.id ? { ...a, status: 'Cancelado' } : a), appointment] });
-      notify('Consulta salva no banco com sucesso!');
+      const doc = dataRef.current.doctors.find((d) => d.id === appointment.doctorId);
+      const patientIdVal = input.patient?.id || input.patientId || user.patientId;
+      const notification = {
+        id: crypto.randomUUID(),
+        patientId: patientIdVal,
+        doctorId: appointment.doctorId,
+        title: input.id ? 'Consulta reagendada' : 'Consulta agendada',
+        message: `${doc?.name || 'Profissional'} · ${appointment.date.split('-').reverse().join('/')} às ${appointment.time}`,
+        at: new Date().toISOString(),
+        readBy: [],
+      };
+      commit({
+        ...dataRef.current,
+        appointments: [
+          ...dataRef.current.appointments.filter((a) => a.id !== appointment.id).map((a) => (a.id === input.id ? { ...a, status: 'Cancelado' } : a)),
+          appointment,
+        ],
+        notifications: [notification, ...(dataRef.current.notifications || [])],
+      });
+      notify(input.id ? 'Consulta reagendada com sucesso!' : 'Consulta agendada com sucesso!');
       return appointment;
     }
     const result = bookAppointment(current, input);
@@ -486,8 +514,29 @@ export function DemoProvider({ children, initialData }) {
       throw new Error('Somente a equipe pode alterar o atendimento.');
     if (remote) {
       const row = mapAppointment(await (value === 'Cancelado' ? apiCancel(id) : apiStatus(id, value)));
-      commit({ ...dataRef.current, appointments: dataRef.current.appointments.map(a => a.id === row.id ? row : a) });
-      notify('Consulta atualizada no banco.');
+      const doc = dataRef.current.doctors.find((d) => d.id === row.doctorId);
+      const notification = {
+        id: crypto.randomUUID(),
+        patientId: row.patientId,
+        doctorId: row.doctorId,
+        title: `Consulta: ${value.toLowerCase()}`,
+        message: `${doc?.name || 'Profissional'} · ${row.date.split('-').reverse().join('/')} às ${row.time}`,
+        at: new Date().toISOString(),
+        readBy: [],
+      };
+      commit({
+        ...dataRef.current,
+        appointments: dataRef.current.appointments.map((a) => (a.id === row.id ? row : a)),
+        notifications: [notification, ...(dataRef.current.notifications || [])],
+      });
+      const labelMap = {
+        Cancelado: 'Consulta cancelada. O horário foi liberado.',
+        Compareceu: 'Presença confirmada! Paciente marcado como compareceu.',
+        'Não compareceu': 'Marcado como não compareceu (falta registrada).',
+        'Em atendimento': 'Atendimento iniciado.',
+        Concluído: 'Atendimento concluído com sucesso.',
+      };
+      notify(labelMap[value] || `Consulta atualizada: ${value.toLowerCase()}.`);
       return;
     }
     commit(changeAppointmentStatus(dataRef.current, id, value));
@@ -505,6 +554,9 @@ export function DemoProvider({ children, initialData }) {
     const docId = targetDoctorId || doctorId || user.doctorId;
     if (user.role === 'medico' && docId !== user.doctorId) {
       throw new Error('Você só pode editar a sua própria agenda.');
+    }
+    if (date < today()) {
+      throw new Error('Não é possível salvar horários para datas passadas.');
     }
     if (remote) {
       await apiSaveAgenda(docId, date, slots);
@@ -543,9 +595,20 @@ export function DemoProvider({ children, initialData }) {
     if (!Array.isArray(targetDates) || targetDates.length === 0) {
       throw new Error('Selecione pelo menos uma data para replicar.');
     }
+    const todayStr = today();
+    for (const d of targetDates) {
+      if (d < todayStr) {
+        throw new Error('Não é possível replicar para datas no passado.');
+      }
+    }
+    const nowTime = `${String(new Date().getHours()).padStart(2, "0")}:${String(new Date().getMinutes()).padStart(2, "0")}`;
     if (remote) {
       const source = await apiGetAgenda(docId, sourceDate);
-      for (const date of targetDates) await saveDoctorSchedule(docId, date, source.horarios.map(h => h.horario));
+      const rawSlots = source.horarios ? source.horarios.map(h => h.horario) : [];
+      for (const date of targetDates) {
+        const slotsToSave = (date === todayStr) ? rawSlots.filter(t => t >= nowTime) : rawSlots;
+        await saveDoctorSchedule(docId, date, slotsToSave);
+      }
       return;
     }
     const current = dataRef.current;
@@ -560,11 +623,12 @@ export function DemoProvider({ children, initialData }) {
       const idx = updatedSchedules.findIndex(
         (s) => s.doctorId === docId && s.date === tDate,
       );
+      const slotsForDay = (tDate === todayStr) ? slotsToCopy.filter(t => t >= nowTime) : [...slotsToCopy];
       const entry = {
         id: idx >= 0 ? updatedSchedules[idx].id : crypto.randomUUID(),
         doctorId: docId,
         date: tDate,
-        slots: [...slotsToCopy],
+        slots: slotsForDay,
         updatedAt: new Date().toISOString(),
       };
       if (idx >= 0) {

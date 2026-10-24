@@ -16,7 +16,13 @@ public interface MedicoRepository extends JpaRepository<Medico, Long> {
     Optional<Medico> findByCrm(String crm);
     Optional<Medico> findByEmailIgnoreCase(String email);
     Optional<Medico> findByUsuarioId(Long usuarioId);
+
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"especialidade", "clinica"})
     List<Medico> findByClinicaIdAndAtivoTrue(Long clinicaId);
+
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"especialidade", "clinica"})
     List<Medico> findByEspecialidadeIdAndAtivoTrue(Long especialidadeId);
+
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"especialidade", "clinica"})
     List<Medico> findByAtivoTrueOrderByNomeAsc();
 }

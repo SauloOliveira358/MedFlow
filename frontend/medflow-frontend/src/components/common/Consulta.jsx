@@ -275,7 +275,7 @@ export function ModalDetalhesConsulta({ appointment, area, onClose, onlyCancel =
                 Concluir atendimento
               </button>
             )}
-            {area !== 'medico' && area !== 'paciente' && canEdit && (
+            {area !== 'medico' && canEdit && (
               <Link
                 className="button secondary"
                 to={`/${area}/agendar?reagendar=${appointment.id}`}

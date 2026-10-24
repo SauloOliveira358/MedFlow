@@ -16,9 +16,16 @@ public interface ConsultaRepository extends JpaRepository<Consulta, Long> {
     @org.springframework.data.jpa.repository.Query("select c from Consulta c where c.id = :id")
     java.util.Optional<Consulta> buscarParaAtualizar(@org.springframework.data.repository.query.Param("id") Long id);
 
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"paciente", "medico", "medico.especialidade", "clinica"})
     List<Consulta> findByPacienteIdOrderByDataConsultaDescHorarioConsultaDesc(Long pacienteId);
+
     List<Consulta> findByMedicoIdAndDataConsultaOrderByHorarioConsultaAsc(Long medicoId, LocalDate dataConsulta);
+
+    List<Consulta> findByMedicoIdAndDataConsultaInOrderByHorarioConsultaAsc(Long medicoId, java.util.Collection<LocalDate> datas);
+
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"paciente", "medico", "medico.especialidade", "clinica"})
     List<Consulta> findByMedicoIdOrderByDataConsultaDescHorarioConsultaDesc(Long medicoId);
+
     List<Consulta> findByStatus(String status);
     boolean existsByMedicoIdAndDataConsultaAndHorarioConsultaAndStatusNot(Long medicoId, LocalDate dataConsulta, String horarioConsulta, String status);
 }

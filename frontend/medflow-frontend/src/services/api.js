@@ -106,6 +106,7 @@ async function agendaRequest(path, method = 'GET', body) {
 }
 export const apiDoctorCatalog = () => agendaRequest('/medicos/catalogo');
 export const apiGetAgenda = (id, date) => agendaRequest(`/medicos/${databaseId(id)}/agenda?data=${encodeURIComponent(date)}`);
+export const apiGetAgendaLote = (id, dates) => agendaRequest(`/medicos/${databaseId(id)}/agenda/lote?datas=${dates.map(encodeURIComponent).join(',')}`);
 export const apiSaveAgenda = (id, date, slots) => agendaRequest(`/medicos/${databaseId(id)}/agenda/${encodeURIComponent(date)}`, 'PUT', { horarios: slots });
 export const apiAppointments = (role, id) => agendaRequest(`/consultas/${role}/${databaseId(id)}`);
 export const apiBook = (body) => agendaRequest('/consultas', 'POST', body);
@@ -114,3 +115,11 @@ export const mapAppointment = (c) => ({ id: `api-c-${c.id}`, doctorId: `api-d-${
 
 export const apiReschedule = (id, body) => agendaRequest(`/consultas/${databaseId(id)}`, 'PUT', body);
 export const apiStatus = (id, status) => agendaRequest(`/consultas/${databaseId(id)}/status`, 'PATCH', { status: status === 'Não compareceu' ? 'Nao compareceu' : status });
+
+/**
+ * Endpoints de Concorrência e Observabilidade (Módulo 3)
+ */
+export const apiGetConcorrenciaMetricas = () => agendaRequest('/concorrencia/metricas');
+export const apiGetConcorrenciaLogs = () => agendaRequest('/concorrencia/logs');
+export const apiSimularConcorrencia = (body) => agendaRequest('/concorrencia/simular', 'POST', body);
+export const apiResetarConcorrencia = () => agendaRequest('/concorrencia/resetar-metricas', 'POST');

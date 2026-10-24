@@ -34,6 +34,19 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 
+    @ExceptionHandler(ConcorrenciaAgendamentoException.class)
+    public ResponseEntity<Map<String, Object>> handleConcorrencia(ConcorrenciaAgendamentoException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", OffsetDateTime.now());
+        body.put("status", HttpStatus.CONFLICT.value());
+        body.put("error", "Conflito de Concorrência");
+        body.put("message", ex.getMessage());
+        if (ex.getMedicoId() != null) body.put("medicoId", ex.getMedicoId());
+        if (ex.getData() != null) body.put("dataConsulta", ex.getData());
+        if (ex.getHorario() != null) body.put("horarioConsulta", ex.getHorario());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidationErrors(MethodArgumentNotValidException ex) {
         Map<String, Object> body = new HashMap<>();
@@ -52,8 +65,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({org.springframework.dao.DataIntegrityViolationException.class,
             org.springframework.dao.ConcurrencyFailureException.class})
     public ResponseEntity<Map<String, Object>> handleConflict(Exception ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of(
-            "status", 409, "message", "Conflito ao salvar. Atualize a agenda e tente novamente."));
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", OffsetDateTime.now());
+        body.put("status", HttpStatus.CONFLICT.value());
+        body.put("error", "Conflito de Concorrência");
+        body.put("message", "Conflito ao salvar: o horário disputado acabou de ser reservado por outro usuário.");
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
     }
 
     @ExceptionHandler({org.springframework.http.converter.HttpMessageNotReadableException.class,

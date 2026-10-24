@@ -34,6 +34,7 @@ const menus = {
     ['prontuarios', 'Prontuários', 'file'],
     ['especialidades', 'Especialidades', 'sparkles'],
     ['relatorios', 'Relatórios', 'chart'],
+    ['concorrencia', 'Concorrencia (Mod. 3)', 'shield'],
     ['configuracoes', 'Configurações', 'settings'],
   ],
 };
@@ -127,6 +128,7 @@ export function BarraLateral({ area, open, onClose }) {
 export const Sidebar = BarraLateral;
 
 export function NavegacaoInferiorMobile({ area }) {
+  const location = useLocation();
   const list =
     area === 'paciente'
       ? [
@@ -152,7 +154,16 @@ export function NavegacaoInferiorMobile({ area }) {
   return (
     <nav className="bottom-navigation" aria-label="Navegação mobile">
       {list.map(([path, label, icon]) => (
-        <NavLink end={!path} key={path} to={`/${area}${path ? '/' + path : ''}`}>
+        <NavLink
+          end={!path}
+          key={path}
+          to={`/${area}${path ? '/' + path : ''}`}
+          className={({ isActive }) =>
+            isActive || (area === 'paciente' && path === 'agendamentos' && location.pathname.includes('/historico'))
+              ? 'active'
+              : ''
+          }
+        >
           <Icone name={icon} size={21} />
           <span>{label}</span>
         </NavLink>

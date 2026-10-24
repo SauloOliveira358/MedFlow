@@ -30,8 +30,13 @@ public class AgendaService {
     public HorarioAgenda buscarHorario(Long medicoId, LocalDate data, String horario) {
         var agenda = agendas.findByMedicoIdAndDataAgenda(medicoId, data)
             .orElseThrow(() -> new RegraNegocioException("O médico não disponibilizou agenda para esta data."));
-        return horarios.findByAgendaIdAndHorario(agenda.getId(), horario)
+        return horarios.buscarParaAtualizar(agenda.getId(), horario)
+            .or(() -> horarios.findByAgendaIdAndHorario(agenda.getId(), horario))
             .orElseThrow(() -> new RegraNegocioException("Horário não disponibilizado na agenda."));
+    }
+
+    public HorarioAgenda buscarHorarioParaAtualizar(Long medicoId, LocalDate data, String horario) {
+        return buscarHorario(medicoId, data, horario);
     }
 
     public void liberarHorario(Long medicoId, LocalDate data, String horario) {
@@ -53,6 +58,35 @@ public class AgendaService {
             && LocalDateTime.of(data, LocalTime.parse(h.getHorario())).isAfter(agora))).toList());
     }
 
+    @Transactional(readOnly = true)
+    public List<AgendaResponseDTO> buscarLote(Long medicoId, List<LocalDate> datas) {
+        if (datas == null || datas.isEmpty()) return List.of();
+        if (!medicos.existsById(medicoId)) throw new RecursoNaoEncontradoException("Médico não encontrado.");
+
+        var consultasOcupadas = consultas.findByMedicoIdAndDataConsultaInOrderByHorarioConsultaAsc(medicoId, datas).stream()
+            .filter(c -> !"Cancelado".equals(c.getStatus()))
+            .collect(java.util.stream.Collectors.groupingBy(Consulta::getDataConsulta, 
+                java.util.stream.Collectors.mapping(Consulta::getHorarioConsulta, java.util.stream.Collectors.toSet())));
+
+        var agendasList = agendas.findByMedicoIdAndDataAgendaIn(medicoId, datas);
+        var agendaMap = agendasList.stream().collect(java.util.stream.Collectors.toMap(AgendaMedico::getDataAgenda, a -> a));
+
+        var agendaIds = agendasList.stream().map(AgendaMedico::getId).toList();
+        var horariosList = agendaIds.isEmpty() ? List.<HorarioAgenda>of() : horarios.findByAgendaIdInOrderByHorarioAsc(agendaIds);
+        var horariosPorAgenda = horariosList.stream().collect(java.util.stream.Collectors.groupingBy(h -> h.getAgenda().getId()));
+
+        var agora = LocalDateTime.now(ZoneId.of("America/Sao_Paulo"));
+
+        return datas.stream().map(data -> {
+            var ag = agendaMap.get(data);
+            var slots = ag != null ? horariosPorAgenda.getOrDefault(ag.getId(), List.of()) : List.<HorarioAgenda>of();
+            var ocupados = consultasOcupadas.getOrDefault(data, Set.of());
+            return new AgendaResponseDTO(medicoId, data, slots.stream().map(h -> new AgendaResponseDTO.HorarioDTO(
+                h.getHorario(), Boolean.TRUE.equals(h.getDisponivel()) && !ocupados.contains(h.getHorario())
+                && LocalDateTime.of(data, LocalTime.parse(h.getHorario())).isAfter(agora))).toList());
+        }).toList();
+    }
+
     @Transactional
     public AgendaResponseDTO salvar(Long medicoId, LocalDate data, AgendaRequestDTO request) {
         var medico = bloquearMedico(medicoId);
@@ -69,7 +103,6 @@ public class AgendaService {
         horarios.deleteAll(existentes.stream().filter(h -> !desejados.contains(h.getHorario())).toList());
         for (String horario : desejados) {
             if (existentes.stream().noneMatch(h -> h.getHorario().equals(horario))) {
-                validarFuturo(data, horario);
                 horarios.save(HorarioAgenda.builder().agenda(agenda).horario(horario).disponivel(!ocupados.contains(horario)).build());
             }
         }

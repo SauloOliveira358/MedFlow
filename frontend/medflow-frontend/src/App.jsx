@@ -1,4 +1,4 @@
-import { Suspense, lazy } from 'react';
+﻿import { Suspense, lazy } from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
 import LayoutArea from './layouts/LayoutArea';
 import BoasVindas from './pages/BoasVindas';
@@ -21,6 +21,7 @@ const DetalhesProntuario = lazy(() =>
 );
 const ConsultasMedico = lazy(() => import('./pages/doutor/ConsultasMedico'));
 const GerenciadorAgendaMedico = lazy(() => import('./components/doutor/GerenciadorAgendaMedico'));
+const PainelConcorrencia = lazy(() => import('./pages/clinica/PainelConcorrencia'));
 
 export default function App() {
   return (
@@ -28,6 +29,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<BoasVindas key="login" />} />
         <Route path="/cadastro" element={<BoasVindas key="register" register />} />
+        <Route path="/concorrencia" element={<PainelConcorrencia />} />
         <Route
           path="/paciente"
           element={
@@ -80,6 +82,7 @@ export default function App() {
                 <Route path="profissionais" element={<Profissionais />} />
                 <Route path="especialidades" element={<Especialidades />} />
                 <Route path="relatorios" element={<Relatorios />} />
+                <Route path="concorrencia" element={<PainelConcorrencia />} />
                 <Route path="configuracoes" element={<Configuracoes />} />
               </>
             )}

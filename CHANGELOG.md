@@ -1,5 +1,30 @@
 # Changelog
 
+## 2026-10-24 — Módulo 3: Concorrência e Processamento Simultâneo
+
+- **Proteção contra Race Condition no Agendamento**:
+  - Implementação de `AgendamentoLockManager` com travas reentrantes (`ReentrantLock`) na JVM indexadas por slot médico (`medicoId:data:horario`).
+  - Bloqueio pessimista `@Lock(LockModeType.PESSIMISTIC_WRITE)` (`SELECT ... FOR UPDATE`) em `HorarioAgendaRepository` e `MedicoRepository`.
+  - Índice único parcial físico no PostgreSQL (`idx_unico_medico_consulta_ativa`) garantindo integridade ACID como barreira final intransponível.
+  - Exceção customizada `ConcorrenciaAgendamentoException` e tratamento em `GlobalExceptionHandler` retornando HTTP 409 Conflict estruturado.
+- **Thread Pool e ExecutorService Gerenciado**:
+  - `ThreadPoolConfig` com `medflowConcurrencyExecutor` (Core 8, Max 32, Fila 100, KeepAlive 60s, Shutdown gracioso de 30s) e política de rejeição com alertas de sobrecarga.
+  - Demonstração prática do par `Thread` e `Runnable` através de `AgendamentoSimuladoTask`.
+- **Segunda Aplicação Assíncrona**:
+  - `ProcessamentoAssincronoService` com pool dedicado `asyncTaskExecutor` (`@Async`):
+  - Emissão desacoplada de comprovante de agendamento digital com protocolo criptográfico único.
+  - Notificações assíncronas persistidas no banco para médico e paciente.
+  - Trilha de telemetria e auditoria em background em `eventos_auditoria`.
+- **Observabilidade e Logs Estruturados**:
+  - `ConcorrenciaMonitorService` com contadores atômicos e histórico circular em memória (últimos 150 registros).
+  - Logs padronizados: `[Horário] [Thread] [Operação] [Médico] [Slot] [Paciente] [Duração] -> [Resultado]`.
+- **Dashboard e Painel Técnico Integrado**:
+  - Criação da página `PainelConcorrencia.jsx` acessível em `/concorrencia` e no menu da clínica `/clinica/concorrencia`.
+  - Métricas em tempo real (solicitações, autorizados, conflitos evitados, latência média, status do pool).
+  - Simulador interativo permitindo demonstrar a falha de Race Condition (Sem Lock) vs a solução íntegra (Com Proteção) para bancas avaliadoras.
+- **Documentação do Módulo 3**:
+  - Criação do documento `docs/MODULO_3.md` com análise de TOCTOU, Diagrama de Sequência UML, Diagrama de Arquitetura e tabela comparativa antes x depois.
+
 ## 2026-09-27 — Login e cadastro por perfil
 
 - Tela inicial de login e cadastro público de paciente com entrada no agendamento.
@@ -22,7 +47,6 @@
 - Documentação atualizada em docs/front; docs/back sinalizada como referência histórica sem implementação.
 - Nenhuma implementação de backend, banco ou API real.
 
-
 ## 2026-09-26 — Frontend demonstrativo (módulos 1 e 2, escopo parcial)
 
 - Identidade MedFlow, símbolo SVG, login, navegação e layout responsivo.
@@ -34,5 +58,3 @@
 - Persistência local, histórico e mensagens de erro/sucesso.
 - Testes automatizados de regras e renderização.
 - Documentação separada em docs/front e docs/back; backend documentado apenas como proposta.
-
-Backend integrado, autenticação real e persistência em banco permanecem pendentes. Não foi criada release dos módulos completos.

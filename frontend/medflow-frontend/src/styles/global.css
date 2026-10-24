@@ -1152,8 +1152,8 @@ svg {
 .time-slots button:disabled {
   background: #f6f7f3;
   color: #afb7a3;
-  text-decoration: line-through;
-  opacity: 0.7;
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 .legend-dot {
   display: inline-block;

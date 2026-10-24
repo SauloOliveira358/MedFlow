@@ -11,5 +11,6 @@ import java.util.Optional;
 @Repository
 public interface AgendaMedicoRepository extends JpaRepository<AgendaMedico, Long> {
     Optional<AgendaMedico> findByMedicoIdAndDataAgenda(Long medicoId, LocalDate dataAgenda);
+    List<AgendaMedico> findByMedicoIdAndDataAgendaIn(Long medicoId, java.util.Collection<LocalDate> datas);
     List<AgendaMedico> findByMedicoIdAndDataAgendaGreaterThanEqualOrderByDataAgendaAsc(Long medicoId, LocalDate dataAgenda);
 }

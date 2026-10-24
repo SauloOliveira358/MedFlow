@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDemo } from '../../context/DemoContext';
 import { CabecalhoPagina, EstadoVazio, Abas, Avatar, CrachaStatus } from '../../components/common/InterfaceUI';
@@ -145,8 +145,22 @@ export function PainelPaciente() {
 }
 export function ConsultasPaciente({ history = false }) {
   const { data, patientId } = useDemo();
+  const navigate = useNavigate();
   const [tab, setTab] = useState(history ? 'Histórico' : 'Próximos');
   const [details, setDetails] = useState(null);
+
+  useEffect(() => {
+    setTab(history ? 'Histórico' : 'Próximos');
+  }, [history]);
+
+  const handleTabChange = (nextTab) => {
+    setTab(nextTab);
+    if (nextTab === 'Histórico') {
+      navigate('/paciente/historico');
+    } else {
+      navigate('/paciente/agendamentos');
+    }
+  };
 
   const upcomingRows = sortAppointments(
     data.appointments.filter((a) => a.patientId === patientId && future(a)),
@@ -169,7 +183,7 @@ export function ConsultasPaciente({ history = false }) {
           </Link>
         }
       />
-      <Tabs items={['Próximos', 'Histórico']} value={tab} onChange={setTab} />
+      <Tabs items={['Próximos', 'Histórico']} value={tab} onChange={handleTabChange} />
 
       {tab === 'Próximos' ? (
         <div className="appointment-grid">

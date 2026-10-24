@@ -15,6 +15,10 @@ public class AgendaController {
     public AgendaResponseDTO buscar(@PathVariable Long medicoId, @RequestParam LocalDate data) {
         return service.buscar(medicoId, data);
     }
+    @GetMapping("/lote")
+    public java.util.List<AgendaResponseDTO> buscarLote(@PathVariable Long medicoId, @RequestParam java.util.List<LocalDate> datas) {
+        return service.buscarLote(medicoId, datas);
+    }
     @PutMapping("/{data}")
     public AgendaResponseDTO salvar(@PathVariable Long medicoId, @PathVariable LocalDate data,
                                    @Valid @RequestBody AgendaRequestDTO request) {

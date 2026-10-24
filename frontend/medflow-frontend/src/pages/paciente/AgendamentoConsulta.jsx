@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useDemo } from '../../context/DemoContext';
 import { CabecalhoPagina, CampoBusca, EstadoVazio, Avatar } from '../../components/common/InterfaceUI';
@@ -431,6 +431,8 @@ function DoctorBooking() {
               setTime('');
               setError('');
             }}
+            doctorId={doctor?.id}
+            excludeId={editId}
           />
 
           <div style={{ marginTop: '16px' }}>
@@ -557,7 +559,9 @@ export function AgendamentoConsulta({ area = 'paciente' }) {
   const isPatient = area === 'paciente';
   const permitted =
     !editId ||
-    (original &&
+    (data.appointments.length === 0
+      ? true
+      : original &&
       ['Confirmado', 'Pendente'].includes(original.status) &&
       (isPatient
         ? original.patientId === patientId
@@ -567,7 +571,7 @@ export function AgendamentoConsulta({ area = 'paciente' }) {
   const [step, setStep] = useState(isPatient ? 0 : -1);
   const [specialtyId, setSpecialty] = useState(
     original
-      ? data.doctors.find((d) => d.id === original.doctorId).specialtyId
+      ? data.doctors.find((d) => d.id === original.doctorId)?.specialtyId || ''
       : params.get('especialidade') || '',
   );
   const [selectedDoctor, setDoctor] = useState(
@@ -584,6 +588,39 @@ export function AgendamentoConsulta({ area = 'paciente' }) {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [busy, setBusy] = useState(false);
+
+  const editInitializedRef = useRef(false);
+  useEffect(() => {
+    if (!editId || editInitializedRef.current) return;
+    const apt = data.appointments.find((a) => a.id === editId);
+    if (!apt) return;
+    editInitializedRef.current = true;
+    const doc = data.doctors.find((d) => d.id === apt.doctorId);
+    if (doc) {
+      setSpecialty(doc.specialtyId || '');
+      setDoctor(doc.id);
+    }
+    if (apt.date >= today()) {
+      setDate(apt.date);
+    } else {
+      setDate(today());
+    }
+    setTime(apt.time || '');
+    const pat = data.patients.find((p) => p.id === (apt.patientId || (isPatient ? patientId : '')));
+    if (pat) {
+      setPerson((prev) => ({
+        ...prev,
+        ...pat,
+        reason: apt.reason || prev.reason || '',
+      }));
+    }
+    setStep(2);
+    setError('');
+  }, [editId, data.appointments, data.doctors, data.patients, isPatient, patientId]);
+
+  useEffect(() => {
+    setError('');
+  }, [step]);
   const doctor = data.doctors.find((d) => d.id === selectedDoctor);
   const specialty = data.specialties.find((s) => s.id === specialtyId);
   const labels = isPatient
@@ -783,6 +820,7 @@ export function AgendamentoConsulta({ area = 'paciente' }) {
                       <SpecialtyCard
                         specialty={s}
                         onSelect={(id) => {
+                          setError('');
                           setSpecialty(id);
                           setDoctor(
                             area === 'medico' &&
@@ -808,7 +846,7 @@ export function AgendamentoConsulta({ area = 'paciente' }) {
               <div className="chosen-specialty">
                 <Icon name={specialty?.icon} />
                 <span>{specialty?.name}</span>
-                <button className="text-button" onClick={() => setStep(0)}>
+                <button className="text-button" onClick={() => { setError(''); setStep(0); }}>
                   Alterar
                 </button>
               </div>
@@ -823,6 +861,7 @@ export function AgendamentoConsulta({ area = 'paciente' }) {
                       key={d.id}
                       doctor={d}
                       onSelect={(id) => {
+                        setError('');
                         setDoctor(id);
                         setTime('');
                         setStep(2);
@@ -842,18 +881,33 @@ export function AgendamentoConsulta({ area = 'paciente' }) {
           )}
           {step === 2 && (
             <>
+              {doctor && (
+                <div className="chosen-specialty" style={{ marginBottom: '16px' }}>
+                  <Icon name={specialty?.icon || 'stethoscope'} />
+                  <span>{specialty?.name || 'Especialidade'} · {formatarNomeMedico(doctor?.name)}</span>
+                  <button className="text-button" type="button" onClick={() => { setError(''); setStep(1); }}>
+                    Alterar profissional
+                  </button>
+                </div>
+              )}
               <DatePicker
                 value={date}
                 onChange={(v) => {
                   setDate(v);
                   setTime('');
+                  setError('');
                 }}
+                doctorId={selectedDoctor}
+                excludeId={editId}
               />
               <TimeSlotPicker
                 doctorId={selectedDoctor}
                 date={date}
                 value={time}
-                onChange={setTime}
+                onChange={(t) => {
+                  setTime(t);
+                  setError('');
+                }}
                 excludeId={editId}
               />
             </>
@@ -861,7 +915,7 @@ export function AgendamentoConsulta({ area = 'paciente' }) {
           {step === 3 && (
             <>
               <p className="form-intro">Só o essencial para preparar o seu atendimento.</p>
-              <PatientForm value={person} onChange={setPerson} notes />
+              <PatientForm value={person} onChange={(p) => { setPerson(p); setError(''); }} notes />
               <small className="privacy-note">
                 <Icon name="shield" size={15} />
                 Informe os dados necessários para realizar o agendamento.
