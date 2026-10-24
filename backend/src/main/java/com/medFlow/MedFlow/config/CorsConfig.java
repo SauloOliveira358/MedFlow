@@ -23,20 +23,9 @@ public class CorsConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
 
-        config.setAllowedOriginPatterns(List.of(
-                "http://localhost:*",
-                "http://127.0.0.1:*",
-                "https://*medflow*",
-                "https://*med-flow*",
-                "https://*amed-flow*",
-                "https://*web.app",
-                "https://*firebaseapp.com",
-                "https://med-flow-4599a.web.app",
-                "https://med-flow-4599a.firebaseapp.com"
-        ));
-
-        config.setAllowedHeaders(List.of("Origin", "Content-Type", "Accept", "Authorization", "X-Requested-With"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        config.addAllowedOriginPattern("*");
+        config.setAllowedHeaders(List.of("*"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"));
         config.setExposedHeaders(List.of("Authorization", "Content-Disposition"));
         config.setMaxAge(3600L);
 
