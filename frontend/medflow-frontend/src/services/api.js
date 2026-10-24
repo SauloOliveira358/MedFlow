@@ -117,6 +117,15 @@ export const apiReschedule = (id, body) => agendaRequest(`/consultas/${databaseI
 export const apiStatus = (id, status) => agendaRequest(`/consultas/${databaseId(id)}/status`, 'PATCH', { status: status === 'Não compareceu' ? 'Nao compareceu' : status });
 
 /**
+ * Endpoints de Prontuários (Histórico Clínico, Anotações, Procedimentos)
+ */
+export const apiProntuariosMedico = (doctorId) => agendaRequest(`/prontuarios/medico/${databaseId(doctorId)}`);
+export const apiProntuarioDetalhes = (id) => agendaRequest(`/prontuarios/${databaseId(id)}`);
+export const apiObterOuCriarProntuario = (body) => agendaRequest('/prontuarios', 'POST', body);
+export const apiSalvarAnotacaoProntuario = (id, body) => agendaRequest(`/prontuarios/${databaseId(id)}/anotacoes`, 'POST', body);
+export const apiSalvarProcedimentoProntuario = (id, body) => agendaRequest(`/prontuarios/${databaseId(id)}/procedimentos`, 'POST', body);
+
+/**
  * Endpoints de Concorrência e Observabilidade (Módulo 3)
  */
 export const apiGetConcorrenciaMetricas = () => agendaRequest('/concorrencia/metricas');

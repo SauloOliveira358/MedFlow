@@ -3,13 +3,14 @@ import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { useDemo } from '../../context/DemoContext';
 import { PageHeading, SearchInput, Avatar, EmptyState, Tabs, Modal, StatusBadge } from './InterfaceUI';
 import { age, normalize, formatDate, sortAppointments } from '../../utils/date';
+import { today } from '../../utils/date';
 import { formatarNomeMedico } from '../../utils/formatters';
 import Icone from './Icone';
 
 export function CartaoProntuario({ record, area }) {
   const { data } = useDemo();
-  const patient = data.patients.find((p) => p.id === record.patientId);
-  const doctor = data.doctors.find((d) => d.id === record.doctorId);
+  const patient = data.patients.find((p) => p.id === record.patientId) || { name: 'Paciente', birth: today() };
+  const doctor = data.doctors.find((d) => d.id === record.doctorId) || { name: 'Profissional' };
   const last = sortAppointments(
     data.appointments.filter(
       (a) => a.patientId === patient.id && a.doctorId === doctor.id && a.status === 'Concluído',
@@ -49,27 +50,43 @@ export function CartaoProntuario({ record, area }) {
 export const MedicalRecordCard = CartaoProntuario;
 
 export function Prontuarios({ area }) {
-  const { data, doctorId } = useDemo();
+  const { data, doctorId, createRecord, notify } = useDemo();
   const [params] = useSearchParams();
   const [search, setSearch] = useState('');
   const [patient, setPatient] = useState(params.get('paciente') || '');
   const [professional, setProfessional] = useState('');
   const [specialty, setSpecialty] = useState('');
   const [date, setDate] = useState('');
+  const [createModal, setCreateModal] = useState(false);
+  const [newPatientId, setNewPatientId] = useState('');
+  const [newSummary, setNewSummary] = useState('');
   const rows = data.records.filter(
     (r) =>
       (area !== 'medico' || r.doctorId === doctorId) &&
       (!patient || r.patientId === patient) &&
       (!professional || r.doctorId === professional) &&
-      (!specialty || data.doctors.find((d) => d.id === r.doctorId).specialtyId === specialty) &&
-      (!date || r.updatedAt.slice(0, 10) === date) &&
-      normalize(data.patients.find((p) => p.id === r.patientId).name).includes(normalize(search)),
+      (!specialty || data.doctors.find((d) => d.id === r.doctorId)?.specialtyId === specialty) &&
+      (!date || r.updatedAt?.slice(0, 10) === date) &&
+      normalize(data.patients.find((p) => p.id === r.patientId)?.name || '').includes(normalize(search)),
   );
   return (
     <>
       <PageHeading
         title="Prontuários"
         description="Histórias de cuidado, organizadas com atenção."
+        action={
+          area === 'medico' && (
+            <button
+              type="button"
+              className="button primary"
+              onClick={() => setCreateModal(true)}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+            >
+              <Icone name="plus" size={17} />
+              Novo prontuário
+            </button>
+          )
+        }
       />
       <div className="filters record-filters">
         <SearchInput value={search} onChange={setSearch} placeholder="Buscar prontuário" />
@@ -140,19 +157,85 @@ export function Prontuarios({ area }) {
         <Icone name="shield" size={16} />
         Todos os registros desta área são fictícios.
       </p>
+      {createModal && (
+        <Modal title="Novo prontuário clínico" onClose={() => setCreateModal(false)}>
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+              if (!newPatientId) {
+                notify('Selecione um paciente para o prontuário.', 'error');
+                return;
+              }
+              try {
+                await createRecord({
+                  patientId: newPatientId,
+                  doctorId,
+                  summary: newSummary,
+                });
+                setCreateModal(false);
+                setNewPatientId('');
+                setNewSummary('');
+              } catch (err) {
+                notify(err.message, 'error');
+              }
+            }}
+          >
+            <label className="field" style={{ marginBottom: '14px' }}>
+              <span>Selecionar paciente</span>
+              <select
+                value={newPatientId}
+                onChange={(e) => setNewPatientId(e.target.value)}
+                required
+              >
+                <option value="">Escolha o paciente</option>
+                {data.patients.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name} {p.phone ? `(${p.phone})` : ''}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="field" style={{ marginBottom: '16px' }}>
+              <span>Resumo clínico inicial / Anamnese</span>
+              <textarea
+                value={newSummary}
+                onChange={(e) => setNewSummary(e.target.value)}
+                placeholder="Histórico prévio, queixa principal, alergias ou plano de cuidado..."
+                rows={4}
+              />
+            </label>
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                className="button secondary"
+                onClick={() => setCreateModal(false)}
+              >
+                Cancelar
+              </button>
+              <button type="submit" className="button primary">
+                Criar prontuário
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
     </>
   );
 }
 export const Records = Prontuarios;
 
 export function DetalhesProntuario({ area }) {
-  const { data, doctorId, addNote, addDocument, notify } = useDemo();
+  const { data, doctorId, addNote, addDocument, addProcedure, notify } = useDemo();
   const { id } = useParams();
   const fileInputRef = useRef(null);
   const [tab, setTab] = useState('Resumo');
   const [note, setNote] = useState('');
   const [error, setError] = useState('');
   const [document, setDocument] = useState(null);
+  const [procOpen, setProcOpen] = useState(false);
+  const [procName, setProcName] = useState('');
+  const [procDate, setProcDate] = useState(today());
+  const [procNotes, setProcNotes] = useState('');
 
   const handleFileUpload = (e) => {
     const file = e.target.files?.[0];
@@ -214,8 +297,8 @@ export function DetalhesProntuario({ area }) {
         action="Voltar aos prontuários"
       />
     );
-  const patient = data.patients.find((p) => p.id === record.patientId);
-  const doctor = data.doctors.find((d) => d.id === record.doctorId);
+  const patient = data.patients.find((p) => p.id === record.patientId) || { name: 'Paciente', birth: today(), phone: '' };
+  const doctor = data.doctors.find((d) => d.id === record.doctorId) || { name: 'Profissional' };
   const appointments = sortAppointments(
     data.appointments.filter((a) => a.patientId === patient.id && a.doctorId === doctor.id),
   ).reverse();
@@ -335,17 +418,96 @@ export function DetalhesProntuario({ area }) {
         )}
         {tab === 'Procedimentos' && (
           <>
-            <h2>Procedimentos registrados</h2>
-            {record.procedures.map((p, i) => (
-              <article className="timeline-entry" key={i}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+              <div>
+                <h2 style={{ margin: 0 }}>Procedimentos registrados</h2>
+                <small style={{ color: '#68776f' }}>Intervenções, avaliações e condutas clínicas realizadas</small>
+              </div>
+              {area === 'medico' && !procOpen && (
+                <button
+                  type="button"
+                  className="button primary"
+                  onClick={() => setProcOpen(true)}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                >
+                  <Icone name="plus" size={16} /> Novo procedimento
+                </button>
+              )}
+            </div>
+
+            {area === 'medico' && procOpen && (
+              <form
+                className="panel note-form"
+                style={{ padding: '20px', background: '#f8faf7', border: '1px solid #ccd9cb', marginBottom: '20px' }}
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  try {
+                    addProcedure(record.id, {
+                      name: procName,
+                      date: procDate,
+                      observacoes: procNotes,
+                    });
+                    setProcName('');
+                    setProcNotes('');
+                    setProcOpen(false);
+                  } catch (err) {
+                    notify(err.message, 'error');
+                  }
+                }}
+              >
+                <h3 style={{ margin: '0 0 12px' }}>Registrar Novo Procedimento</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+                  <label className="field">
+                    <span>Nome do procedimento</span>
+                    <input
+                      type="text"
+                      value={procName}
+                      onChange={(e) => setProcName(e.target.value)}
+                      placeholder="Ex: Consulta de Avaliação, Sutura, Biópsia..."
+                      required
+                    />
+                  </label>
+                  <label className="field">
+                    <span>Data do procedimento</span>
+                    <input
+                      type="date"
+                      value={procDate}
+                      onChange={(e) => setProcDate(e.target.value)}
+                      required
+                    />
+                  </label>
+                </div>
+                <label className="field" style={{ marginBottom: '14px' }}>
+                  <span>Observações / Laudo</span>
+                  <textarea
+                    value={procNotes}
+                    onChange={(e) => setProcNotes(e.target.value)}
+                    placeholder="Descreva detalhes do procedimento, medicamentos ou condutas..."
+                    rows={3}
+                  />
+                </label>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button type="submit" className="button primary">
+                    Salvar procedimento
+                  </button>
+                  <button type="button" className="button secondary" onClick={() => setProcOpen(false)}>
+                    Cancelar
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {(record.procedures || []).map((p, i) => (
+              <article className="timeline-entry" key={p.id || i}>
                 <small>{formatDate(p.date)}</small>
                 <h3>{p.name}</h3>
+                {p.observacoes && <p style={{ color: '#475569', margin: '4px 0 0' }}>{p.observacoes}</p>}
               </article>
             ))}
-            {!record.procedures.length && (
+            {(!record.procedures || !record.procedures.length) && !procOpen && (
               <EmptyState
                 title="Nenhum procedimento registrado"
-                description="Os procedimentos realizados aparecerão aqui."
+                description="Use o botão acima para registrar os procedimentos e intervenções realizadas."
               />
             )}
           </>

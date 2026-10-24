@@ -221,7 +221,7 @@ export function ModalDetalhesConsulta({ appointment, area, onClose, onlyCancel =
             {area !== 'paciente' && (
               <Link
                 className="button secondary"
-                to={record ? `/${area}/prontuarios/${record.id}` : `/${area}/prontuarios`}
+                to={record ? `/${area}/prontuarios/${record.id}` : `/${area}/prontuarios?paciente=${appointment.patientId}`}
                 onClick={onClose}
               >
                 Ver prontuário

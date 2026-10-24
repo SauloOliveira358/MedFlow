@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useDemo } from '../../context/DemoContext';
 import { PageHeading, StatusBadge, EmptyState, SearchInput, Avatar, ConfirmationModal } from '../../components/common/InterfaceUI';
 import Icone, { Icon } from '../../components/common/Icone';
@@ -282,6 +283,26 @@ export default function ConsultasMedico() {
                       <Icon name="x" size={14} />
                       {apt.status === 'Não compareceu' ? 'Não compareceu ✓' : 'Não compareceu'}
                     </button>
+
+                    {/* Prontuário Button */}
+                    <Link
+                      to={`/medico/prontuarios?paciente=${apt.patientId}`}
+                      className="button small secondary"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                        fontWeight: 600,
+                        fontSize: '12px',
+                        padding: '6px 11px',
+                        borderRadius: '8px',
+                        textDecoration: 'none',
+                      }}
+                      title="Abrir prontuário clínico deste paciente"
+                    >
+                      <Icon name="file" size={13} />
+                      Prontuário
+                    </Link>
 
                     {/* Cancelar Button */}
                     {apt.status !== 'Cancelado' && (

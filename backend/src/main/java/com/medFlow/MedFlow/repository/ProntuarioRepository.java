@@ -11,4 +11,5 @@ import java.util.Optional;
 public interface ProntuarioRepository extends JpaRepository<Prontuario, Long> {
     List<Prontuario> findByPacienteIdOrderByCriadoEmDesc(Long pacienteId);
     Optional<Prontuario> findByPacienteIdAndMedicoId(Long pacienteId, Long medicoId);
+    List<Prontuario> findByMedicoIdOrderByAtualizadoEmDesc(Long medicoId);
 }

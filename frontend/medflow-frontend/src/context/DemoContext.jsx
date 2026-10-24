@@ -78,6 +78,55 @@ function loadSession() {
     return null;
   }
 }
+
+function ensureRecords(records = [], appointments = [], doctors = [], patients = []) {
+  const next = [...records];
+  appointments.forEach((a) => {
+    if (!a.patientId || !a.doctorId) return;
+    const exists = next.some((r) => r.patientId === a.patientId && r.doctorId === a.doctorId);
+    if (!exists) {
+      const pat = patients.find((p) => p.id === a.patientId);
+      const doc = doctors.find((d) => d.id === a.doctorId);
+      const cleanPatId = String(a.patientId).replace(/^api-p-/, '');
+      const cleanDocId = String(a.doctorId).replace(/^api-d-/, '');
+      next.push({
+        id: `rec-${cleanPatId}-${cleanDocId}`,
+        patientId: a.patientId,
+        doctorId: a.doctorId,
+        updatedAt: a.createdAt || new Date().toISOString(),
+        summary: `Acompanhamento clínico de ${pat?.name || 'Paciente'}. Cuidados iniciados com ${doc?.name || 'Especialista'}.`,
+        notes: a.reason
+          ? [
+              {
+                id: crypto.randomUUID(),
+                text: `Primeira consulta agendada: ${a.reason}`,
+                date: a.date,
+                author: doc?.name || 'Médico Responsável',
+              },
+            ]
+          : [
+              {
+                id: crypto.randomUUID(),
+                text: 'Prontuário clínico aberto para acompanhamento do paciente.',
+                date: a.date || today(),
+                author: doc?.name || 'Médico Responsável',
+              },
+            ],
+        procedures: [
+          {
+            id: crypto.randomUUID(),
+            name: a.type || 'Consulta Médica',
+            date: a.date || today(),
+            observacoes: a.reason || 'Avaliação clínica inicial.',
+          },
+        ],
+        documents: [],
+      });
+    }
+  });
+  return next;
+}
+
 export function DemoProvider({ children, initialData }) {
   const [data, setData] = useState(() => (initialData ? withAccounts(initialData) : load()));
   const remote = !initialData && !window.__VITEST__;
@@ -161,8 +210,15 @@ export function DemoProvider({ children, initialData }) {
         rows.forEach(c => {
           if (!patients.some(p => p.id === `api-p-${c.pacienteId}`)) patients.push({ id: `api-p-${c.pacienteId}`, name: c.pacienteNome, phone: '', email: '', birth: '' });
         });
-        commit({ ...current, doctors, patients, appointments: rows.map(mapAppointment),
-          specialties: specialties.map(s => ({ id: String(s.id), name: s.nome, description: s.descricao || '', icon: s.icone || 'stethoscope', color: s.cor || 'sage' })) });
+        const mappedAppointments = rows.map(mapAppointment);
+        commit({
+          ...current,
+          doctors,
+          patients,
+          appointments: mappedAppointments,
+          records: ensureRecords(current.records || [], mappedAppointments, doctors, patients),
+          specialties: specialties.map(s => ({ id: String(s.id), name: s.nome, description: s.descricao || '', icon: s.icone || 'stethoscope', color: s.cor || 'sage' }))
+        });
       } catch (e) { if (alive) { notify(`Não foi possível atualizar a agenda: ${e.message}`, 'error'); } }
       finally { running = false; }
     };
@@ -759,6 +815,86 @@ export function DemoProvider({ children, initialData }) {
     });
     notify(`Documento "${document.name}" anexado com sucesso!`);
   };
+
+  const addProcedure = (recordId, procedure) => {
+    const user = actor();
+    const current = dataRef.current;
+    const record = current.records.find((r) => r.id === recordId);
+    if (!record) throw new Error('Prontuário não encontrado.');
+    if (user.role === 'medico' && record.doctorId !== user.doctorId) {
+      throw new Error('Este prontuário não pertence à sua conta.');
+    }
+    if (!procedure || !procedure.name?.trim()) {
+      throw new Error('Informe o nome do procedimento.');
+    }
+    const newProc = {
+      id: crypto.randomUUID(),
+      name: procedure.name.trim(),
+      date: procedure.date || today(),
+      observacoes: procedure.observacoes?.trim() || '',
+    };
+    commit({
+      ...current,
+      records: current.records.map((r) =>
+        r.id === recordId
+          ? {
+              ...r,
+              updatedAt: new Date().toISOString(),
+              procedures: [newProc, ...(r.procedures || [])],
+            }
+          : r,
+      ),
+    });
+    notify(`Procedimento "${newProc.name}" registrado no prontuário!`);
+    return newProc;
+  };
+
+  const createRecord = async ({ patientId, doctorId: targetDoctorId, summary }) => {
+    const user = actor();
+    const docId = targetDoctorId || doctorId || user.doctorId;
+    const current = dataRef.current;
+    const existing = current.records.find((r) => r.patientId === patientId && r.doctorId === docId);
+    if (existing) return existing;
+
+    const pat = current.patients.find((p) => p.id === patientId);
+    const doc = current.doctors.find((d) => d.id === docId);
+    const cleanPatId = String(patientId).replace(/^api-p-/, '');
+    const cleanDocId = String(docId).replace(/^api-d-/, '');
+
+    const newRecord = {
+      id: `rec-${cleanPatId}-${cleanDocId}-${Date.now().toString().slice(-4)}`,
+      patientId,
+      doctorId: docId,
+      updatedAt: new Date().toISOString(),
+      summary: summary?.trim() || `Prontuário clínico de ${pat?.name || 'Paciente'}. Iniciado por ${doc?.name || 'Médico'}.`,
+      notes: [
+        {
+          id: crypto.randomUUID(),
+          text: 'Abertura do prontuário médico.',
+          date: today(),
+          author: doc?.name || 'Médico Responsável',
+        },
+      ],
+      procedures: [
+        {
+          id: crypto.randomUUID(),
+          name: 'Avaliação Clínica Inicial',
+          date: today(),
+          observacoes: 'Registro inicial de histórico clínico.',
+        },
+      ],
+      documents: [],
+    };
+
+    commit({
+      ...current,
+      records: [newRecord, ...(current.records || [])],
+    });
+
+    notify('Prontuário criado com sucesso!');
+    return newRecord;
+  };
+
   const markRead = () => {
     const user = actor();
     const viewer = user.patientId || user.doctorId;
@@ -793,6 +929,8 @@ export function DemoProvider({ children, initialData }) {
         saveClinic,
         addNote,
         addDocument,
+        addProcedure,
+        createRecord,
         markRead,
         notify,
         toast,
