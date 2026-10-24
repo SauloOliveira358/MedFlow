@@ -27,9 +27,12 @@ public class CorsConfig {
                 "http://localhost:*",
                 "http://127.0.0.1:*",
                 "https://*medflow*",
+                "https://*med-flow*",
                 "https://*amed-flow*",
-                "https://amed-flow.web.app",
-                "https://amed-flow.firebaseapp.com"
+                "https://*web.app",
+                "https://*firebaseapp.com",
+                "https://med-flow-4599a.web.app",
+                "https://med-flow-4599a.firebaseapp.com"
         ));
 
         config.setAllowedHeaders(List.of("Origin", "Content-Type", "Accept", "Authorization", "X-Requested-With"));

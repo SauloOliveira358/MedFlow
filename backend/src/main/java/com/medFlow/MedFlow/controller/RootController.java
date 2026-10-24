@@ -15,7 +15,7 @@ public class RootController {
                 "status", "UP",
                 "servico", "MedFlow API Backend",
                 "mensagem", "Backend funcionando com sucesso!",
-                "frontend", "https://amed-flow.web.app",
+                "frontend", "https://med-flow-4599a.web.app",
                 "swagger", "/swagger-ui.html"
         ));
     }
