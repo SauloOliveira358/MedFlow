@@ -2,14 +2,13 @@
 FROM eclipse-temurin:21-jdk-alpine AS builder
 WORKDIR /app
 
-# Copia arquivos do Maven
+# Copia arquivos do Maven e código-fonte
 COPY .mvn/ .mvn/
 COPY mvnw pom.xml ./
-RUN chmod +x mvnw && ./mvnw dependency:go-offline -B
-
-# Copia código-fonte e gera o .jar
 COPY src/ src/
-RUN ./mvnw clean package -DskipTests
+
+# Garante permissão e finais de linha Linux no wrapper do Maven
+RUN sed -i 's/\r$//' mvnw && chmod +x mvnw && ./mvnw clean package -DskipTests
 
 # Estágio de execução leve
 FROM eclipse-temurin:21-jre-alpine
@@ -22,3 +21,4 @@ ENV PORT=8080
 EXPOSE 8080
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
+
