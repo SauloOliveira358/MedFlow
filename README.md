@@ -82,4 +82,4 @@ docs/
   MODULO_3.md          Documentação técnica detalhada, diagramas UML Mermaid e evidências
 ```
 
-[Documentação Módulo 3](docs/MODULO_3.md) · [Documentação Geral](docs/README.md) · [Frontend](docs/front/README.md) · [Changelog](CHANGELOG.md) · [Uso de IA](AI_USAGE.md)
+[Guia de execução completa](docs/GUIA_EXECUCAO.md) · [Documentação Módulo 3](docs/MODULO_3.md) · [Documentação Geral](docs/README.md) · [Frontend](docs/front/README.md) · [Changelog](CHANGELOG.md) · [Uso de IA](AI_USAGE.md)
