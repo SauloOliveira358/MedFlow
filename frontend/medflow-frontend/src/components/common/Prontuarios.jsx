@@ -438,7 +438,7 @@ export function DetalhesProntuario({ area }) {
             {area === 'medico' && procOpen && (
               <form
                 className="panel note-form"
-                style={{ padding: '20px', background: '#f8faf7', border: '1px solid #ccd9cb', marginBottom: '20px' }}
+                style={{ padding: '20px', background: 'var(--surface-subtle, #f8faf7)', border: '1px solid var(--border-card, #ccd9cb)', marginBottom: '20px' }}
                 onSubmit={(e) => {
                   e.preventDefault();
                   try {
@@ -549,7 +549,7 @@ export function DetalhesProntuario({ area }) {
                   borderRadius: '12px',
                   padding: '24px 16px',
                   textAlign: 'center',
-                  background: '#f8faf7',
+                  background: 'var(--surface-subtle, #f8faf7)',
                   cursor: 'pointer',
                   marginBottom: '20px',
                   transition: 'all 0.18s ease',
@@ -558,7 +558,7 @@ export function DetalhesProntuario({ area }) {
                 <div style={{ color: '#3f6d63', marginBottom: '8px' }}>
                   <Icone name="file" size={28} />
                 </div>
-                <strong style={{ display: 'block', color: '#273831', fontSize: '15px', marginBottom: '4px' }}>
+                <strong style={{ display: 'block', color: 'var(--ink, #273831)', fontSize: '15px', marginBottom: '4px' }}>
                   Clique aqui para selecionar e subir um arquivo
                 </strong>
                 <small style={{ color: '#68776f', fontSize: '13px' }}>
@@ -580,7 +580,7 @@ export function DetalhesProntuario({ area }) {
                     padding: '12px 16px',
                     borderRadius: '10px',
                     border: '1px solid #dfe5dc',
-                    background: '#ffffff',
+                    background: 'var(--surface-card, #ffffff)',
                     width: '100%',
                     textAlign: 'left',
                     cursor: 'pointer',
@@ -591,7 +591,7 @@ export function DetalhesProntuario({ area }) {
                       <Icone name="file" />
                     </span>
                     <div>
-                      <strong style={{ fontSize: '14px', color: '#26382f', display: 'block' }}>{d.name}</strong>
+                      <strong style={{ fontSize: '14px', color: 'var(--ink, #26382f)', display: 'block' }}>{d.name}</strong>
                       <small style={{ color: '#697a70', fontSize: '12px' }}>
                         {d.fileSize ? `${d.fileSize} · ` : ''}
                         {d.uploadedAt ? `Enviado em ${formatDate(d.uploadedAt.slice(0, 10))} · ` : ''}
@@ -627,9 +627,9 @@ export function DetalhesProntuario({ area }) {
             ) : null}
 
             {document.fileData && document.fileType === 'application/pdf' ? (
-              <div style={{ textAlign: 'center', padding: '24px 16px', background: '#f8faf7', borderRadius: '10px', marginBottom: '16px', border: '1px solid #e1e8df' }}>
+              <div style={{ textAlign: 'center', padding: '24px 16px', background: 'var(--surface-subtle, #f8faf7)', borderRadius: '10px', marginBottom: '16px', border: '1px solid #e1e8df' }}>
                 <Icone name="file" size={42} style={{ color: '#c9302c', marginBottom: '10px' }} />
-                <h4 style={{ margin: '0 0 6px', color: '#26382f' }}>Documento PDF Anexado</h4>
+                <h4 style={{ margin: '0 0 6px', color: 'var(--ink, #26382f)' }}>Documento PDF Anexado</h4>
                 <p style={{ margin: 0, fontSize: '13px', color: '#68776f' }}>Clique no botão abaixo para baixar ou visualizar:</p>
                 <a
                   href={document.fileData}
@@ -642,7 +642,7 @@ export function DetalhesProntuario({ area }) {
               </div>
             ) : null}
 
-            <p className="document-text" style={{ whiteSpace: 'pre-wrap', lineHeight: 1.5, background: '#fbfcfb', padding: '14px', borderRadius: '8px', border: '1px solid #eef2ed' }}>
+            <p className="document-text" style={{ whiteSpace: 'pre-wrap', lineHeight: 1.5, background: 'var(--surface-subtle, #fbfcfb)', padding: '14px', borderRadius: '8px', border: '1px solid var(--border-subtle, #eef2ed)' }}>
               {document.text}
             </p>
 

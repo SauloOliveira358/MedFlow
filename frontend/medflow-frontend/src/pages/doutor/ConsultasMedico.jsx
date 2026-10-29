@@ -77,7 +77,7 @@ export default function ConsultasMedico() {
         </article>
 
         <article className="metric">
-          <div className="icon-box" style={{ background: '#eaf4e6', color: '#4a8247' }}>
+          <div className="icon-box" style={{ background: 'var(--badge-bg, #eaf4e6)', color: '#4a8247' }}>
             <Icon name="check" />
           </div>
           <span>Compareceu</span>
@@ -86,7 +86,7 @@ export default function ConsultasMedico() {
         </article>
 
         <article className="metric">
-          <div className="icon-box" style={{ background: '#fdf4e7', color: '#b57929' }}>
+          <div className="icon-box" style={{ background: 'var(--badge-bg, #fdf4e7)', color: '#b57929' }}>
             <Icon name="clock" />
           </div>
           <span>Não compareceu</span>
@@ -182,8 +182,8 @@ export default function ConsultasMedico() {
                     justifyContent: 'space-between',
                     padding: '16px 20px',
                     borderRadius: '12px',
-                    border: isToday ? '1px solid #c2dbbe' : '1px solid #e7ece5',
-                    background: isToday ? '#f9fcf8' : '#ffffff',
+                    border: isToday ? '1px solid var(--primary, #c2dbbe)' : '1px solid var(--border-card, #e7ece5)',
+                    background: isToday ? 'var(--surface-today, #f9fcf8)' : 'var(--surface-card, #ffffff)',
                     flexWrap: 'wrap',
                     gap: '14px',
                     transition: 'all 0.15s ease',
@@ -197,17 +197,17 @@ export default function ConsultasMedico() {
                         flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        background: '#edf3e9',
+                        background: 'var(--surface-tag, #edf3e9)',
                         padding: '10px 14px',
                         borderRadius: '10px',
                         minWidth: '78px',
                         textAlign: 'center',
                       }}
                     >
-                      <span style={{ fontSize: '15px', fontWeight: 700, color: '#314e44' }}>
+                      <span style={{ fontSize: '15px', fontWeight: 700, color: 'var(--ink, #314e44)' }}>
                         {apt.time}
                       </span>
-                      <small style={{ fontSize: '11px', color: '#63756b' }}>
+                      <small style={{ fontSize: '11px', color: 'var(--muted, #63756b)' }}>
                         {isToday ? 'Hoje' : apt.date.split('-').reverse().slice(0, 2).join('/')}
                       </small>
                     </div>
@@ -215,10 +215,10 @@ export default function ConsultasMedico() {
                     <Avatar person={patient} />
 
                     <div>
-                      <h3 style={{ fontSize: '15px', fontWeight: 600, margin: 0, color: '#273831' }}>
+                      <h3 style={{ fontSize: '15px', fontWeight: 600, margin: 0, color: 'var(--ink, #273831)' }}>
                         {patient?.name || 'Paciente sem nome'}
                       </h3>
-                      <p style={{ fontSize: '12px', color: '#68776f', margin: '2px 0 0' }}>
+                      <p style={{ fontSize: '12px', color: 'var(--muted, #68776f)', margin: '2px 0 0' }}>
                         {patient?.birth ? `${age(patient.birth)} anos` : ''} · Tel: {patient?.phone || 'Não informado'}
                       </p>
                       {apt.reason && (
@@ -249,7 +249,7 @@ export default function ConsultasMedico() {
                         fontSize: '12px',
                         fontWeight: 600,
                         border: apt.status === 'Compareceu' ? '1px solid #488c43' : '1px solid #bee0b9',
-                        background: apt.status === 'Compareceu' ? '#488c43' : '#f0f8ee',
+                        background: apt.status === 'Compareceu' ? '#488c43' : 'var(--badge-bg, #f0f8ee)',
                         color: apt.status === 'Compareceu' ? '#ffffff' : '#31692d',
                         cursor: 'pointer',
                         transition: 'all 0.15s ease',

@@ -155,15 +155,15 @@ function DoctorBooking() {
             style={{
               marginTop: '12px',
               padding: '10px 16px',
-              background: '#f8fafc',
+              background: 'var(--surface-subtle, #f8fafc)',
               borderRadius: '8px',
-              border: '1px solid #e2e8f0',
+              border: '1px solid var(--border-subtle, #e2e8f0)',
               textAlign: 'left',
               width: '100%',
             }}
           >
             <div style={{ fontSize: '13px', color: '#64748b' }}>Paciente:</div>
-            <strong style={{ fontSize: '16px', color: '#1e293b' }}>{confirmedPatient.name}</strong>
+            <strong style={{ fontSize: '16px', color: 'var(--ink, #1e293b)' }}>{confirmedPatient.name}</strong>
             <div style={{ fontSize: '13px', color: '#475569', marginTop: '2px' }}>
               Tel: {confirmedPatient.phone} {confirmedPatient.email && `· ${confirmedPatient.email}`}
             </div>
@@ -211,15 +211,15 @@ function DoctorBooking() {
           alignItems: 'center',
           gap: '16px',
           marginBottom: '24px',
-          background: 'linear-gradient(135deg, #f0fdf4 0%, #e6f7ff 100%)',
-          border: '1px solid #bbf7d0',
+          background: 'var(--hero-gradient, linear-gradient(135deg, #f0fdf4 0%, #e6f7ff 100%))',
+          border: '1px solid var(--border-subtle, #bbf7d0)',
           padding: '16px 20px',
         }}
       >
         <Avatar person={doctor} large />
         <div style={{ flex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            <h3 style={{ margin: 0, fontSize: '18px', color: '#134e4a' }}>{formatarNomeMedico(doctor.name)}</h3>
+            <h3 style={{ margin: 0, fontSize: '18px', color: 'var(--ink, #134e4a)' }}>{formatarNomeMedico(doctor.name)}</h3>
             <span
               style={{
                 fontSize: '11px',
@@ -234,7 +234,7 @@ function DoctorBooking() {
               {specialty?.name}
             </span>
           </div>
-          <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#334155' }}>
+          <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--muted, #334155)' }}>
             CRM {doctor.crm} · {data.clinic?.name || 'Clínica MedFlow'} · Consulta presencial de 30 minutos
           </p>
         </div>
@@ -316,16 +316,16 @@ function DoctorBooking() {
                   style={{
                     marginTop: '12px',
                     padding: '12px 16px',
-                    background: '#f8fafc',
+                    background: 'var(--surface-subtle, #f8fafc)',
                     borderRadius: '8px',
-                    border: '1px solid #e2e8f0',
+                    border: '1px solid var(--border-subtle, #e2e8f0)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
                   }}
                 >
                   <div>
-                    <strong style={{ fontSize: '15px', color: '#0f172a' }}>
+                    <strong style={{ fontSize: '15px', color: 'var(--ink, #0f172a)' }}>
                       {selectedPatient.name}
                     </strong>
                     <div style={{ fontSize: '13px', color: '#64748b', marginTop: '2px' }}>
@@ -353,12 +353,12 @@ function DoctorBooking() {
               style={{
                 marginBottom: '24px',
                 padding: '16px',
-                background: '#f8fafc',
+                background: 'var(--surface-subtle, #f8fafc)',
                 borderRadius: '8px',
-                border: '1px solid #e2e8f0',
+                border: '1px solid var(--border-subtle, #e2e8f0)',
               }}
             >
-              <h4 style={{ margin: '0 0 12px', fontSize: '14px', color: '#334155' }}>
+              <h4 style={{ margin: '0 0 12px', fontSize: '14px', color: 'var(--muted, #334155)' }}>
                 Dados do novo paciente
               </h4>
               <div className="form-grid">

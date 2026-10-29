@@ -51,14 +51,14 @@ export function SeletorHorario({ doctorId, date, value, onChange, excludeId }) {
           style={{
             padding: '24px 16px',
             textAlign: 'center',
-            background: '#f8faf7',
+            background: 'var(--surface-subtle, #f8faf7)',
             borderRadius: '12px',
             border: '1px dashed #ccd9cb',
             margin: '12px 0',
           }}
         >
           <Icone name="clock" size={24} style={{ color: '#54867b', opacity: 0.7, marginBottom: '6px' }} />
-          <p style={{ margin: '4px 0 2px', fontWeight: 600, color: '#273831', fontSize: '14px' }}>
+          <p style={{ margin: '4px 0 2px', fontWeight: 600, color: 'var(--ink, #273831)', fontSize: '14px' }}>
             Nenhum horário disponível para esta data
           </p>
           <small style={{ color: '#68776f', fontSize: '12px' }}>
@@ -160,7 +160,7 @@ export function SeletorData({ value, onChange, doctorId, excludeId }) {
           <div
             style={{
               padding: '16px',
-              background: '#f8faf7',
+              background: 'var(--surface-subtle, #f8faf7)',
               borderRadius: '10px',
               border: '1px dashed #d0dcd0',
               textAlign: 'center',

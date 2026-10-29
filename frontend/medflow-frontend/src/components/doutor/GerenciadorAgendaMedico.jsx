@@ -360,7 +360,7 @@ export default function GerenciadorAgendaMedico({ doctorId: propDoctorId }) {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          background: '#f3f7f2',
+          background: 'var(--surface-subtle, #f3f7f2)',
           border: '1px solid #dfe6dc',
           borderRadius: '12px',
           padding: '12px 18px',
@@ -441,8 +441,8 @@ export default function GerenciadorAgendaMedico({ doctorId: propDoctorId }) {
               style={{
                 display: 'flex',
                 flexDirection: 'column',
-                background: isPastDate ? '#f6f7f6' : isTodayDate ? '#f8fbf6' : '#ffffff',
-                border: isTodayDate ? '2px solid #54867b' : isPastDate ? '1px solid #e2e8e0' : '1px solid #dfe6dc',
+                background: isPastDate ? 'var(--surface-past, #f6f7f6)' : isTodayDate ? 'var(--surface-today, #f8fbf6)' : 'var(--surface-card, #ffffff)',
+                border: isTodayDate ? '2px solid var(--primary, #54867b)' : isPastDate ? '1px solid var(--border-subtle, #e2e8e0)' : '1px solid var(--border-card, #dfe6dc)',
                 borderRadius: '12px',
                 minHeight: '440px',
                 boxShadow: isPastDate ? 'none' : '0 2px 8px rgba(0,0,0,0.04)',
@@ -456,12 +456,12 @@ export default function GerenciadorAgendaMedico({ doctorId: propDoctorId }) {
               <div
                 style={{
                   padding: '12px 10px',
-                  background: isPastDate ? '#e3eae1' : isTodayDate ? '#54867b' : '#edf4ec',
-                  color: isPastDate ? '#6c7d73' : isTodayDate ? '#ffffff' : '#273831',
+                  background: isPastDate ? 'var(--surface-past-header, #e3eae1)' : isTodayDate ? '#54867b' : 'var(--surface-header, #edf4ec)',
+                  color: isPastDate ? 'var(--muted, #6c7d73)' : isTodayDate ? '#ffffff' : 'var(--ink, #273831)',
                   borderTopLeftRadius: '10px',
                   borderTopRightRadius: '10px',
                   textAlign: 'center',
-                  borderBottom: '1px solid #dfe6dc',
+                  borderBottom: '1px solid var(--border-card, #dfe6dc)',
                 }}
               >
                 <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.6px' }}>
@@ -482,7 +482,7 @@ export default function GerenciadorAgendaMedico({ doctorId: propDoctorId }) {
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  background: isPastDate ? '#f0f3ef' : '#fafbfa',
+                  background: isPastDate ? 'var(--surface-past, #f0f3ef)' : 'var(--surface-subtle, #fafbfa)',
                   borderBottom: '1px solid #edf1ea',
                   gap: '4px',
                 }}
@@ -492,7 +492,7 @@ export default function GerenciadorAgendaMedico({ doctorId: propDoctorId }) {
                     fontSize: '11px',
                     fontWeight: 700,
                     color: isPastDate ? '#7c8d83' : daySlots.length > 0 ? '#336830' : '#859389',
-                    background: isPastDate ? '#e6ece4' : daySlots.length > 0 ? '#eaf5e7' : '#f0f2ef',
+                    background: isPastDate ? 'var(--surface-tag, #e6ece4)' : daySlots.length > 0 ? 'var(--badge-bg, #eaf5e7)' : 'var(--surface-subtle, #f0f2ef)',
                     padding: '2px 6px',
                     borderRadius: '6px',
                   }}
@@ -547,7 +547,7 @@ export default function GerenciadorAgendaMedico({ doctorId: propDoctorId }) {
                         textAlign: 'center',
                         color: '#8b9b90',
                         fontSize: '11px',
-                        background: '#f8faf7',
+                        background: 'var(--surface-subtle, #f8faf7)',
                         margin: 'auto 0',
                       }}
                     >
@@ -672,7 +672,7 @@ export default function GerenciadorAgendaMedico({ doctorId: propDoctorId }) {
                           padding: '6px',
                           borderRadius: '6px',
                           border: '1px dashed #a4c0b4',
-                          background: '#f4f8f4',
+                          background: 'var(--surface-subtle, #f4f8f4)',
                           color: '#3f6d63',
                           fontSize: '11px',
                           fontWeight: 600,
@@ -707,7 +707,7 @@ export default function GerenciadorAgendaMedico({ doctorId: propDoctorId }) {
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                background: '#edf4ed',
+                background: 'var(--surface-tag, #edf4ed)',
                 border: '1px solid #d3e2d1',
                 borderRadius: '10px',
                 padding: '12px 16px',
@@ -718,7 +718,7 @@ export default function GerenciadorAgendaMedico({ doctorId: propDoctorId }) {
                 <span style={{ fontSize: '11px', fontWeight: 700, color: '#446654', textTransform: 'uppercase' }}>
                   Dia Selecionado
                 </span>
-                <p style={{ margin: '2px 0 0', fontWeight: 700, color: '#273831', fontSize: '15px' }}>
+                <p style={{ margin: '2px 0 0', fontWeight: 700, color: 'var(--ink, #273831)', fontSize: '15px' }}>
                   {modalDayName} ({formatDate(modalTargetDate, { day: '2-digit', month: 'long', year: 'numeric' })})
                 </p>
               </div>
@@ -733,7 +733,7 @@ export default function GerenciadorAgendaMedico({ doctorId: propDoctorId }) {
                   padding: '6px 10px',
                   borderRadius: '8px',
                   border: '1px solid #bcc9b9',
-                  background: '#ffffff',
+                  background: 'var(--surface-card, #ffffff)',
                   fontSize: '12px',
                   fontWeight: 600,
                 }}
@@ -758,10 +758,10 @@ export default function GerenciadorAgendaMedico({ doctorId: propDoctorId }) {
                 borderRadius: '10px',
                 padding: '14px',
                 marginBottom: '14px',
-                background: '#ffffff',
+                background: 'var(--surface-card, #ffffff)',
               }}
             >
-              <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#273831', margin: '0 0 10px' }}>
+              <h4 style={{ fontSize: '13px', fontWeight: 700, color: 'var(--ink, #273831)', margin: '0 0 10px' }}>
                 1. Adicionar um horário específico:
               </h4>
               <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
@@ -798,10 +798,10 @@ export default function GerenciadorAgendaMedico({ doctorId: propDoctorId }) {
                 borderRadius: '10px',
                 padding: '14px',
                 marginBottom: '14px',
-                background: '#ffffff',
+                background: 'var(--surface-card, #ffffff)',
               }}
             >
-              <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#273831', margin: '0 0 10px' }}>
+              <h4 style={{ fontSize: '13px', fontWeight: 700, color: 'var(--ink, #273831)', margin: '0 0 10px' }}>
                 2. Adicionar por faixa de horários (Ex: Manhã ou Tarde):
               </h4>
               <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
@@ -865,10 +865,10 @@ export default function GerenciadorAgendaMedico({ doctorId: propDoctorId }) {
                 borderRadius: '10px',
                 padding: '14px',
                 marginBottom: '16px',
-                background: '#ffffff',
+                background: 'var(--surface-card, #ffffff)',
               }}
             >
-              <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#273831', margin: '0 0 8px' }}>
+              <h4 style={{ fontSize: '13px', fontWeight: 700, color: 'var(--ink, #273831)', margin: '0 0 8px' }}>
                 3. Seleção direta de horários:
               </h4>
               <small style={{ display: 'block', color: '#74847b', marginBottom: '10px' }}>
@@ -895,7 +895,7 @@ export default function GerenciadorAgendaMedico({ doctorId: propDoctorId }) {
                           padding: '6px 4px',
                           borderRadius: '6px',
                           border: isSelected ? '1px solid #3f6d63' : '1px solid #d7dfd3',
-                          background: isSelected ? '#3f6d63' : '#f8faf7',
+                          background: isSelected ? 'var(--primary-dark, #3f6d63)' : 'var(--surface-subtle, #f8faf7)',
                           color: isSelected ? '#ffffff' : '#3c4c44',
                           fontWeight: 700,
                           fontSize: '12px',
@@ -956,7 +956,7 @@ export default function GerenciadorAgendaMedico({ doctorId: propDoctorId }) {
               {/* Data de Origem */}
               <div
                 style={{
-                  background: '#f4f8f4',
+                  background: 'var(--surface-subtle, #f4f8f4)',
                   border: '1.5px solid #c7d9c4',
                   borderRadius: '12px',
                   padding: '16px',
@@ -997,8 +997,8 @@ export default function GerenciadorAgendaMedico({ doctorId: propDoctorId }) {
                       border: '1.5px solid #a3beaf',
                       fontSize: '15px',
                       fontWeight: 700,
-                      background: '#ffffff',
-                      color: '#23382f',
+                      background: 'var(--surface-card, #ffffff)',
+                      color: 'var(--ink, #23382f)',
                       cursor: 'pointer',
                     }}
                   />
@@ -1051,7 +1051,7 @@ export default function GerenciadorAgendaMedico({ doctorId: propDoctorId }) {
               {/* Data de Destino */}
               <div
                 style={{
-                  background: '#ffffff',
+                  background: 'var(--surface-card, #ffffff)',
                   border: isTargetDatePast ? '1.5px solid #e57373' : '1.5px solid #d2e1cf',
                   borderRadius: '12px',
                   padding: '16px',
@@ -1093,8 +1093,8 @@ export default function GerenciadorAgendaMedico({ doctorId: propDoctorId }) {
                       border: isTargetDatePast ? '1.5px solid #d32f2f' : '1.5px solid #a3beaf',
                       fontSize: '15px',
                       fontWeight: 700,
-                      background: isTargetDatePast ? '#fff5f5' : '#ffffff',
-                      color: '#23382f',
+                      background: isTargetDatePast ? '#fff5f5' : 'var(--surface-card, #ffffff)',
+                      color: 'var(--ink, #23382f)',
                       cursor: 'pointer',
                     }}
                   />

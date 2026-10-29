@@ -3838,3 +3838,594 @@ td small {
   font-weight: 600;
 }
 
+
+
+/* ==========================================================================
+   ACESSIBILIDADE, MODO ESCURO E USABILIDADE MOBILE (MEDFLOW)
+   ========================================================================== */
+
+/* 1. MODAL DE ACESSIBILIDADE */
+.modal-scrim.a11y-scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(14, 21, 18, 0.65);
+  backdrop-filter: blur(6px);
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+.modal-scrim.a11y-scrim.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+.a11y-modal-card {
+  background: #ffffff;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 24px;
+}
+.a11y-modal-card .modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+.a11y-active {
+  border-color: var(--primary) !important;
+  color: var(--primary) !important;
+  font-weight: 700 !important;
+}
+
+/* 2. TEMA ESCURO (DARK MODE) */
+[data-theme="dark"] {
+  --ink: #e5eee9;
+  --muted: #95a89e;
+  --line: #263830;
+  --shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+  color-scheme: dark;
+
+  --bg-app: #0d1512;
+  --surface-card: #15221d;
+  --surface-panel: #14201b;
+  --surface-subtle: #1a2923;
+  --surface-today: #1c2e26;
+  --surface-past: #111a16;
+  --surface-past-header: #15201b;
+  --surface-header: #1d3027;
+  --surface-tag: #1c2e27;
+  --surface-input: #121c18;
+  --surface-hover: #1f332a;
+  --badge-bg: #1f332a;
+  --border-card: #283d33;
+  --border-subtle: #24352d;
+  --hero-gradient: linear-gradient(135deg, #162620 0%, #101c17 100%);
+}
+
+[data-theme="dark"],
+[data-theme="dark"] body {
+  background: #0d1512;
+  color: #e5eee9;
+}
+
+/* Painéis, modais e cartões estruturais */
+[data-theme="dark"] .panel,
+[data-theme="dark"] .modal,
+[data-theme="dark"] .a11y-modal-card,
+[data-theme="dark"] .auth-card,
+[data-theme="dark"] .specialty-card,
+[data-theme="dark"] .doctor-card,
+[data-theme="dark"] .record-card,
+[data-theme="dark"] .table-card,
+[data-theme="dark"] .data-table,
+[data-theme="dark"] .wellness-card,
+[data-theme="dark"] .metric,
+[data-theme="dark"] .document-item,
+[data-theme="dark"] .portal-card,
+[data-theme="dark"] .success-summary,
+[data-theme="dark"] .responsive-table tr {
+  background: #14201b !important;
+  border-color: #263830 !important;
+  color: #e5eee9 !important;
+}
+
+[data-theme="dark"] .sidebar {
+  background: #111a16;
+  border-right-color: #23342d;
+}
+
+[data-theme="dark"] .top-header {
+  background: rgba(17, 26, 22, 0.94);
+  border-bottom-color: #23342d;
+}
+
+[data-theme="dark"] .bottom-navigation {
+  background: rgba(17, 26, 22, 0.96);
+  border-top-color: #23342d;
+}
+
+[data-theme="dark"] .bottom-navigation a {
+  color: #83978c;
+}
+
+[data-theme="dark"] .bottom-navigation a.active {
+  color: #6ed6b8;
+  background: #1c2d26;
+}
+
+[data-theme="dark"] .sidebar nav a {
+  color: #a4b7ad;
+}
+
+[data-theme="dark"] .sidebar nav a:hover {
+  background: #1a2923;
+  color: #e5eee9;
+}
+
+[data-theme="dark"] .sidebar nav a.active {
+  background: #1e3129;
+  color: #6ed6b8;
+}
+
+[data-theme="dark"] .care-tip {
+  background: #182721;
+  border-color: #283e34;
+  color: #d1ded7;
+}
+
+[data-theme="dark"] .sidebar-profile {
+  background: #16241e;
+  border-color: #263930;
+  color: #e5eee9;
+}
+
+[data-theme="dark"] .sidebar-profile:hover {
+  background: #1c2d26;
+}
+
+/* Elementos do Paciente */
+[data-theme="dark"] .patient-hero {
+  background: linear-gradient(135deg, #162620 0%, #101c17 100%) !important;
+  border-color: #263a31 !important;
+}
+
+[data-theme="dark"] .hero-arch {
+  background: #182821 !important;
+  border-color: #273b31 !important;
+}
+
+[data-theme="dark"] .floating-label {
+  background: rgba(20, 33, 26, 0.95) !important;
+  border-color: #2a3f34 !important;
+  color: #e5eee9 !important;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5) !important;
+}
+[data-theme="dark"] .floating-label small {
+  color: #92a69a !important;
+}
+
+[data-theme="dark"] .appointment-card {
+  background: #15221d !important;
+  border-color: #273b32 !important;
+  color: #e5eee9 !important;
+}
+[data-theme="dark"] .appointment-card-top,
+[data-theme="dark"] .appointment-card-bottom {
+  background: #121c17 !important;
+  border-color: #22342c !important;
+}
+
+[data-theme="dark"] .date-strip button {
+  background: #16241e !important;
+  border-color: #283e33 !important;
+  color: #e5eee9 !important;
+}
+[data-theme="dark"] .date-strip button span {
+  color: #92a69b !important;
+}
+[data-theme="dark"] .date-strip button.selected {
+  background: #233b30 !important;
+  border-color: #5fa194 !important;
+  color: #72e0bf !important;
+}
+
+[data-theme="dark"] .time-slots button {
+  background: #16241e !important;
+  border-color: #283e33 !important;
+  color: #d1ded7 !important;
+}
+[data-theme="dark"] .time-slots button:hover:not(:disabled) {
+  background: #1e3329 !important;
+}
+[data-theme="dark"] .time-slots button.selected {
+  background: #468779 !important;
+  border-color: #5fa194 !important;
+  color: #ffffff !important;
+}
+[data-theme="dark"] .time-slots button:disabled {
+  background: #101815 !important;
+  border-color: #1e2c25 !important;
+  color: #54645c !important;
+}
+
+[data-theme="dark"] .tabs {
+  background: #121d18 !important;
+  border-color: #24362e !important;
+}
+[data-theme="dark"] .tabs button {
+  color: #93a79d !important;
+}
+[data-theme="dark"] .tabs button.selected {
+  background: #1e3128 !important;
+  color: #72e0bf !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] .booking-progress {
+  background: #14201b !important;
+  border-color: #263830 !important;
+}
+[data-theme="dark"] .booking-progress li {
+  color: #8fa297 !important;
+}
+[data-theme="dark"] .booking-progress li > span {
+  background: #1a2a22 !important;
+  border-color: #293f34 !important;
+  color: #a2b7ac !important;
+}
+[data-theme="dark"] .booking-progress li.current > span {
+  background: #468779 !important;
+  color: #ffffff !important;
+  border-color: #5fa194 !important;
+}
+[data-theme="dark"] .booking-progress li.complete > span {
+  background: #1c3227 !important;
+  color: #72e0bf !important;
+}
+
+[data-theme="dark"] .chosen-specialty {
+  background: #16261f !important;
+  border-color: #283d32 !important;
+  color: #a4beaf !important;
+}
+
+[data-theme="dark"] .empty-time-slots,
+[data-theme="dark"] .empty-icon {
+  background: #16241e !important;
+  border-color: #283c31 !important;
+}
+
+[data-theme="dark"] .rating {
+  background: #232a1e !important;
+  color: #e4c478 !important;
+}
+
+/* Agenda / Calendário do Especialista / Clínica */
+[data-theme="dark"] .schedule-event {
+  background: #16251e !important;
+  border-color: #273c31 !important;
+  border-left-color: #5fa194 !important;
+  color: #e5eee9 !important;
+}
+[data-theme="dark"] .schedule-event:hover {
+  background: #1c2f26 !important;
+}
+[data-theme="dark"] .month-day {
+  border-color: #24362e !important;
+  background: #14201b !important;
+}
+[data-theme="dark"] .month-day.outside {
+  background: #101915 !important;
+  color: #5a6d63 !important;
+}
+[data-theme="dark"] .month-day.today {
+  background: #192b22 !important;
+}
+[data-theme="dark"] .month-weekdays span {
+  color: #8da497 !important;
+}
+[data-theme="dark"] .timeline-entry {
+  background: #16251e !important;
+  border-color: #273c31 !important;
+}
+[data-theme="dark"] .notifications article.read {
+  background: #121d18 !important;
+}
+[data-theme="dark"] .quick-links > a {
+  border-color: #24362e !important;
+}
+
+/* Inputs, selects e textareas */
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+  background: #121c18 !important;
+  border-color: #2c4238 !important;
+  color: #edf3f0 !important;
+}
+
+[data-theme="dark"] input:focus,
+[data-theme="dark"] select:focus,
+[data-theme="dark"] textarea:focus {
+  border-color: #5fa194 !important;
+  box-shadow: 0 0 0 3px rgba(95, 161, 148, 0.2) !important;
+}
+
+/* Botões */
+[data-theme="dark"] .secondary {
+  background: #182620;
+  border-color: #2c4237;
+  color: #e5eee9;
+}
+[data-theme="dark"] .secondary:hover {
+  background: #20332b;
+}
+
+[data-theme="dark"] .icon-button {
+  background: #182620;
+  border-color: #2c4237;
+  color: #e5eee9;
+}
+[data-theme="dark"] .icon-button:hover {
+  background: #20332b;
+}
+
+[data-theme="dark"] .primary {
+  background: #468779;
+}
+[data-theme="dark"] .primary:hover {
+  background: #397064;
+}
+
+/* Badges e tags */
+[data-theme="dark"] .sage,
+[data-theme="dark"] .workspace-tag .icon-box,
+[data-theme="dark"] .demo-pill {
+  background: #1b2d25;
+  color: #92bfae;
+  border-color: #294237;
+}
+
+[data-theme="dark"] .tag,
+[data-theme="dark"] .badge {
+  background: #1a2a23;
+  color: #a0b8ac;
+  border-color: #293f35;
+}
+
+[data-theme="dark"] .toast {
+  background: #172620;
+  border-color: #2b4238;
+  color: #e5eee9;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .auth-page {
+  background: #0d1512;
+}
+
+[data-theme="dark"] .brand {
+  color: #b3d9c7;
+}
+
+[data-theme="dark"] .brand-symbol {
+  background: #192a23;
+  color: #6ed6b8;
+}
+
+[data-theme="dark"] .brand-period {
+  color: #6ed6b8;
+}
+
+/* Tabelas */
+[data-theme="dark"] table,
+[data-theme="dark"] thead,
+[data-theme="dark"] tbody,
+[data-theme="dark"] tr {
+  border-color: #24362e !important;
+}
+[data-theme="dark"] th {
+  background: #111a16 !important;
+  border-color: #24362e !important;
+  color: #8fa498 !important;
+}
+[data-theme="dark"] td {
+  border-color: #203129 !important;
+  color: #e5eee9 !important;
+}
+
+/* Wildcards agressivos para eliminar qualquer fundo branco dentro de elementos */
+[data-theme="dark"] [style*="background: #fff"],
+[data-theme="dark"] [style*="background:#fff"],
+[data-theme="dark"] [style*="background: white"],
+[data-theme="dark"] [style*="background: rgb(255, 255, 255)"],
+[data-theme="dark"] [style*="background:#ffffff"],
+[data-theme="dark"] [style*="background: #ffffff"] {
+  background: #15221d !important;
+  border-color: #283d33 !important;
+  color: #e5eee9 !important;
+}
+
+[data-theme="dark"] [style*="background: #f8fafc"],
+[data-theme="dark"] [style*="background: #f8faf7"],
+[data-theme="dark"] [style*="background: #f9fcf8"],
+[data-theme="dark"] [style*="background: #f4f8f4"],
+[data-theme="dark"] [style*="background: #f3f7f2"],
+[data-theme="dark"] [style*="background: #edf3e9"],
+[data-theme="dark"] [style*="background: #edf4ed"],
+[data-theme="dark"] [style*="background: #fafbfa"],
+[data-theme="dark"] [style*="background: #f0f3ef"],
+[data-theme="dark"] [style*="background: #f6f7f6"],
+[data-theme="dark"] [style*="background: #fbfcfb"],
+[data-theme="dark"] [style*="background: #eaf4ee"],
+[data-theme="dark"] [style*="background: #eaf3fa"],
+[data-theme="dark"] [style*="background: #f0f8ee"],
+[data-theme="dark"] [style*="background: #eaf4e6"],
+[data-theme="dark"] [style*="background: #fdf4e7"],
+[data-theme="dark"] [style*="background: #f7f2e9"],
+[data-theme="dark"] [style*="background: #fbf5e9"],
+[data-theme="dark"] [style*="background: #ecfdf5"],
+[data-theme="dark"] [style*="background: #fdfefa"],
+[data-theme="dark"] [style*="background: #f9fafb"],
+[data-theme="dark"] [style*="background: #e6ece4"],
+[data-theme="dark"] [style*="background: #eaf5e7"],
+[data-theme="dark"] [style*="background: #e3eae1"] {
+  background: #192822 !important;
+  border-color: #293d33 !important;
+  color: #e5eee9 !important;
+}
+
+[data-theme="dark"] [style*="background: linear-gradient(135deg, #f0fdf4"],
+[data-theme="dark"] [style*="background: linear-gradient(135deg, #f0fdfa"] {
+  background: linear-gradient(135deg, #162620 0%, #101c17 100%) !important;
+  border-color: #273d32 !important;
+}
+
+[data-theme="dark"] [style*="color: #273831"],
+[data-theme="dark"] [style*="color: #1e293b"],
+[data-theme="dark"] [style*="color: #0f172a"],
+[data-theme="dark"] [style*="color: #334155"],
+[data-theme="dark"] [style*="color: #23382f"],
+[data-theme="dark"] [style*="color: #26382f"],
+[data-theme="dark"] [style*="color: #314e44"],
+[data-theme="dark"] [style*="color: #134e4a"],
+[data-theme="dark"] [style*="color: #2e473d"],
+[data-theme="dark"] [style*="color: #2d5442"] {
+  color: #e5eee9 !important;
+}
+
+[data-theme="dark"] [style*="color: #64748b"],
+[data-theme="dark"] [style*="color: #68776f"],
+[data-theme="dark"] [style*="color: #687b70"],
+[data-theme="dark"] [style*="color: #55655d"],
+[data-theme="dark"] [style*="color: #74847b"],
+[data-theme="dark"] [style*="color: #63756b"],
+[data-theme="dark"] [style*="color: #7c8e84"],
+[data-theme="dark"] [style*="color: #697a70"],
+[data-theme="dark"] [style*="color: #56695e"],
+[data-theme="dark"] [style*="color: #475569"],
+[data-theme="dark"] [style*="color: #887a60"],
+[data-theme="dark"] [style*="color: #9b9281"],
+[data-theme="dark"] [style*="color: #9a8c71"] {
+  color: #9ab0a4 !important;
+}
+
+/* 3. CONTROLE DE TAMANHO DE FONTE */
+html[data-font-size="large"] body {
+  font-size: 15px;
+}
+html[data-font-size="large"] h1 {
+  font-size: 33px;
+}
+html[data-font-size="large"] h2 {
+  font-size: 21px;
+}
+html[data-font-size="large"] p,
+html[data-font-size="large"] input,
+html[data-font-size="large"] button,
+html[data-font-size="large"] select {
+  font-size: 14px;
+}
+
+html[data-font-size="xlarge"] body {
+  font-size: 17px;
+}
+html[data-font-size="xlarge"] h1 {
+  font-size: 36px;
+}
+html[data-font-size="xlarge"] h2 {
+  font-size: 23px;
+}
+html[data-font-size="xlarge"] p,
+html[data-font-size="xlarge"] input,
+html[data-font-size="xlarge"] button,
+html[data-font-size="xlarge"] select {
+  font-size: 15px;
+}
+
+/* 4. ALTO CONTRASTE */
+[data-high-contrast="true"] {
+  --line: #4a5c53;
+}
+
+[data-high-contrast="true"] .panel,
+[data-high-contrast="true"] .modal,
+[data-high-contrast="true"] .a11y-modal-card,
+[data-high-contrast="true"] .auth-card,
+[data-high-contrast="true"] input,
+[data-high-contrast="true"] select,
+[data-high-contrast="true"] textarea,
+[data-high-contrast="true"] .button {
+  border-width: 2px !important;
+}
+
+[data-high-contrast="true"] :focus-visible {
+  outline: 3px solid #ffbf00 !important;
+  outline-offset: 3px !important;
+}
+
+[data-high-contrast="true"] strong,
+[data-high-contrast="true"] b,
+[data-high-contrast="true"] h1,
+[data-high-contrast="true"] h2,
+[data-high-contrast="true"] h3 {
+  font-weight: 750 !important;
+}
+
+/* 5. FONTE MAIS LEGÍVEL (DYSLEXIA-FRIENDLY & HIGH-LEGIBILITY) */
+[data-readable-font="true"],
+[data-readable-font="true"] body,
+[data-readable-font="true"] input,
+[data-readable-font="true"] button,
+[data-readable-font="true"] select,
+[data-readable-font="true"] textarea {
+  font-family: 'Segoe UI', -apple-system, Arial, sans-serif !important;
+  letter-spacing: 0.03em !important;
+  word-spacing: 0.05em !important;
+  line-height: 1.7 !important;
+}
+
+/* 6. REDUÇÃO DE MOVIMENTO */
+[data-reduce-motion="true"] *,
+[data-reduce-motion="true"] *::before,
+[data-reduce-motion="true"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* 7. USABILIDADE NO CELULAR (MOBILE REFINEMENTS) */
+@media (max-width: 767px) {
+  /* Evita que qualquer conteúdo ou botão final fique coberto pela navegação inferior fixa */
+  .page-content {
+    padding-bottom: calc(85px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  /* Suporte a barra home segura de iPhones/Androids */
+  .bottom-navigation {
+    padding-bottom: calc(9px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  /* Botões de acessibilidade e tema no cabeçalho mobile */
+  .a11y-toggle-btn,
+  .theme-toggle-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  /* Garante área de clique acessível em botões de ação */
+  .button,
+  .icon-button {
+    min-height: 40px;
+  }
+}

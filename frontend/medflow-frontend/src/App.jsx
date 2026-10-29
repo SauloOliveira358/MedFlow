@@ -1,9 +1,10 @@
-﻿import { Suspense, lazy } from 'react';
+import { Suspense, lazy } from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
 import LayoutArea from './layouts/LayoutArea';
 import BoasVindas from './pages/BoasVindas';
 import RequerConta from './components/common/RequerConta';
 import { EsqueletoCarregamento, EstadoVazio } from './components/common/InterfaceUI';
+import ModalAcessibilidade from './components/common/ModalAcessibilidade';
 import { PainelPaciente, ConsultasPaciente } from './pages/paciente/PaginasPaciente';
 import PainelMedico from './pages/doutor/PainelMedico';
 import PainelClinica from './pages/clinica/PainelClinica';
@@ -25,85 +26,88 @@ const PainelConcorrencia = lazy(() => import('./pages/clinica/PainelConcorrencia
 
 export default function App() {
   return (
-    <Suspense fallback={<EsqueletoCarregamento />}>
-      <Routes>
-        <Route path="/" element={<BoasVindas key="login" />} />
-        <Route path="/cadastro" element={<BoasVindas key="register" register />} />
-        <Route path="/concorrencia" element={<PainelConcorrencia />} />
-        <Route
-          path="/paciente"
-          element={
-            <RequerConta area="paciente">
-              <LayoutArea area="paciente" />
-            </RequerConta>
-          }
-        >
-          <Route index element={<PainelPaciente />} />
-          <Route path="agendar" element={<AgendamentoConsulta key="paciente" />} />
-          <Route path="agendamentos" element={<ConsultasPaciente key="upcoming" />} />
-          <Route path="historico" element={<ConsultasPaciente key="history" history />} />
-          <Route path="notificacoes" element={<Notificacoes area="paciente" />} />
-          <Route path="perfil" element={<Perfil area="paciente" />} />
-        </Route>
-        {['medico', 'clinica'].map((area) => (
+    <>
+      <ModalAcessibilidade />
+      <Suspense fallback={<EsqueletoCarregamento />}>
+        <Routes>
+          <Route path="/" element={<BoasVindas key="login" />} />
+          <Route path="/cadastro" element={<BoasVindas key="register" register />} />
+          <Route path="/concorrencia" element={<PainelConcorrencia />} />
           <Route
-            key={area}
-            path={`/${area}`}
+            path="/paciente"
             element={
-              <RequerConta area={area}>
-                <LayoutArea area={area} />
+              <RequerConta area="paciente">
+                <LayoutArea area="paciente" />
               </RequerConta>
             }
           >
-            <Route index element={area === 'medico' ? <PainelMedico /> : <PainelClinica />} />
-            <Route path="agenda" element={<Agenda key={area + 'agenda'} area={area} />} />
-            <Route path="agendar" element={<AgendamentoConsulta key={area} area={area} />} />
-            <Route
-              path="agendamentos"
-              element={<Agenda key={area + 'appointments'} area={area} appointmentsPage />}
-            />
-            <Route path="pacientes" element={<Pacientes area={area} />} />
-            <Route path="prontuarios" element={<Prontuarios key={area + 'records'} area={area} />} />
-            <Route path="prontuarios/:id" element={<DetalhesProntuario area={area} />} />
-            {area === 'medico' ? (
-              <>
-                <Route path="horarios" element={<GerenciadorAgendaMedico />} />
-                <Route path="agendados" element={<ConsultasMedico />} />
-                <Route path="agendado" element={<Navigate to="/medico/agendados" replace />} />
-                <Route
-                  path="atendimentos"
-                  element={<Navigate to={`/${area}/agenda`} replace />}
-                />
-                <Route path="notificacoes" element={<Notificacoes area={area} />} />
-                <Route path="perfil" element={<Perfil area={area} />} />
-              </>
-            ) : (
-              <>
-                <Route path="profissionais" element={<Profissionais />} />
-                <Route path="especialidades" element={<Especialidades />} />
-                <Route path="relatorios" element={<Relatorios />} />
-                <Route path="concorrencia" element={<PainelConcorrencia />} />
-                <Route path="configuracoes" element={<Configuracoes />} />
-              </>
-            )}
+            <Route index element={<PainelPaciente />} />
+            <Route path="agendar" element={<AgendamentoConsulta key="paciente" />} />
+            <Route path="agendamentos" element={<ConsultasPaciente key="upcoming" />} />
+            <Route path="historico" element={<ConsultasPaciente key="history" history />} />
+            <Route path="notificacoes" element={<Notificacoes area="paciente" />} />
+            <Route path="perfil" element={<Perfil area="paciente" />} />
           </Route>
-        ))}
-        <Route path="/medicos/agendado" element={<Navigate to="/medico/agendados" replace />} />
-        <Route path="/medicos/agendados" element={<Navigate to="/medico/agendados" replace />} />
-        <Route path="/medicos/*" element={<Navigate to="/medico" replace />} />
-        <Route path="/medico/agendado" element={<Navigate to="/medico/agendados" replace />} />
-        <Route
-          path="*"
-          element={
-            <EstadoVazio
-              title="Esse caminho não foi encontrado"
-              description="Vamos voltar ao seu espaço de cuidado?"
-              to="/"
-              action="Voltar ao início"
-            />
-          }
-        />
-      </Routes>
-    </Suspense>
+          {['medico', 'clinica'].map((area) => (
+            <Route
+              key={area}
+              path={`/${area}`}
+              element={
+                <RequerConta area={area}>
+                  <LayoutArea area={area} />
+                </RequerConta>
+              }
+            >
+              <Route index element={area === 'medico' ? <PainelMedico /> : <PainelClinica />} />
+              <Route path="agenda" element={<Agenda key={area + 'agenda'} area={area} />} />
+              <Route path="agendar" element={<AgendamentoConsulta key={area} area={area} />} />
+              <Route
+                path="agendamentos"
+                element={<Agenda key={area + 'appointments'} area={area} appointmentsPage />}
+              />
+              <Route path="pacientes" element={<Pacientes area={area} />} />
+              <Route path="prontuarios" element={<Prontuarios key={area + 'records'} area={area} />} />
+              <Route path="prontuarios/:id" element={<DetalhesProntuario area={area} />} />
+              {area === 'medico' ? (
+                <>
+                  <Route path="horarios" element={<GerenciadorAgendaMedico />} />
+                  <Route path="agendados" element={<ConsultasMedico />} />
+                  <Route path="agendado" element={<Navigate to="/medico/agendados" replace />} />
+                  <Route
+                    path="atendimentos"
+                    element={<Navigate to={`/${area}/agenda`} replace />}
+                  />
+                  <Route path="notificacoes" element={<Notificacoes area={area} />} />
+                  <Route path="perfil" element={<Perfil area={area} />} />
+                </>
+              ) : (
+                <>
+                  <Route path="profissionais" element={<Profissionais />} />
+                  <Route path="especialidades" element={<Especialidades />} />
+                  <Route path="relatorios" element={<Relatorios />} />
+                  <Route path="concorrencia" element={<PainelConcorrencia />} />
+                  <Route path="configuracoes" element={<Configuracoes />} />
+                </>
+              )}
+            </Route>
+          ))}
+          <Route path="/medicos/agendado" element={<Navigate to="/medico/agendados" replace />} />
+          <Route path="/medicos/agendados" element={<Navigate to="/medico/agendados" replace />} />
+          <Route path="/medicos/*" element={<Navigate to="/medico" replace />} />
+          <Route path="/medico/agendado" element={<Navigate to="/medico/agendados" replace />} />
+          <Route
+            path="*"
+            element={
+              <EstadoVazio
+                title="Esse caminho não foi encontrado"
+                description="Vamos voltar ao seu espaço de cuidado?"
+                to="/"
+                action="Voltar ao início"
+              />
+            }
+          />
+        </Routes>
+      </Suspense>
+    </>
   );
 }

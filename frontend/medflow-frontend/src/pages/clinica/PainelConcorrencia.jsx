@@ -133,7 +133,7 @@ export default function PainelConcorrencia() {
           marginBottom: '28px',
         }}
       >
-        <div className="panel" style={{ padding: '20px', borderRadius: '12px', background: '#fff', border: '1px solid #e5e7eb' }}>
+        <div className="panel" style={{ padding: '20px', borderRadius: '12px', background: 'var(--surface-card, #fff)', border: '1px solid var(--border-card, #e5e7eb)' }}>
           <small style={{ color: '#6b7280', fontWeight: '600', textTransform: 'uppercase' }}>Solicitações Totais</small>
           <div style={{ fontSize: '32px', fontWeight: '800', color: '#111827', margin: '6px 0' }}>
             {metricas ? metricas.totalSolicitacoes : 0}
@@ -141,7 +141,7 @@ export default function PainelConcorrencia() {
           <span style={{ fontSize: '12px', color: '#059669' }}>Requisições concorrentes</span>
         </div>
 
-        <div className="panel" style={{ padding: '20px', borderRadius: '12px', background: '#fff', border: '1px solid #e5e7eb' }}>
+        <div className="panel" style={{ padding: '20px', borderRadius: '12px', background: 'var(--surface-card, #fff)', border: '1px solid var(--border-card, #e5e7eb)' }}>
           <small style={{ color: '#6b7280', fontWeight: '600', textTransform: 'uppercase' }}>Agendados com Sucesso</small>
           <div style={{ fontSize: '32px', fontWeight: '800', color: '#059669', margin: '6px 0' }}>
             {metricas ? metricas.agendamentosConcluidos : 0}
@@ -149,7 +149,7 @@ export default function PainelConcorrencia() {
           <span style={{ fontSize: '12px', color: '#059669' }}>100% íntegros no banco</span>
         </div>
 
-        <div className="panel" style={{ padding: '20px', borderRadius: '12px', background: '#fff', border: '1px solid #e5e7eb' }}>
+        <div className="panel" style={{ padding: '20px', borderRadius: '12px', background: 'var(--surface-card, #fff)', border: '1px solid var(--border-card, #e5e7eb)' }}>
           <small style={{ color: '#6b7280', fontWeight: '600', textTransform: 'uppercase' }}>Conflitos Bloqueados</small>
           <div style={{ fontSize: '32px', fontWeight: '800', color: '#d97706', margin: '6px 0' }}>
             {metricas ? metricas.rejeicoesConflito : 0}
@@ -157,7 +157,7 @@ export default function PainelConcorrencia() {
           <span style={{ fontSize: '12px', color: '#d97706' }}>Duplos agendamentos evitados</span>
         </div>
 
-        <div className="panel" style={{ padding: '20px', borderRadius: '12px', background: '#fff', border: '1px solid #e5e7eb' }}>
+        <div className="panel" style={{ padding: '20px', borderRadius: '12px', background: 'var(--surface-card, #fff)', border: '1px solid var(--border-card, #e5e7eb)' }}>
           <small style={{ color: '#6b7280', fontWeight: '600', textTransform: 'uppercase' }}>Tempo Médio</small>
           <div style={{ fontSize: '32px', fontWeight: '800', color: '#2563eb', margin: '6px 0' }}>
             {metricas ? `${metricas.tempoMedioMs}ms` : '0ms'}
@@ -165,7 +165,7 @@ export default function PainelConcorrencia() {
           <span style={{ fontSize: '12px', color: '#2563eb' }}>Latência média por requisição</span>
         </div>
 
-        <div className="panel" style={{ padding: '20px', borderRadius: '12px', background: '#fff', border: '1px solid #e5e7eb' }}>
+        <div className="panel" style={{ padding: '20px', borderRadius: '12px', background: 'var(--surface-card, #fff)', border: '1px solid var(--border-card, #e5e7eb)' }}>
           <small style={{ color: '#6b7280', fontWeight: '600', textTransform: 'uppercase' }}>Thread Pool Ativo</small>
           <div style={{ fontSize: '32px', fontWeight: '800', color: '#4f46e5', margin: '6px 0' }}>
             {metricas ? `${metricas.threadsAtivas} / ${metricas.tamanhoPool}` : '0 / 8'}
@@ -180,7 +180,7 @@ export default function PainelConcorrencia() {
         style={{
           padding: '24px',
           borderRadius: '16px',
-          background: 'linear-gradient(135deg, #f0fdfa 0%, #e6fffa 100%)',
+          background: 'var(--hero-gradient, linear-gradient(135deg, #f0fdfa 0%, #e6fffa 100%))',
           border: '1px solid #99f6e4',
           marginBottom: '28px',
         }}
@@ -204,7 +204,7 @@ export default function PainelConcorrencia() {
             <select
               value={totalThreads}
               onChange={(e) => setTotalThreads(Number(e.target.value))}
-              style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#fff' }}
+              style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-card, #cbd5e1)', background: 'var(--surface-card, #fff)' }}
               disabled={simulando}
             >
               <option value={10}>10 Threads simultâneas</option>
@@ -222,7 +222,7 @@ export default function PainelConcorrencia() {
               type="date"
               value={dataSimulacao}
               onChange={(e) => setDataSimulacao(e.target.value)}
-              style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#fff' }}
+              style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-card, #cbd5e1)', background: 'var(--surface-card, #fff)' }}
               disabled={simulando}
             />
           </div>
@@ -234,7 +234,7 @@ export default function PainelConcorrencia() {
             <select
               value={horarioSimulacao}
               onChange={(e) => setHorarioSimulacao(e.target.value)}
-              style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#fff' }}
+              style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-card, #cbd5e1)', background: 'var(--surface-card, #fff)' }}
               disabled={simulando}
             >
               <option value="09:00">09:00</option>
@@ -273,7 +273,7 @@ export default function PainelConcorrencia() {
             onClick={() => dispararSimulacao(false)}
             disabled={simulando}
             style={{
-              background: '#fff',
+              background: 'var(--surface-card, #fff)',
               color: '#dc2626',
               border: '2px solid #ef4444',
               padding: '12px 24px',
@@ -297,7 +297,7 @@ export default function PainelConcorrencia() {
               marginTop: '24px',
               padding: '20px',
               borderRadius: '12px',
-              background: '#fff',
+              background: 'var(--surface-card, #fff)',
               border: `2px solid ${resultadoSimulacao.inconsistenciasDetectadas > 0 ? '#ef4444' : '#059669'}`,
             }}
           >
@@ -327,11 +327,11 @@ export default function PainelConcorrencia() {
                 marginBottom: '16px',
               }}
             >
-              <div style={{ background: '#f9fafb', padding: '12px', borderRadius: '8px' }}>
+              <div style={{ background: 'var(--surface-subtle, #f9fafb)', padding: '12px', borderRadius: '8px' }}>
                 <small style={{ color: '#6b7280' }}>Solicitadas</small>
                 <div style={{ fontSize: '22px', fontWeight: '700' }}>{resultadoSimulacao.operacoesSolicitadas}</div>
               </div>
-              <div style={{ background: '#ecfdf5', padding: '12px', borderRadius: '8px' }}>
+              <div style={{ background: 'var(--badge-bg, #ecfdf5)', padding: '12px', borderRadius: '8px' }}>
                 <small style={{ color: '#047857' }}>Autorizadas</small>
                 <div style={{ fontSize: '22px', fontWeight: '700', color: '#047857' }}>
                   {resultadoSimulacao.operacoesConcluidas}
@@ -373,7 +373,7 @@ export default function PainelConcorrencia() {
       </div>
 
       {/* Terminal de Logs de Observabilidade ao Vivo (Item 12 do PDF) */}
-      <div className="panel" style={{ padding: '24px', borderRadius: '16px', background: '#fff', border: '1px solid #e5e7eb' }}>
+      <div className="panel" style={{ padding: '24px', borderRadius: '16px', background: 'var(--surface-card, #fff)', border: '1px solid var(--border-card, #e5e7eb)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
           <div>
             <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#111827', margin: 0 }}>

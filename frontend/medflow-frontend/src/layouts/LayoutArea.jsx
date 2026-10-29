@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import useDrawerFocus from '../hooks/useDrawerFocus';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useDemo } from '../context/DemoContext';
+import { useAcessibilidade } from '../context/AcessibilidadeContext';
 import { Marca, Avatar } from '../components/common/InterfaceUI';
 import { formatarNomeMedico } from '../utils/formatters';
 import Icone from '../components/common/Icone';
@@ -176,6 +177,7 @@ export const MobileBottomNavigation = NavegacaoInferiorMobile;
 export function CabecalhoSuperior({ area, onMenu }) {
   const navigate = useNavigate();
   const { account, logout } = useDemo();
+  const { effectiveTheme, toggleTheme, openModal } = useAcessibilidade();
   return (
     <header className="top-header">
       <div className="top-context">
@@ -188,7 +190,25 @@ export function CabecalhoSuperior({ area, onMenu }) {
         </span>
       </div>
       <div className="header-tools">
-        <span className="signed-in-email">{account.email}</span>
+        <span className="signed-in-email">{account?.email || ''}</span>
+        <button
+          type="button"
+          className="icon-button a11y-toggle-btn"
+          onClick={openModal}
+          aria-label="Abrir opções de acessibilidade e tema"
+          title="Acessibilidade e Tema (Alt+A)"
+        >
+          <Icone name="accessibility" size={18} />
+        </button>
+        <button
+          type="button"
+          className="icon-button theme-toggle-btn"
+          onClick={toggleTheme}
+          aria-label={`Mudar para modo ${effectiveTheme === 'dark' ? 'claro' : 'escuro'}`}
+          title={`Alternar modo ${effectiveTheme === 'dark' ? 'claro' : 'escuro'} (Alt+T)`}
+        >
+          <Icone name={effectiveTheme === 'dark' ? 'sun' : 'moon'} size={18} />
+        </button>
         {area !== 'clinica' && (
           <Link
             className="icon-button notification-link"

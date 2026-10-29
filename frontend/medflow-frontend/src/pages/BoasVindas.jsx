@@ -5,11 +5,13 @@ import FormularioPaciente from '../components/common/FormularioPaciente';
 import FormularioMedico from '../components/common/FormularioMedico';
 import Icone from '../components/common/Icone';
 import { useDemo } from '../context/DemoContext';
+import { useAcessibilidade } from '../context/AcessibilidadeContext';
 
 const Icon = Icone;
 
 export default function BoasVindas({ register = false }) {
   const { account, login, registerPatient, registerDoctor, storageError } = useDemo();
+  const { effectiveTheme, toggleTheme, openModal } = useAcessibilidade();
   const location = useLocation();
   const [params] = useSearchParams();
 
@@ -112,9 +114,31 @@ export default function BoasVindas({ register = false }) {
 
   return (
     <div className="auth-page">
-      <header>
-        <Brand />
-        <span className="demo-pill">Plataforma Médica & Paciente</span>
+      <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+          <Brand />
+          <span className="demo-pill">Plataforma Médica & Paciente</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <button
+            type="button"
+            className="icon-button a11y-toggle-btn"
+            onClick={openModal}
+            aria-label="Abrir opções de acessibilidade e tema"
+            title="Acessibilidade e Tema (Alt+A)"
+          >
+            <Icon name="accessibility" size={18} />
+          </button>
+          <button
+            type="button"
+            className="icon-button theme-toggle-btn"
+            onClick={toggleTheme}
+            aria-label={`Mudar para modo ${effectiveTheme === 'dark' ? 'claro' : 'escuro'}`}
+            title={`Alternar modo ${effectiveTheme === 'dark' ? 'claro' : 'escuro'} (Alt+T)`}
+          >
+            <Icon name={effectiveTheme === 'dark' ? 'sun' : 'moon'} size={18} />
+          </button>
+        </div>
       </header>
 
       <main className={`auth-layout ${register ? 'register-layout' : ''}`}>
@@ -187,7 +211,7 @@ export default function BoasVindas({ register = false }) {
             <div
               style={{
                 display: 'flex',
-                background: '#edf3e9',
+                background: 'var(--surface-tag, #edf3e9)',
                 padding: '4px',
                 borderRadius: '10px',
                 marginBottom: '20px',
@@ -203,8 +227,8 @@ export default function BoasVindas({ register = false }) {
                   fontSize: '13px',
                   fontWeight: 600,
                   transition: 'all 0.2s',
-                  background: roleType === 'paciente' ? '#fff' : 'transparent',
-                  color: roleType === 'paciente' ? '#2e473d' : '#697a70',
+                  background: roleType === 'paciente' ? 'var(--surface-card, #fff)' : 'transparent',
+                  color: roleType === 'paciente' ? 'var(--ink, #2e473d)' : 'var(--muted, #697a70)',
                   boxShadow: roleType === 'paciente' ? '0 2px 6px rgba(0,0,0,0.06)' : 'none',
                   display: 'flex',
                   alignItems: 'center',
@@ -224,8 +248,8 @@ export default function BoasVindas({ register = false }) {
                   fontSize: '13px',
                   fontWeight: 600,
                   transition: 'all 0.2s',
-                  background: roleType === 'medico' ? '#fff' : 'transparent',
-                  color: roleType === 'medico' ? '#2e473d' : '#697a70',
+                  background: roleType === 'medico' ? 'var(--surface-card, #fff)' : 'transparent',
+                  color: roleType === 'medico' ? 'var(--ink, #2e473d)' : 'var(--muted, #697a70)',
                   boxShadow: roleType === 'medico' ? '0 2px 6px rgba(0,0,0,0.06)' : 'none',
                   display: 'flex',
                   alignItems: 'center',

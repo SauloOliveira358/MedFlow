@@ -37,11 +37,21 @@ import {
   CircleHelp,
   Camera,
   Upload,
+  Sun,
+  Moon,
+  Accessibility,
+  Contrast,
+  Type,
 } from 'lucide-react';
 
 const icones = {
   camera: Camera,
   upload: Upload,
+  sun: Sun,
+  moon: Moon,
+  accessibility: Accessibility,
+  contrast: Contrast,
+  type: Type,
   heart: Heart,
   calendar: CalendarDays,
   clock: Clock3,
@@ -87,4 +97,3 @@ export default function Icone({ name, size = 20, ...props }) {
 
 export const Icon = Icone;
 export { Icone };
-
