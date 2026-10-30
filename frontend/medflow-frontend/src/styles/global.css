@@ -252,6 +252,52 @@ svg {
   background: #f7eae5;
   color: #bf8f7f;
 }
+
+.icon-box.amber {
+  background: #fdf4e7;
+  color: #b57929;
+}
+
+.btn-status-attended {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid #bee0b9;
+  background: #f0f8ee;
+  color: #31692d;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.btn-status-attended.active {
+  background: #488c43;
+  border-color: #488c43;
+  color: #ffffff;
+}
+
+.btn-status-no-show {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid #f6deb6;
+  background: #fdf6eb;
+  color: #8d5910;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.btn-status-no-show.active {
+  background: #cb8a27;
+  border-color: #cb8a27;
+  color: #ffffff;
+}
+
 .peach {
   background: #fbf0e3;
   color: #be9a6e;
@@ -4318,6 +4364,492 @@ td small {
 [data-theme="dark"] [style*="color: #9a8c71"] {
   color: #9ab0a4 !important;
 }
+
+
+/* ==========================================================================
+   MELHORIAS DO MODO ESCURO (BUSCADORES, MAPA, STATUS CANCELADOS, BOTÕES & COMPONENTES)
+   ========================================================================== */
+
+/* 1. TODOS OS BUSCADORES (SEARCH INPUTS) NO MODO ESCURO */
+[data-theme="dark"] .search-input {
+  background: #121c18 !important;
+  border: 1px solid #2c4238 !important;
+  color: #8fa598 !important;
+}
+
+[data-theme="dark"] .search-input:focus-within {
+  border-color: #5fa194 !important;
+  box-shadow: 0 0 0 3px rgba(95, 161, 148, 0.2) !important;
+}
+
+[data-theme="dark"] .search-input input {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  color: #edf3f0 !important;
+  padding: 12px 0 !important;
+}
+
+[data-theme="dark"] .search-input input::placeholder,
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder,
+[data-theme="dark"] .map-search-input::placeholder {
+  color: #6b8277 !important;
+}
+
+[data-theme="dark"] .search-input svg,
+[data-theme="dark"] .search-input .icon,
+[data-theme="dark"] .search-input i {
+  color: #7d9489 !important;
+}
+
+/* 2. MAPA LEAFLET E PAINÉIS DE LOCALIZAÇÃO NO MODO ESCURO */
+[data-theme="dark"] .map-viewport,
+[data-theme="dark"] .leaflet-container {
+  background: #111a16 !important;
+}
+
+/* Inversão suave apenas da camada de azulejos do mapa (mantém alfinetes e popups nítidos) */
+[data-theme="dark"] .leaflet-tile-pane {
+  filter: brightness(0.68) invert(1) contrast(1.15) hue-rotate(185deg) saturate(0.75);
+}
+
+[data-theme="dark"] .leaflet-control-zoom-in,
+[data-theme="dark"] .leaflet-control-zoom-out {
+  background-color: #16241e !important;
+  border-color: #283e33 !important;
+  color: #e5eee9 !important;
+}
+
+[data-theme="dark"] .leaflet-control-zoom-in:hover,
+[data-theme="dark"] .leaflet-control-zoom-out:hover {
+  background-color: #20332b !important;
+  color: #72e0bf !important;
+}
+
+[data-theme="dark"] .leaflet-popup-content-wrapper,
+[data-theme="dark"] .leaflet-popup-tip {
+  background: #15221d !important;
+  color: #e5eee9 !important;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.65) !important;
+  border: 1px solid #283d33 !important;
+}
+
+[data-theme="dark"] .leaflet-popup-content strong {
+  color: #72e0bf !important;
+}
+
+[data-theme="dark"] .leaflet-popup-content small {
+  color: #92a69b !important;
+}
+
+[data-theme="dark"] .leaflet-control-attribution {
+  background: rgba(17, 26, 22, 0.88) !important;
+  color: #788a80 !important;
+}
+
+[data-theme="dark"] .leaflet-control-attribution a {
+  color: #92a69b !important;
+}
+
+[data-theme="dark"] .map-header {
+  background: #14201b !important;
+  border-bottom-color: #263830 !important;
+}
+
+[data-theme="dark"] .map-badge {
+  background: #1b2d25 !important;
+  color: #72e0bf !important;
+  border: 1px solid #283d33 !important;
+}
+
+[data-theme="dark"] .map-clinic-name {
+  color: #e5eee9 !important;
+}
+
+[data-theme="dark"] .map-address-text {
+  color: #95a89e !important;
+}
+
+[data-theme="dark"] .map-search-panel {
+  background: #14201b !important;
+  border-bottom-color: #263830 !important;
+}
+
+[data-theme="dark"] .map-search-input {
+  background: #121c18 !important;
+  border: 1px solid #2c4238 !important;
+  color: #edf3f0 !important;
+}
+
+[data-theme="dark"] .map-search-input:focus {
+  border-color: #5fa194 !important;
+  box-shadow: 0 0 0 3px rgba(95, 161, 148, 0.2) !important;
+}
+
+[data-theme="dark"] .search-icon-inside,
+[data-theme="dark"] .map-clear-btn {
+  color: #7d9489 !important;
+}
+
+[data-theme="dark"] .map-clear-btn:hover {
+  color: #edf3f0 !important;
+}
+
+[data-theme="dark"] .map-search-feedback {
+  color: #72e0bf !important;
+}
+
+[data-theme="dark"] .map-results-dropdown {
+  background: #16241e !important;
+  border-color: #283e33 !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+}
+
+[data-theme="dark"] .map-results-dropdown .results-title {
+  color: #93a79d !important;
+  border-bottom-color: #24362e !important;
+}
+
+[data-theme="dark"] .map-results-dropdown .result-row {
+  color: #e5eee9 !important;
+  border-bottom-color: #24362e !important;
+}
+
+[data-theme="dark"] .map-results-dropdown .result-row:hover {
+  background: #1e3329 !important;
+  color: #72e0bf !important;
+}
+
+[data-theme="dark"] .map-footer {
+  background: #14201b !important;
+  border-top-color: #263830 !important;
+}
+
+[data-theme="dark"] .map-coords-badge {
+  background: #182821 !important;
+  border-color: #293d33 !important;
+  color: #95a89e !important;
+}
+
+[data-theme="dark"] .map-coords-badge code {
+  background: #121c18 !important;
+  color: #72e0bf !important;
+  border: 1px solid #283d33 !important;
+}
+
+[data-theme="dark"] .copy-coord-btn {
+  background: #1e3329 !important;
+  border-color: #2e4a3b !important;
+  color: #72e0bf !important;
+}
+
+[data-theme="dark"] .copy-coord-btn:hover {
+  background: #254033 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .map-live-status {
+  color: #8da498 !important;
+}
+
+[data-theme="dark"] .map-click-hint {
+  background: rgba(17, 26, 22, 0.9) !important;
+  border-color: #293d33 !important;
+  color: #d1ded7 !important;
+}
+
+[data-theme="dark"] .map-btn.gmaps-btn {
+  background: #132736 !important;
+  border-color: #234c69 !important;
+  color: #7dd3fc !important;
+}
+
+[data-theme="dark"] .map-btn.gmaps-btn:hover {
+  background: #19354a !important;
+  color: #bae6fd !important;
+}
+
+[data-theme="dark"] .map-btn.directions-btn {
+  background: #142a1f !important;
+  border-color: #28543d !important;
+  color: #6ee7b7 !important;
+}
+
+[data-theme="dark"] .map-btn.directions-btn:hover {
+  background: #193829 !important;
+  color: #a7f3d0 !important;
+}
+
+[data-theme="dark"] .map-tool-btn {
+  background: #16241e !important;
+  border-color: #293d33 !important;
+  color: #72e0bf !important;
+}
+
+[data-theme="dark"] .map-tool-btn:hover:not(:disabled) {
+  background: #1f332a !important;
+  border-color: #3b5648 !important;
+}
+
+/* 3. SÍMBOLOS, BADGES E STATUS (CANCELADOS E DEMAIS STATUS) */
+[data-theme="dark"] .status-cancelled {
+  background: #2b1816 !important;
+  border: 1px solid #542522 !important;
+  color: #f87171 !important;
+}
+
+[data-theme="dark"] .status-cancelled i {
+  background: #f87171 !important;
+}
+
+[data-theme="dark"] .icon-box.rose,
+[data-theme="dark"] .rose {
+  background: #2b1816 !important;
+  border: 1px solid #542522 !important;
+  color: #f87171 !important;
+}
+
+[data-theme="dark"] .icon-box.amber {
+  background: #2d1d0e !important;
+  border: 1px solid #5c3716 !important;
+  color: #fb923c !important;
+}
+
+[data-theme="dark"] .status-confirmed,
+[data-theme="dark"] .status-attended {
+  background: #142a1f !important;
+  border: 1px solid #28543d !important;
+  color: #6ee7b7 !important;
+}
+
+[data-theme="dark"] .status-confirmed i,
+[data-theme="dark"] .status-attended i {
+  background: #6ee7b7 !important;
+}
+
+[data-theme="dark"] .status-pending {
+  background: #2a2212 !important;
+  border: 1px solid #59441c !important;
+  color: #fcd34d !important;
+}
+
+[data-theme="dark"] .status-pending i {
+  background: #fcd34d !important;
+}
+
+[data-theme="dark"] .status-ongoing {
+  background: #132736 !important;
+  border: 1px solid #234c69 !important;
+  color: #7dd3fc !important;
+}
+
+[data-theme="dark"] .status-ongoing i {
+  background: #7dd3fc !important;
+}
+
+[data-theme="dark"] .status-completed {
+  background: #1b2621 !important;
+  border: 1px solid #2d3e35 !important;
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .status-completed i {
+  background: #94a3b8 !important;
+}
+
+[data-theme="dark"] .status-no-show {
+  background: #2d1d0e !important;
+  border: 1px solid #5c3716 !important;
+  color: #fb923c !important;
+}
+
+[data-theme="dark"] .status-no-show i {
+  background: #fb923c !important;
+}
+
+[data-theme="dark"] .availability-pill {
+  background: #162a21 !important;
+  border: 1px solid #2b4839 !important;
+  color: #72e0bf !important;
+}
+
+/* 4. BOTÕES E COMPONENTES INTERATIVOS NO TEMA ESCURO */
+[data-theme="dark"] .button.primary,
+[data-theme="dark"] .primary {
+  background: #3d8072 !important;
+  border: 1px solid #4f9687 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(61, 128, 114, 0.3) !important;
+}
+
+[data-theme="dark"] .button.primary:hover,
+[data-theme="dark"] .primary:hover {
+  background: #326d61 !important;
+  border-color: #5fa898 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .button.primary:active,
+[data-theme="dark"] .primary:active {
+  background: #27594e !important;
+}
+
+[data-theme="dark"] .button.secondary,
+[data-theme="dark"] .secondary {
+  background: #16241e !important;
+  border: 1px solid #2a3e34 !important;
+  color: #e5eee9 !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] .button.secondary:hover,
+[data-theme="dark"] .secondary:hover {
+  background: #1f332a !important;
+  border-color: #3b5648 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .button.danger,
+[data-theme="dark"] .danger {
+  background: #b91c1c !important;
+  border: 1px solid #dc2626 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(185, 28, 28, 0.3) !important;
+}
+
+[data-theme="dark"] .button.danger:hover,
+[data-theme="dark"] .danger:hover {
+  background: #991b1b !important;
+  border-color: #ef4444 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .button.danger-soft,
+[data-theme="dark"] .danger-soft {
+  background: #2b1716 !important;
+  border: 1px solid #542220 !important;
+  color: #f87171 !important;
+}
+
+[data-theme="dark"] .button.danger-soft:hover,
+[data-theme="dark"] .danger-soft:hover {
+  background: #3b1e1c !important;
+  border-color: #7f1d1d !important;
+  color: #fca5a5 !important;
+}
+
+[data-theme="dark"] .button.ghost,
+[data-theme="dark"] .ghost {
+  color: #95a89e !important;
+}
+
+[data-theme="dark"] .button.ghost:hover,
+[data-theme="dark"] .ghost:hover {
+  background: #1c2d26 !important;
+  color: #e5eee9 !important;
+}
+
+[data-theme="dark"] .text-button {
+  color: #6ed6b8 !important;
+}
+
+[data-theme="dark"] .text-button:hover {
+  color: #9df2d8 !important;
+}
+
+[data-theme="dark"] .text-button.cancel-link,
+[data-theme="dark"] .patient-card-actions .cancel-link {
+  color: #f87171 !important;
+}
+
+[data-theme="dark"] .text-button.cancel-link:hover,
+[data-theme="dark"] .patient-card-actions .cancel-link:hover {
+  color: #fca5a5 !important;
+}
+
+[data-theme="dark"] .icon-button {
+  background: #16241e !important;
+  border: 1px solid #2a3e34 !important;
+  color: #e5eee9 !important;
+}
+
+[data-theme="dark"] .icon-button:hover {
+  background: #1f332a !important;
+  border-color: #3b5648 !important;
+  color: #72e0bf !important;
+}
+
+[data-theme="dark"] .password-toggle {
+  color: #83d4bb !important;
+}
+
+[data-theme="dark"] .a11y-active {
+  background: #1e3328 !important;
+  border-color: #5fa194 !important;
+  color: #72e0bf !important;
+}
+
+[data-theme="dark"] .btn-status-attended {
+  background: #142a1f !important;
+  border-color: #28543d !important;
+  color: #6ee7b7 !important;
+}
+[data-theme="dark"] .btn-status-attended.active {
+  background: #237446 !important;
+  border-color: #34d399 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .btn-status-no-show {
+  background: #2d1d0e !important;
+  border-color: #5c3716 !important;
+  color: #fb923c !important;
+}
+[data-theme="dark"] .btn-status-no-show.active {
+  background: #b45309 !important;
+  border-color: #f59e0b !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .choice.selected .specialty-card,
+[data-theme="dark"] .specialty-card.selected {
+  background: #1e3328 !important;
+  border-color: #5fa194 !important;
+  box-shadow: 0 0 0 1px #5fa194 !important;
+}
+
+[data-theme="dark"] .specialty-card:hover,
+[data-theme="dark"] .doctor-card:hover {
+  background: #1a2a23 !important;
+  border-color: #385345 !important;
+}
+
+[data-theme="dark"] .date-stamp {
+  color: #92a69b !important;
+}
+
+[data-theme="dark"] .date-stamp b {
+  color: #72e0bf !important;
+}
+
+/* Cores de textos inline específicos para boa leitura no escuro */
+[data-theme="dark"] [style*="color: #115e59"],
+[data-theme="dark"] [style*="color: #134e4a"],
+[data-theme="dark"] [style*="color: #111827"],
+[data-theme="dark"] [style*="color: #253830"],
+[data-theme="dark"] [style*="color: #1a4159"],
+[data-theme="dark"] [style*="color: #1b4157"],
+[data-theme="dark"] [style*="color: #3f6d63"],
+[data-theme="dark"] [style*="color: #4a756b"] {
+  color: #e5eee9 !important;
+}
+
+[data-theme="dark"] [style*="color: #4b5563"],
+[data-theme="dark"] [style*="color: #6b7280"] {
+  color: #9ab0a4 !important;
+}
+
 
 /* 3. CONTROLE DE TAMANHO DE FONTE */
 html[data-font-size="large"] body {

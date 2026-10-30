@@ -86,7 +86,7 @@ export default function ConsultasMedico() {
         </article>
 
         <article className="metric">
-          <div className="icon-box" style={{ background: 'var(--badge-bg, #fdf4e7)', color: '#b57929' }}>
+          <div className="icon-box amber">
             <Icon name="clock" />
           </div>
           <span>Não compareceu</span>
@@ -139,7 +139,7 @@ export default function ConsultasMedico() {
               style={{
                 padding: '6px 10px',
                 borderRadius: '8px',
-                border: '1px solid #ccd6c7',
+                
                 fontSize: '13px',
               }}
               title="Filtrar por data específica"
@@ -240,20 +240,7 @@ export default function ConsultasMedico() {
                     <button
                       type="button"
                       onClick={() => handleMarkStatus(apt.id, 'Compareceu')}
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        padding: '7px 12px',
-                        borderRadius: '8px',
-                        fontSize: '12px',
-                        fontWeight: 600,
-                        border: apt.status === 'Compareceu' ? '1px solid #488c43' : '1px solid #bee0b9',
-                        background: apt.status === 'Compareceu' ? '#488c43' : 'var(--badge-bg, #f0f8ee)',
-                        color: apt.status === 'Compareceu' ? '#ffffff' : '#31692d',
-                        cursor: 'pointer',
-                        transition: 'all 0.15s ease',
-                      }}
+                      className={`btn-status-attended ${apt.status === 'Compareceu' ? 'active' : ''}`}
                       title="Marcar que o paciente compareceu à consulta"
                     >
                       <Icon name="check" size={14} />
@@ -264,20 +251,7 @@ export default function ConsultasMedico() {
                     <button
                       type="button"
                       onClick={() => handleMarkStatus(apt.id, 'Não compareceu')}
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        padding: '7px 12px',
-                        borderRadius: '8px',
-                        fontSize: '12px',
-                        fontWeight: 600,
-                        border: apt.status === 'Não compareceu' ? '1px solid #cb8a27' : '1px solid #f6deb6',
-                        background: apt.status === 'Não compareceu' ? '#cb8a27' : '#fdf6eb',
-                        color: apt.status === 'Não compareceu' ? '#ffffff' : '#8d5910',
-                        cursor: 'pointer',
-                        transition: 'all 0.15s ease',
-                      }}
+                      className={`btn-status-no-show ${apt.status === 'Não compareceu' ? 'active' : ''}`}
                       title="Marcar falta (paciente não compareceu)"
                     >
                       <Icon name="x" size={14} />

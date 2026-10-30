@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site": "med-flow-4599a",
     "public": "frontend/medflow-frontend/dist",
     "ignore": [
       "firebase.json",
