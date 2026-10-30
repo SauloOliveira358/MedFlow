@@ -41,7 +41,7 @@ function TestControls() {
       <button onClick={toggleTheme}>Toggle Theme</button>
       <button onClick={() => setTheme('dark')}>Set Dark</button>
       <button onClick={() => setFontSize('large')}>Set Large</button>
-      <button onClick={() => setFontSize('xlarge')}>Set XLarge</button>
+      <button onClick={() => setFontSize('small')}>Set Small</button>
       <button onClick={() => setHighContrast(true)}>Set High Contrast</button>
       <button onClick={() => setReadableFont(true)}>Set Readable Font</button>
       <button onClick={() => setReduceMotion(true)}>Set Reduce Motion</button>
@@ -132,7 +132,7 @@ describe('Acessibilidade e Modo Escuro (MedFlow)', () => {
     expect(localStorage.getItem('medflow-theme')).toBe('light');
   });
 
-  it('ajusta escala de fonte (normal, large, xlarge)', () => {
+  it('ajusta escala de fonte (small, normal, large)', () => {
     render(
       <AcessibilidadeProvider>
         <TestControls />
@@ -143,9 +143,9 @@ describe('Acessibilidade e Modo Escuro (MedFlow)', () => {
     expect(screen.getByTestId('current-size').textContent).toBe('large');
     expect(document.documentElement.getAttribute('data-font-size')).toBe('large');
 
-    fireEvent.click(screen.getByText('Set XLarge'));
-    expect(screen.getByTestId('current-size').textContent).toBe('xlarge');
-    expect(document.documentElement.getAttribute('data-font-size')).toBe('xlarge');
+    fireEvent.click(screen.getByText('Set Small'));
+    expect(screen.getByTestId('current-size').textContent).toBe('small');
+    expect(document.documentElement.getAttribute('data-font-size')).toBe('small');
   });
 
   it('permite ativar alto contraste, fonte legível e redução de movimento', () => {

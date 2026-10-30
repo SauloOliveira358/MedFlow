@@ -4851,79 +4851,284 @@ td small {
 }
 
 
-/* 3. CONTROLE DE TAMANHO DE FONTE */
-html[data-font-size="large"] body {
-  font-size: 15px;
+/* 3. CONTROLE DE TAMANHO DE FONTE
+   Escala proporcional de toda a interface (texto, espaçamentos e ícones).
+   Usar zoom evita o problema anterior, em que tamanhos fixos sobrescreviam
+   textos que já eram maiores no padrão. */
+html[data-font-size="small"] body {
+  zoom: 0.9;
 }
-html[data-font-size="large"] h1 {
-  font-size: 33px;
-}
-html[data-font-size="large"] h2 {
-  font-size: 21px;
-}
-html[data-font-size="large"] p,
-html[data-font-size="large"] input,
-html[data-font-size="large"] button,
-html[data-font-size="large"] select {
-  font-size: 14px;
-}
-
+html[data-font-size="large"] body,
 html[data-font-size="xlarge"] body {
-  font-size: 17px;
-}
-html[data-font-size="xlarge"] h1 {
-  font-size: 36px;
-}
-html[data-font-size="xlarge"] h2 {
-  font-size: 23px;
-}
-html[data-font-size="xlarge"] p,
-html[data-font-size="xlarge"] input,
-html[data-font-size="xlarge"] button,
-html[data-font-size="xlarge"] select {
-  font-size: 15px;
+  zoom: 1.15;
 }
 
 /* 4. ALTO CONTRASTE */
-[data-high-contrast="true"] {
-  --line: #4a5c53;
+html[data-high-contrast="true"] {
+  --ink: #050807;
+  --muted: #1c2621;
+  --line: #2f3d36;
+  --primary: #1d5c4e;
+  --primary-dark: #123f35;
 }
-
-[data-high-contrast="true"] .panel,
-[data-high-contrast="true"] .modal,
-[data-high-contrast="true"] .a11y-modal-card,
-[data-high-contrast="true"] .auth-card,
-[data-high-contrast="true"] input,
-[data-high-contrast="true"] select,
-[data-high-contrast="true"] textarea,
-[data-high-contrast="true"] .button {
-  border-width: 2px !important;
+html[data-high-contrast="true"] body {
+  color: #050807;
 }
-
-[data-high-contrast="true"] :focus-visible {
-  outline: 3px solid #ffbf00 !important;
-  outline-offset: 3px !important;
+html[data-high-contrast="true"] h1,
+html[data-high-contrast="true"] h2,
+html[data-high-contrast="true"] h3,
+html[data-high-contrast="true"] p,
+html[data-high-contrast="true"] small,
+html[data-high-contrast="true"] label,
+html[data-high-contrast="true"] th,
+html[data-high-contrast="true"] td,
+html[data-high-contrast="true"] .eyebrow,
+html[data-high-contrast="true"] .header-area,
+html[data-high-contrast="true"] .sidebar nav a {
+  color: #050807 !important;
 }
-
-[data-high-contrast="true"] strong,
-[data-high-contrast="true"] b,
-[data-high-contrast="true"] h1,
-[data-high-contrast="true"] h2,
-[data-high-contrast="true"] h3 {
+html[data-high-contrast="true"] strong,
+html[data-high-contrast="true"] b,
+html[data-high-contrast="true"] h1,
+html[data-high-contrast="true"] h2,
+html[data-high-contrast="true"] h3 {
   font-weight: 750 !important;
 }
+html[data-high-contrast="true"] .panel,
+html[data-high-contrast="true"] .modal,
+html[data-high-contrast="true"] .a11y-modal-card,
+html[data-high-contrast="true"] .auth-card,
+html[data-high-contrast="true"] .metric,
+html[data-high-contrast="true"] .appointment-card,
+html[data-high-contrast="true"] .specialty-card,
+html[data-high-contrast="true"] .doctor-card,
+html[data-high-contrast="true"] .record-card,
+html[data-high-contrast="true"] .sidebar,
+html[data-high-contrast="true"] .top-header,
+html[data-high-contrast="true"] .bottom-navigation {
+  border: 2px solid #2f3d36 !important;
+  box-shadow: none !important;
+}
+html[data-high-contrast="true"] input,
+html[data-high-contrast="true"] select,
+html[data-high-contrast="true"] textarea,
+html[data-high-contrast="true"] .search-input,
+html[data-high-contrast="true"] .map-search-input {
+  border: 2px solid #050807 !important;
+  color: #050807 !important;
+}
+html[data-high-contrast="true"] .search-input input {
+  border: 0 !important;
+}
+html[data-high-contrast="true"] ::placeholder {
+  color: #3d4a44 !important;
+  opacity: 1;
+}
+html[data-high-contrast="true"] .button,
+html[data-high-contrast="true"] .icon-button {
+  border-width: 2px !important;
+  border-style: solid !important;
+}
+html[data-high-contrast="true"] .button.primary,
+html[data-high-contrast="true"] .primary {
+  background: #1d5c4e !important;
+  border-color: #0b2e26 !important;
+  color: #ffffff !important;
+}
+html[data-high-contrast="true"] .button.secondary,
+html[data-high-contrast="true"] .secondary,
+html[data-high-contrast="true"] .icon-button {
+  background: #ffffff !important;
+  border-color: #050807 !important;
+  color: #050807 !important;
+}
+html[data-high-contrast="true"] .button.danger,
+html[data-high-contrast="true"] .danger {
+  background: #9b1c1c !important;
+  border-color: #5c0f0f !important;
+  color: #ffffff !important;
+}
+html[data-high-contrast="true"] .button.danger-soft,
+html[data-high-contrast="true"] .danger-soft {
+  background: #ffffff !important;
+  border-color: #9b1c1c !important;
+  color: #9b1c1c !important;
+}
+html[data-high-contrast="true"] .text-button,
+html[data-high-contrast="true"] main a:not(.button):not(.icon-button) {
+  color: #123f35 !important;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+html[data-high-contrast="true"] .status {
+  border: 1.5px solid currentColor !important;
+  font-weight: 700 !important;
+}
+html[data-high-contrast="true"] .status-confirmed,
+html[data-high-contrast="true"] .status-attended {
+  background: #e6f4e3 !important;
+  color: #1f5418 !important;
+}
+html[data-high-contrast="true"] .status-pending {
+  background: #fff4d6 !important;
+  color: #6b4a00 !important;
+}
+html[data-high-contrast="true"] .status-ongoing {
+  background: #e3f0fa !important;
+  color: #0f3f63 !important;
+}
+html[data-high-contrast="true"] .status-completed {
+  background: #eeeeee !important;
+  color: #2b2b2b !important;
+}
+html[data-high-contrast="true"] .status-no-show {
+  background: #ffeedd !important;
+  color: #7a3b00 !important;
+}
+html[data-high-contrast="true"] .status-cancelled {
+  background: #fde8e8 !important;
+  color: #8a1414 !important;
+}
+html[data-high-contrast="true"] .sidebar nav a.active,
+html[data-high-contrast="true"] .bottom-navigation a.active,
+html[data-high-contrast="true"] .tabs button.selected,
+html[data-high-contrast="true"] .a11y-active {
+  outline: 2px solid currentColor !important;
+  outline-offset: -2px;
+  font-weight: 750 !important;
+}
+html[data-high-contrast="true"] :focus-visible {
+  outline: 3px solid #ffbf00 !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 0 6px #050807 !important;
+}
 
-/* 5. FONTE MAIS LEGÍVEL (DYSLEXIA-FRIENDLY & HIGH-LEGIBILITY) */
-[data-readable-font="true"],
-[data-readable-font="true"] body,
-[data-readable-font="true"] input,
-[data-readable-font="true"] button,
-[data-readable-font="true"] select,
-[data-readable-font="true"] textarea {
-  font-family: 'Segoe UI', -apple-system, Arial, sans-serif !important;
-  letter-spacing: 0.03em !important;
-  word-spacing: 0.05em !important;
-  line-height: 1.7 !important;
+/* Alto contraste + modo escuro */
+html[data-theme="dark"][data-high-contrast="true"] {
+  --ink: #ffffff;
+  --muted: #e4ece8;
+  --line: #a9c2b6;
+  --primary: #7fe6c4;
+  --primary-dark: #b3f5df;
+}
+html[data-theme="dark"][data-high-contrast="true"],
+html[data-theme="dark"][data-high-contrast="true"] body,
+html[data-theme="dark"][data-high-contrast="true"] .auth-page {
+  background: #000000 !important;
+  color: #ffffff !important;
+}
+html[data-theme="dark"][data-high-contrast="true"] h1,
+html[data-theme="dark"][data-high-contrast="true"] h2,
+html[data-theme="dark"][data-high-contrast="true"] h3,
+html[data-theme="dark"][data-high-contrast="true"] p,
+html[data-theme="dark"][data-high-contrast="true"] small,
+html[data-theme="dark"][data-high-contrast="true"] label,
+html[data-theme="dark"][data-high-contrast="true"] th,
+html[data-theme="dark"][data-high-contrast="true"] td,
+html[data-theme="dark"][data-high-contrast="true"] .eyebrow,
+html[data-theme="dark"][data-high-contrast="true"] .header-area,
+html[data-theme="dark"][data-high-contrast="true"] .sidebar nav a {
+  color: #ffffff !important;
+}
+html[data-theme="dark"][data-high-contrast="true"] .panel,
+html[data-theme="dark"][data-high-contrast="true"] .modal,
+html[data-theme="dark"][data-high-contrast="true"] .a11y-modal-card,
+html[data-theme="dark"][data-high-contrast="true"] .auth-card,
+html[data-theme="dark"][data-high-contrast="true"] .metric,
+html[data-theme="dark"][data-high-contrast="true"] .appointment-card,
+html[data-theme="dark"][data-high-contrast="true"] .specialty-card,
+html[data-theme="dark"][data-high-contrast="true"] .doctor-card,
+html[data-theme="dark"][data-high-contrast="true"] .record-card,
+html[data-theme="dark"][data-high-contrast="true"] .sidebar,
+html[data-theme="dark"][data-high-contrast="true"] .top-header,
+html[data-theme="dark"][data-high-contrast="true"] .bottom-navigation,
+html[data-theme="dark"][data-high-contrast="true"] .responsive-table tr {
+  background: #0a0a0a !important;
+  border: 2px solid #a9c2b6 !important;
+  color: #ffffff !important;
+}
+html[data-theme="dark"][data-high-contrast="true"] input,
+html[data-theme="dark"][data-high-contrast="true"] select,
+html[data-theme="dark"][data-high-contrast="true"] textarea,
+html[data-theme="dark"][data-high-contrast="true"] .search-input,
+html[data-theme="dark"][data-high-contrast="true"] .map-search-input {
+  background: #000000 !important;
+  border: 2px solid #ffffff !important;
+  color: #ffffff !important;
+}
+html[data-theme="dark"][data-high-contrast="true"] .search-input input {
+  border: 0 !important;
+}
+html[data-theme="dark"][data-high-contrast="true"] ::placeholder {
+  color: #c9d6cf !important;
+}
+html[data-theme="dark"][data-high-contrast="true"] .button.primary,
+html[data-theme="dark"][data-high-contrast="true"] .primary {
+  background: #7fe6c4 !important;
+  border-color: #ffffff !important;
+  color: #000000 !important;
+}
+html[data-theme="dark"][data-high-contrast="true"] .button.secondary,
+html[data-theme="dark"][data-high-contrast="true"] .secondary,
+html[data-theme="dark"][data-high-contrast="true"] .icon-button {
+  background: #000000 !important;
+  border-color: #ffffff !important;
+  color: #ffffff !important;
+}
+html[data-theme="dark"][data-high-contrast="true"] .button.danger-soft,
+html[data-theme="dark"][data-high-contrast="true"] .danger-soft {
+  background: #000000 !important;
+  border-color: #ff8a8a !important;
+  color: #ff8a8a !important;
+}
+html[data-theme="dark"][data-high-contrast="true"] .text-button,
+html[data-theme="dark"][data-high-contrast="true"] main a:not(.button):not(.icon-button) {
+  color: #7fe6c4 !important;
+}
+html[data-theme="dark"][data-high-contrast="true"] .status-confirmed,
+html[data-theme="dark"][data-high-contrast="true"] .status-attended {
+  background: #000000 !important;
+  color: #8cf5b4 !important;
+}
+html[data-theme="dark"][data-high-contrast="true"] .status-pending {
+  background: #000000 !important;
+  color: #ffe066 !important;
+}
+html[data-theme="dark"][data-high-contrast="true"] .status-ongoing {
+  background: #000000 !important;
+  color: #8fd3ff !important;
+}
+html[data-theme="dark"][data-high-contrast="true"] .status-completed {
+  background: #000000 !important;
+  color: #e0e0e0 !important;
+}
+html[data-theme="dark"][data-high-contrast="true"] .status-no-show {
+  background: #000000 !important;
+  color: #ffb366 !important;
+}
+html[data-theme="dark"][data-high-contrast="true"] .status-cancelled {
+  background: #000000 !important;
+  color: #ff8a8a !important;
+}
+
+/* 5. FONTE MAIS LEGÍVEL (Atkinson Hyperlegible, criada para baixa visão) */
+html[data-readable-font="true"],
+html[data-readable-font="true"] body,
+html[data-readable-font="true"] body * {
+  font-family: 'Atkinson Hyperlegible', Verdana, Tahoma, sans-serif !important;
+}
+html[data-readable-font="true"] body * {
+  letter-spacing: 0.02em !important;
+  word-spacing: 0.08em;
+}
+html[data-readable-font="true"] p,
+html[data-readable-font="true"] small,
+html[data-readable-font="true"] li,
+html[data-readable-font="true"] td,
+html[data-readable-font="true"] label,
+html[data-readable-font="true"] input,
+html[data-readable-font="true"] textarea {
+  line-height: 1.75 !important;
 }
 
 /* 6. REDUÇÃO DE MOVIMENTO */

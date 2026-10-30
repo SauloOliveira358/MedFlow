@@ -4,7 +4,7 @@ const STORAGE_THEME_KEY = 'medflow-theme';
 const STORAGE_A11Y_KEY = 'medflow-a11y';
 
 const defaultA11yState = {
-  fontSize: 'normal', // 'normal' | 'large' | 'xlarge'
+  fontSize: 'normal', // 'small' | 'normal' | 'large'
   highContrast: false,
   reduceMotion: false,
   readableFont: false,
@@ -56,9 +56,11 @@ export function AcessibilidadeProvider({ children }) {
       const saved = localStorage.getItem(STORAGE_A11Y_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
+        const fontSize = parsed.fontSize === 'xlarge' ? 'large' : parsed.fontSize;
         return {
           ...defaultA11yState,
           ...parsed,
+          fontSize: ['small', 'normal', 'large'].includes(fontSize) ? fontSize : 'normal',
         };
       }
     } catch {

@@ -141,51 +141,28 @@ export default function ModalAcessibilidade() {
           <div className="a11y-section">
             <span className="eyebrow" style={{ marginBottom: '6px' }}>TAMANHO DO TEXTO</span>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
-              <button
-                type="button"
-                className={`button secondary ${fontSize === 'normal' ? 'a11y-active' : ''}`}
-                onClick={() => setFontSize('normal')}
-                aria-pressed={fontSize === 'normal'}
-                style={{
-                  padding: '10px 8px',
-                  border: fontSize === 'normal' ? '2px solid var(--primary)' : '1px solid var(--line)',
-                  background: fontSize === 'normal' ? 'rgba(84, 134, 123, 0.08)' : 'transparent',
-                  fontWeight: 600,
-                  fontSize: '12px',
-                }}
-              >
-                Padrão (100%)
-              </button>
-              <button
-                type="button"
-                className={`button secondary ${fontSize === 'large' ? 'a11y-active' : ''}`}
-                onClick={() => setFontSize('large')}
-                aria-pressed={fontSize === 'large'}
-                style={{
-                  padding: '10px 8px',
-                  border: fontSize === 'large' ? '2px solid var(--primary)' : '1px solid var(--line)',
-                  background: fontSize === 'large' ? 'rgba(84, 134, 123, 0.08)' : 'transparent',
-                  fontWeight: 600,
-                  fontSize: '13px',
-                }}
-              >
-                Grande (115%)
-              </button>
-              <button
-                type="button"
-                className={`button secondary ${fontSize === 'xlarge' ? 'a11y-active' : ''}`}
-                onClick={() => setFontSize('xlarge')}
-                aria-pressed={fontSize === 'xlarge'}
-                style={{
-                  padding: '10px 8px',
-                  border: fontSize === 'xlarge' ? '2px solid var(--primary)' : '1px solid var(--line)',
-                  background: fontSize === 'xlarge' ? 'rgba(84, 134, 123, 0.08)' : 'transparent',
-                  fontWeight: 600,
-                  fontSize: '14px',
-                }}
-              >
-                Muito Grande (130%)
-              </button>
+              {[
+                ['small', 'Pequeno (90%)', '11px'],
+                ['normal', 'Padrão (100%)', '12px'],
+                ['large', 'Grande (115%)', '14px'],
+              ].map(([value, label, preview]) => (
+                <button
+                  key={value}
+                  type="button"
+                  className={`button secondary ${fontSize === value ? 'a11y-active' : ''}`}
+                  onClick={() => setFontSize(value)}
+                  aria-pressed={fontSize === value}
+                  style={{
+                    padding: '10px 8px',
+                    border: fontSize === value ? '2px solid var(--primary)' : '1px solid var(--line)',
+                    background: fontSize === value ? 'rgba(84, 134, 123, 0.08)' : 'transparent',
+                    fontWeight: 600,
+                    fontSize: preview,
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
           </div>
 
